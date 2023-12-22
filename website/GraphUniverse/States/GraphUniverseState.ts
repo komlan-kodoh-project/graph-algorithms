@@ -1,6 +1,6 @@
-import { GraphPointerEvent } from "../GraphUniverseEventListener";
+import GraphUniverseComponent from "@/GraphUniverse/GraphUniverseComponent";
 
 
-export default interface GraphUniverseState {
-    onStageClick(pointerEvent: GraphPointerEvent): void
+export default interface GraphUniverseState<T> extends GraphUniverseComponent<T> {
+    uninstall(): void
 }

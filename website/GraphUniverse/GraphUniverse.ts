@@ -1,30 +1,38 @@
-import { Application, Container, DisplayObject, Graphics, extensions } from "pixi.js";
+import {Application} from "pixi.js";
 import GraphUniverseState from "./States/GraphUniverseState";
 import GraphUniverseConfiguration from "./GraphUniverseConfiguration";
 import GraphUniverseExplorationState from "./States/GraphUniverseExplorationState";
 import GraphUniverseCamera from "./GraphUniverseCamera";
-import GraphUniverseEventListener, { GraphPointerEvent } from "./GraphUniverseEventListener";
-import { Viewport } from "pixi-viewport";
+import GraphUniverseEventListener from "./GraphUniverseEventListener";
+import {Viewport} from "pixi-viewport";
+import GraphLayoutController from "@/GraphUniverse/Embeddings/Embedding";
+import PhysicsBasedEmbedding from "@/GraphUniverse/Embeddings/PhysicsBasedEmbedding";
+import SimpleGraph from "@/GraphUniverse/Graph/SimpleGraph";
+import Vertex from "@/GraphUniverse/Graph/Vertex";
+import Graph from "@/GraphUniverse/Graph/Graph";
+import GraphRenderingController from "@/GraphUniverse/GraphRenderingController";
 
-export default class GraphUniverse {
+export default class GraphUniverse<T> {
     application: Application;
-    configuration: GraphUniverseConfiguration;
+    configuration: GraphUniverseConfiguration<T>;
+    graph: Graph<Vertex<T>> = new SimpleGraph();
 
     private hasInitialized = false;
 
     viewport: Viewport = null as unknown as Viewport;
 
     // Composite class extensions
-    state: GraphUniverseState;
-    camera: GraphUniverseCamera;
-    listener: GraphUniverseEventListener;
+    state: GraphUniverseState<T>;
+    camera: GraphUniverseCamera<T>;
+    embedding: GraphLayoutController<T>;
+    listener: GraphUniverseEventListener<T>;
+    renderingController: GraphRenderingController<T>;
 
-    constructor(configuration: GraphUniverseConfiguration) {
-
+    constructor(configuration: GraphUniverseConfiguration<T>) {
         this.application = new Application({
             resolution: window.devicePixelRatio || 1,
             antialias: true,
-            autoDensity: true,
+            autoDensity: true
         });
 
         this.viewport = new Viewport({
@@ -34,8 +42,10 @@ export default class GraphUniverse {
         this.configuration = configuration;
 
         this.camera = new GraphUniverseCamera(this);
+        this.embedding = new PhysicsBasedEmbedding(this);
         this.state = new GraphUniverseExplorationState(this);
         this.listener = new GraphUniverseEventListener(this);
+        this.renderingController = new GraphRenderingController(this);
     }
 
 
@@ -44,55 +54,26 @@ export default class GraphUniverse {
             throw new Error("Graph Universe has already been initialized");
         }
 
+        // Initialize universe components
+        this.renderingController.initialize();
+        this.listener.initialize();
 
-        this.application.renderer.background.color = 0xF1F5FE;
-        this.application.resizeTo = this.configuration.container;
-        this.configuration.container.appendChild(this.application.view as unknown as Node)
+        this.camera.initialize();
+        this.embedding.initialize();
+        this.state.initialize();
 
-        this.viewport
-            .pinch()
-            .wheel()
-            .decelerate();
-
-
-        this.application.stage.addChild(this.viewport);
-
-
-        this.listener.addClickEventListener(
-            this.viewport,
-            event => this.state.onStageClick(event)
-        );
+        this.renderingController.start();
 
         this.hasInitialized = true;
     }
 
-
     public createVertex(x: number, y: number) {
-        const vertex = new Graphics();
+        const newVertex = new Vertex<T>(x, y);
 
-        // border
-        vertex.beginFill(0x7C98CD);
-        vertex.drawCircle(0, 0, 15);
-        vertex.endFill();
+        this.graph.addVertex(newVertex);
+        this.viewport.addChild(newVertex.entity);
 
-        // interior
-        vertex.beginFill(0xBBD3F0);
-        vertex.drawCircle(0, 0, 12);
-        vertex.endFill();
-
-        // cordinate
-        vertex.x = x;
-        vertex.y = y;
-
-        vertex.eventMode = 'static';
-
-        this.listener.addClickEventListener(
-            vertex,
-            event => this.state.onStageClick(event)
-        );
-
-
-        this.viewport.addChild(vertex);
+        this.listener.notifyVertexCreated(newVertex);
     }
 }
 

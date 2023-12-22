@@ -1,19 +1,33 @@
-import { extensions } from "pixi.js";
 import GraphUniverse from "./GraphUniverse";
+import GraphUniverseComponent from "@/GraphUniverse/GraphUniverseComponent";
 
-export default class GraphUniverseCamera {
-    private universe: GraphUniverse;
+export default class GraphUniverseCamera<T> implements GraphUniverseComponent<T> {
+    private universe: GraphUniverse<object>;
 
-    constructor(universe: GraphUniverse) {
+    constructor(universe: GraphUniverse<object>) {
         this.universe = universe;
+    }
 
+    public initialize(): void {
+        this.initializeEventListener();
+        this.initializeZoomController();
+    }
+
+    private initializeZoomController() {
+        this.universe.viewport
+            .pinch()
+            .wheel()
+            .decelerate();
+    }
+
+    private initializeEventListener(): void {
         window.addEventListener('keydown', (e) => {
 
             let delta_x = 0;
             let delta_y = 0;
 
             if (e.key == "ArrowUp") {
-                delta_y = - 10;
+                delta_y = -10;
             }
 
             if (e.key == "ArrowDown") {
@@ -21,11 +35,11 @@ export default class GraphUniverseCamera {
             }
 
             if (e.key == "ArrowLeft") {
-                delta_x = - 10;
+                delta_x = -10;
             }
 
             if (e.key == "ArrowRight") {
-                delta_x = + 10;
+                delta_x = +10;
             }
 
             this.universe.viewport.moveCenter(
