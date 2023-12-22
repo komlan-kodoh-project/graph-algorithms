@@ -13,6 +13,7 @@ export default class GraphUniverseEventListener<T> {
     private universe: GraphUniverse<T>;
 
     private isDragging: boolean = false;
+    private intermittantDragVertex: VertexEntity<T> | null = null;
     private mouseDownVertex: VertexEntity<T> | null = null;
     private mouseDownEdge: VertexEntity<T> | null = null;
     private mouseDownOnView: boolean = false;
@@ -50,20 +51,35 @@ export default class GraphUniverseEventListener<T> {
         entity.addEventListener("mousedown", (event) => {
             event.stopPropagation();
             this.mouseDownVertex = event.target as VertexEntity<T>;
-            console.log("mouse down stuff", this.mouseDownVertex.id);
         });
 
-        entity.addEventListener("mousemove", (event) => {
+        this.universe.viewport.addEventListener("mousemove", (event) => {
             event.stopPropagation();
-            const target = event.target as VertexEntity<T>;
-
-            if (this.mouseDownVertex === target && !this.isDragging) {
+            if (this.mouseDownVertex !== null && !this.isDragging) {
                 this.isDragging = true;
                 this.events.vertexDragStart.trigger({
                     x: event.clientX,
                     y: event.clientY,
-                    vertex: target.graphVertex,
+                    vertex: this.mouseDownVertex.graphVertex,
                 });
+            }
+        });
+
+        entity.addEventListener("mousemove", (event) => {
+            const target = event.target as VertexEntity<T>;
+
+            if (this.intermittantDragVertex === null && this.mouseDownVertex != null){
+                this.intermittantDragVertex = this.mouseDownVertex;
+            }
+
+            if (this.intermittantDragVertex !== target && this.isDragging) {
+                this.events.vertexToVertexDrag.trigger({
+                    IsDirected: false,
+                    targetVertex: target.graphVertex,
+                    sourceVertex: this.intermittantDragVertex!.graphVertex,
+                })
+
+                this.intermittantDragVertex = target;
             }
         });
 
@@ -108,6 +124,7 @@ export default class GraphUniverseEventListener<T> {
             this.mouseDownEdge = null;
             this.mouseDownVertex = null;
             this.mouseDownOnView = false;
+            this.intermittantDragVertex = null;
         });
 
     }

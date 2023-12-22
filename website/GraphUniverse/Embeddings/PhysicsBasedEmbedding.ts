@@ -38,6 +38,7 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
         this.universe.graph.getAllNodes().forEach(graphNode => {
             const body = graphNode.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
 
+            console.log(body, graphNode);
             this.universe.renderingController.moveVertex(
                 graphNode,
                 body.position.x,
@@ -54,7 +55,7 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
             bodyA: firstBody,
             bodyB: secondBody,
             damping: 1,
-            stiffness: 0.1,
+            stiffness: 1/100,
             length: 100
         });
 
@@ -68,7 +69,7 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
             20
         );
 
-        particle.frictionAir = 0.5;
+        particle.restitution = 10;
 
         World.add(this.engine.world, particle);
 
