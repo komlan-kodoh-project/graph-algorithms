@@ -11,6 +11,8 @@ import SimpleGraph from "@/GraphUniverse/Graph/SimpleGraph";
 import Vertex from "@/GraphUniverse/Graph/Vertex";
 import Graph from "@/GraphUniverse/Graph/Graph";
 import GraphRenderingController from "@/GraphUniverse/GraphRenderingController";
+import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
+import {useOnClickOutside} from "next/dist/client/components/react-dev-overlay/internal/hooks/use-on-click-outside";
 
 export default class GraphUniverse<T> {
     application: Application;
@@ -36,8 +38,12 @@ export default class GraphUniverse<T> {
         });
 
         this.viewport = new Viewport({
-            events: this.application.renderer.events
-        })
+            events: this.application.renderer.events,
+        });
+
+        // TODO: Change this to use layers
+        this.viewport.sortableChildren = true;
+
 
         this.configuration = configuration;
 
@@ -67,13 +73,34 @@ export default class GraphUniverse<T> {
         this.hasInitialized = true;
     }
 
+    public getNeighbors(vertex: Vertex<T>): Vertex<T>[] {
+        return this.graph.getNeighbor(vertex);
+    }
+
     public createVertex(x: number, y: number) {
-        const newVertex = new Vertex<T>(x, y);
+        const newVertex = new Vertex<T>();
 
         this.graph.addVertex(newVertex);
-        this.viewport.addChild(newVertex.entity);
 
-        this.listener.notifyVertexCreated(newVertex);
+        this.listener.notifyVertexCreated({
+            x,
+            y,
+            vertex: newVertex
+        });
+    }
+
+    public createEdge(firstVertex: Vertex<T>, secondVertex: Vertex<T>) : void {
+        const newVertex = new Vertex<T>();
+
+        this.graph.addEdge(firstVertex, secondVertex);
+
+        this.listener.notifyEdgeCreated(
+            {
+                IsDirected: false,
+                sourceVertex:  secondVertex,
+                targetVertex:firstVertex,
+            }
+        );
     }
 }
 

@@ -18,14 +18,16 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
 
     initialize(): void {
         this.universe.listener.addEventListener("vertexAddedEvent", event => {
-            this.addNode(event.vertex);
+            const newPhysicVertex = this.addVertex(event.x, event.y);
+
+            event.vertex.addMeta(
+                PhysicsBasedEmbedding.META_PROPERTY_NAME,
+                newPhysicVertex
+            );
         });
 
-        this.universe.listener.addEventListener("edgeAddedEvent",event => {
+        this.universe.listener.addEventListener("edgeAddedEvent", event => {
             this.handleNewEdge(event.sourceVertex, event.targetVertex);
-        });
-
-        this.universe.application.ticker.add(_ => {
         });
     }
 
@@ -36,8 +38,11 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
         this.universe.graph.getAllNodes().forEach(graphNode => {
             const body = graphNode.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
 
-            graphNode.entity.x = body.position.x;
-            graphNode.entity.y = body.position.y;
+            this.universe.renderingController.moveVertex(
+                graphNode,
+                body.position.x,
+                body.position.y
+            );
         });
     }
 
@@ -56,12 +61,10 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
         World.addConstraint(this.engine.world, constraint);
     }
 
-    private addNode(vertex: Vertex<any>): void {
-        const entity = vertex.entity;
-
+    private addVertex(x: number, y: number): Matter.Body {
         const particle = Bodies.circle(
-            entity.x,
-            entity.y,
+            x,
+            y,
             20
         );
 
@@ -69,7 +72,7 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
 
         World.add(this.engine.world, particle);
 
-        vertex.addMeta(PhysicsBasedEmbedding.META_PROPERTY_NAME, particle);
+        return particle;
     }
 
     public update(delta: number): void {

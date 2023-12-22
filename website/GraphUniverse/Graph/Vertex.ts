@@ -1,13 +1,11 @@
 import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
 
 export default class Vertex<T> {
-    public entity: VertexEntity<T>;
     private neighbors: Vertex<T>[];
     private metaData: { [key: string]: any } = {};
 
-    constructor(x: number, y: number) {
+    constructor() {
         this.neighbors = [];
-        this.entity = new VertexEntity(x, y, this);
     }
 
     addMeta(name: string, meta: any) {
@@ -16,6 +14,10 @@ export default class Vertex<T> {
         }
 
         this.metaData[name] = meta;
+    }
+
+    getNeighbors(): Vertex<T>[]{
+        return this.neighbors;
     }
 
     getMeta<T>(name: string) : T {

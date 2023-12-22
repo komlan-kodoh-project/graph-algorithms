@@ -3,40 +3,51 @@ import GraphUniverseState from "./GraphUniverseState";
 import {ViewClickedEvent} from "@/GraphUniverse/GraphEvents/VertexAddedEvent";
 
 export default class GraphUniverseExplorationState<T> implements GraphUniverseState<T> {
-    private graphUniverse: GraphUniverse<T>;
+    private universe: GraphUniverse<T>;
 
     constructor(graphUniverse: GraphUniverse<T>) {
-        this.graphUniverse = graphUniverse;
+        this.universe = graphUniverse;
     }
 
     initialize(): void {
-        this.graphUniverse.listener.addEventListener(
+        this.universe.listener.addEventListener(
             "viewClickedEvent",
             (event) => {
-                this.graphUniverse.createVertex(
+                this.universe.createVertex(
                     event.x,
                     event.y
                 )
             }
         );
 
-        this.graphUniverse.listener.addEventListener(
+        this.universe.listener.addEventListener(
             "vertexDragStart",
             (event) => {
-                event.vertex.entity.updateDisplayConfiguration({
+                const entity = this.universe.renderingController.getVertexEntity(event.vertex);
+
+                entity.updateDisplayConfiguration({
                     edgeColor: 0x7ccd88,
                 });
             }
         );
 
-        this.graphUniverse.listener.addEventListener(
+        this.universe.listener.addEventListener(
             "vertexDragEnd",
             (event) => {
-                event.vertex.entity.updateDisplayConfiguration(
+                const entity = this.universe.renderingController.getVertexEntity(event.vertex);
+
+                entity.updateDisplayConfiguration(
                     {
                         edgeColor: 0x7C98CD
                     }
                 );
+            }
+        );
+
+        this.universe.listener.addEventListener(
+            "vertexToVertexDrag",
+            (event) => {
+                this.universe.createEdge(event.sourceVertex, event.targetVertex);
             }
         );
     }

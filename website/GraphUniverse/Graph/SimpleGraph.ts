@@ -16,6 +16,10 @@ export default class SimpleGraph<T> implements Graph<T> {
         node1.addNeighbor(node2);
         node2.addNeighbor(node1);
     }
+    
+    getNeighbor(vertex: Vertex<T>) : Vertex<T>[] {
+        return vertex.getNeighbors();
+    }
 
     getAllNodes(): Vertex<T>[] {
         return this.nodes;

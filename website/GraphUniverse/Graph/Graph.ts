@@ -5,6 +5,8 @@ export default interface Graph<T> {
 
     getAllNodes(): Vertex<T>[];
 
+    getNeighbor(vertex: Vertex<T>) : Vertex<T>[];
+
     addEdge(node1: Vertex<T>, node2: Vertex<T>): void;
 }
 

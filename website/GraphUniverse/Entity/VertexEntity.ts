@@ -2,6 +2,7 @@ import Matter from "matter-js";
 import {ColorSource, Graphics} from "pixi.js";
 import Vertex from "@/GraphUniverse/Graph/Vertex";
 import {underline} from "next/dist/lib/picocolors";
+import UndirectedEdge from "@/GraphUniverse/Entity/UndirectedEdge";
 
 export type VertexDisplayConfiguration = {
     edgeColor?: ColorSource
@@ -14,7 +15,12 @@ const VertexDefaultDisplayConfiguration: VertexDisplayConfiguration = {
 }
 
 export default class VertexEntity<T> extends Graphics {
+    private static INSTANCE_NUMBERER = 0;
+
+    public id = ++VertexEntity.INSTANCE_NUMBERER;
     public graphVertex: Vertex<T>;
+    public outgoingEdges: UndirectedEdge<T>[] = [];
+    public inComingEdges: UndirectedEdge<T>[] = [];
     private displayConfiguration: VertexDisplayConfiguration = VertexDefaultDisplayConfiguration;
 
     constructor(x: number, y: number, vertex: Vertex<T>) {
@@ -34,6 +40,7 @@ export default class VertexEntity<T> extends Graphics {
     }
 
     private drawSelf(displayConfiguration: VertexDisplayConfiguration) {
+        this.zIndex = 20;
         // border
         this.beginFill(displayConfiguration.edgeColor);
         this.drawCircle(0, 0, 15);
