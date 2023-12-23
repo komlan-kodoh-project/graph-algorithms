@@ -1,0 +1,6 @@
+*/pkg
+*/.github
+*/target
+
+*/node_modules
+*/.next
