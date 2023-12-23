@@ -2,8 +2,9 @@
 name: Build and publish to cloud flare pages 
 
 env:
-  ACCOUNT_ID: "438fa90d47933c5f0f94c0bfeefe076d"
   PROJECT_NAME: "graph-algorithm"
+  ACCOUNT_ID: "438fa90d47933c5f0f94c0bfeefe076d"
+  CLOUDFLARE_API_TOKEN:  ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
 on:
   push:
@@ -46,9 +47,9 @@ jobs:
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ env.YOUR_ACCOUNT_ID }}
+          accountId: ${{ env.ACCOUNT_ID }}
           projectName: ${{ env.PROJECT_NAME }}
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
           directory:  ./website/out
 
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
