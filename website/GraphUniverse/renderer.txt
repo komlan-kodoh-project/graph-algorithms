@@ -1,0 +1,70 @@
+// Matter.js module aliases
+var Engine = Matter.Engine,
+  World    = Matter.World,
+  Bodies   = Matter.Bodies,
+  Body     = Matter.Body;
+
+var Composite = Matter.Composite
+var Events = Matter.Events;
+
+var MouseConstraint = Matter.MouseConstraint;
+var Constraint = Matter.Constraint;
+
+
+var params = {
+  timing: 675,
+  x: 0,
+  y: 0,
+};
+
+var createConnect = function(bodyA, bodyB) {
+	bodyA.frictionAir = 0.5;
+	bodyB.frictionAir = 0.5;
+  return Constraint.create({
+    bodyA: bodyA,
+    bodyB: bodyB,
+		damping: 1,
+    stiffness: 0.1,
+		length: 100
+  });
+};
+
+
+
+// create a Matter.js engine
+var engine = Engine.create(document.body);
+
+var mouseConstraint = MouseConstraint.create(engine, {
+  constraint: {
+    stiffness: 1.0
+  }
+});
+
+var boxA = Bodies.circle(50, 50, 10, 10);
+var boxB = Bodies.circle(50, 100, 10);
+var boxC = Bodies.circle(400, 50, 10);
+var boxD = Bodies.circle(400, 200, 10);
+var boxE = Bodies.circle(100, 100, 10);
+
+
+
+var connectA = createConnect(boxA, boxB);
+var connectB = createConnect(boxA, boxC);
+var connectC = createConnect(boxA, boxD);
+var connectD = createConnect(boxA, boxE);
+var connectE = createConnect(boxB, boxC);
+var connectF = createConnect(boxB, boxD);
+var connectG = createConnect(boxB, boxE);
+var connectH = createConnect(boxC, boxD);
+var connectI = createConnect(boxC, boxE);
+var connectJ = createConnect(boxD, boxE);
+
+
+// add all of the bodies to the world
+World.add(engine.world, [mouseConstraint, boxA, boxB, boxC, boxD, boxE]);
+World.add(engine.world, [connectD,connectE,connectF,connectG,connectH,connectI,connectJ]);
+	
+
+
+// run the engine
+Engine.run(engine);
