@@ -1,36 +1,56 @@
-# This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Build and publish to cloud flare pages 
 
-# Controls when the workflow will run
+env:
+  PROJECT_NAME: "graph-algorithm"
+  ACCOUNT_ID: "438fa90d47933c5f0f94c0bfeefe076d"
+  CLOUDFLARE_API_TOKEN:  ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - '*'
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  push-image-to-docker-hub:
+    name: Build and Publish to Cloud Flare Pages 
+    
+    permissions:
+      contents: read
+      deployments: write
+
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: Configures node js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name : Configures rust and cargo 
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh -s -- -y
+
+      - name: Build Wasm Library
+        run: wasm-pack build --target web
+        working-directory: ./wasm-lib
+
+      - name: Build Website  
+        working-directory: ./wasm-lib
+        run: |
+          npm install
+          npm run build
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          accountId: ${{ env.ACCOUNT_ID }}
+          projectName: ${{ env.PROJECT_NAME }}
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
+          directory:  ./website/out
+
+          # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
+          wranglerVersion: '3'
