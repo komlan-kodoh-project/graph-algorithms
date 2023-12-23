@@ -1,11 +1,12 @@
 "use client";
+import SimpleGraph from "@/GraphUniverse/Graph/SimpleGraph";
 import GraphUniverse from "@/GraphUniverse/GraphUniverse";
 import { Application, Graphics, Sprite } from "pixi.js";
 import { useEffect, useRef } from "react";
 import { greet } from "wasm-lib";
 
 function GraphContainer() {
-  const graphUniverse = useRef<GraphUniverse | null>(null);
+  const graphUniverse = useRef<GraphUniverse<any> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -14,6 +15,7 @@ function GraphContainer() {
     }
 
     const newUniverse = new GraphUniverse({
+      graph: new SimpleGraph(),
       container: containerRef.current,
     });
 
