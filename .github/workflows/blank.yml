@@ -39,7 +39,7 @@ jobs:
         working-directory: ./wasm-lib
 
       - name: Build Website  
-        working-directory: ./wasm-lib
+        working-directory: ./website
         run: |
           npm install
           npm run build
