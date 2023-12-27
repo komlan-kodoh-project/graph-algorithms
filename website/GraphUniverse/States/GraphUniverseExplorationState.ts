@@ -1,59 +1,62 @@
 import GraphUniverse from "../GraphUniverse";
 import GraphUniverseState from "./GraphUniverseState";
-import {ViewClickedEvent} from "@/GraphUniverse/GraphEvents/VertexAddedEvent";
 
 export default class GraphUniverseExplorationState<T> implements GraphUniverseState<T> {
     private universe: GraphUniverse<T>;
+    private cleanup: (() => void)[] = [];
 
     constructor(graphUniverse: GraphUniverse<T>) {
         this.universe = graphUniverse;
     }
 
     initialize(): void {
-        this.universe.listener.addEventListener(
-            "viewClickedEvent",
-            (event) => {
-                this.universe.createVertex(
-                    event.x,
-                    event.y
-                )
-            }
-        );
+        this.cleanup = [
+            this.universe.listener.addEventListener(
+                "vertexDragStart",
+                (event) => {
+                    this.universe.embedding.free(
+                        event.target
+                    );
 
-        this.universe.listener.addEventListener(
-            "vertexDragStart",
-            (event) => {
-                const entity = this.universe.renderingController.getVertexEntity(event.vertex);
+                    this.universe.embedding.moveVertex(
+                        event.target,
+                        event.x,
+                        event.y
+                    );
+                }
+            ),
 
-                entity.updateDisplayConfiguration({
-                    edgeColor: 0x7ccd88,
-                });
-            }
-        );
+            this.universe.listener.addEventListener(
+                "vertexDrag",
+                (event) => {
+                    this.universe.embedding.moveVertex(
+                        event.target,
+                        event.x,
+                        event.y
+                    );
+                }
+            ),
 
-        this.universe.listener.addEventListener(
-            "vertexDragEnd",
-            (event) => {
-                const entity = this.universe.renderingController.getVertexEntity(event.vertex);
+            this.universe.listener.addEventListener(
+                "vertexDragEnd",
+                (event) => {
 
-                entity.updateDisplayConfiguration(
-                    {
-                        edgeColor: 0x7C98CD
-                    }
-                );
-            }
-        );
+                    this.universe.embedding.moveVertex(
+                        event.target,
+                        event.x,
+                        event.y
+                    );
 
-        this.universe.listener.addEventListener(
-            "vertexToVertexDrag",
-            (event) => {
-                this.universe.createEdge(event.sourceVertex, event.targetVertex);
-            }
-        );
+                    this.universe.embedding.control(
+                        event.target
+                    );
+                }
+            ),
+
+        ]
     }
 
     uninstall(): void {
-
+        this.cleanup.forEach(callback => callback());
     }
-
 }

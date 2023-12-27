@@ -1,7 +1,8 @@
 import Vertex from "@/GraphUniverse/Graph/Vertex";
 import GraphUniverse from "@/GraphUniverse/GraphUniverse";
 import Embedding from "@/GraphUniverse/Embeddings/Embedding";
-import Matter, {Bodies, Constraint, Engine, World} from "matter-js";
+import Matter, {Bodies, Body, Constraint, Engine, Sleeping, World} from "matter-js";
+import {event} from "next/dist/build/output/log";
 
 export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
     private static readonly META_PROPERTY_NAME: string = "physics-render-object";
@@ -31,14 +32,40 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
         });
     }
 
+    control(target: Vertex<T>): void {
+        const physicsVertex = target.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
+
+        Body.setStatic(
+            physicsVertex,
+            false
+        );
+    }
+
+    free(target: Vertex<T>): void {
+        const physicsVertex = target.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
+        Body.setStatic(
+            physicsVertex,
+            true
+        );
+    }
+
+    moveVertex(target: Vertex<T>, x: number, y: number): void {
+        const physicsVertex = target.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
+
+        Body.setPosition(
+            physicsVertex,
+            {x, y}
+        );
+    }
+
 
     private move(delta: number): void {
         Engine.update(this.engine, delta);
 
+
         this.universe.graph.getAllNodes().forEach(graphNode => {
             const body = graphNode.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
 
-            console.log(body, graphNode);
             this.universe.renderingController.moveVertex(
                 graphNode,
                 body.position.x,
@@ -48,14 +75,14 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
     }
 
     private handleNewEdge(firstVertex: Vertex<any>, secondVertex: Vertex<any>): void {
-        const secondBody = secondVertex.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
         const firstBody = firstVertex.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
+        const secondBody = secondVertex.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
 
         const constraint = Constraint.create({
             bodyA: firstBody,
             bodyB: secondBody,
             damping: 1,
-            stiffness: 1/100,
+            stiffness: 1 / 100,
             length: 100
         });
 
