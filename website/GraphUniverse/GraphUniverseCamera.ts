@@ -14,6 +14,7 @@ export default class GraphUniverseCamera<T> implements GraphUniverseComponent<T>
     }
 
     private initializeZoomController() {
+        // this.universe.viewport.plugins.
         this.universe.viewport
             .pinch()
             .wheel()

@@ -1,5 +1,6 @@
 import Vertex from "@/GraphUniverse/Graph/Vertex";
 import {FederatedPointerEvent} from "pixi.js";
+import {Coordinates} from "@/GraphUniverse/Coordinates";
 
 export type VertexAddedEvent<T> = {
     x: number,
@@ -10,7 +11,6 @@ export type VertexAddedEvent<T> = {
 export type VertexToVertexDrag<T> = {
     sourceVertex:  Vertex<T>,
     targetVertex:  Vertex<T>,
-    IsDirected : boolean
 }
 
 export type VertexClickedEvent<T> = {
@@ -21,6 +21,13 @@ export type VertexDragEvent<T> = {
     x: number,
     y: number,
     vertex: Vertex<T>,
+}
+
+export type GraphDragEvent<T> = {
+    start: Coordinates,
+    x: number,
+    y: number,
+    target: T,
 }
 
 export type ViewClickedEvent<T> = {

@@ -77,6 +77,13 @@ export default class GraphUniverse<T> {
         return this.graph.getNeighbor(vertex);
     }
 
+    public setState(state: GraphUniverseState<T>){
+        this.state.uninstall();
+
+        this.state = state;
+        this.state.initialize();
+    }
+
     public createVertex(x: number, y: number) {
         const newVertex = new Vertex<T>();
 

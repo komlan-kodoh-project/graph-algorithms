@@ -1,27 +1,53 @@
 import GraphUniverse from "./GraphUniverse";
 import GraphEvents from "@/GraphUniverse/GraphEvents/GraphEvents";
 import VertexAddedEvent, {
-    EdgeAddedEvent,
+    EdgeAddedEvent, GraphDragEvent,
     VertexClickedEvent,
-    VertexDragEvent, VertexToVertexDrag,
+    VertexToVertexDrag,
     ViewClickedEvent
 } from "@/GraphUniverse/GraphEvents/VertexAddedEvent";
 import Vertex from "@/GraphUniverse/Graph/Vertex";
 import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
+import {Coordinates} from "@/GraphUniverse/Coordinates";
+import {FederatedPointerEvent} from "pixi.js";
+
+type MouseState = {
+    down: boolean,
+    dragging: boolean,
+    location: Coordinates
+}
+
+type MouseDownObject = {
+    type: "vertex-entity" | "viewport",
+    object: object,
+}
+
 
 export default class GraphUniverseEventListener<T> {
     private universe: GraphUniverse<T>;
 
-    private isDragging: boolean = false;
-    private intermittantDragVertex: VertexEntity<T> | null = null;
-    private mouseDownVertex: VertexEntity<T> | null = null;
-    private mouseDownEdge: VertexEntity<T> | null = null;
-    private mouseDownOnView: boolean = false;
+    private mouseDownObject: MouseDownObject | null = null;
+    private dragHoveredVertex: VertexEntity<T> | null = null;
+
+    private mouseState: MouseState = {
+        down: false,
+        dragging: false,
+        location: {x: 0, y: 0}
+    };
+
 
     private events = {
         edgeAddedEvent: new GraphEvents<EdgeAddedEvent<T>>(),
-        vertexDragEnd: new GraphEvents<VertexDragEvent<T>>(),
-        vertexDragStart: new GraphEvents<VertexDragEvent<T>>(),
+
+        vertexDragStart: new GraphEvents<GraphDragEvent<Vertex<T>>>(),
+        viewportDragStart: new GraphEvents<GraphDragEvent<null>>(),
+
+        vertexDrag: new GraphEvents<GraphDragEvent<Vertex<T>>>(),
+        viewportDrag: new GraphEvents<GraphDragEvent<null>>(),
+
+        vertexDragEnd: new GraphEvents<GraphDragEvent<Vertex<T>>>(),
+        viewportDragEnd: new GraphEvents<GraphDragEvent<null>>(),
+
         vertexAddedEvent: new GraphEvents<VertexAddedEvent<T>>(),
         viewClickedEvent: new GraphEvents<ViewClickedEvent<T>>(),
         vertexClickedEvent: new GraphEvents<VertexClickedEvent<T>>(),
@@ -36,7 +62,9 @@ export default class GraphUniverseEventListener<T> {
     initialize() {
         this.universe.application.stage.eventMode = 'static';
         this.universe.application.stage.hitArea = this.universe.application.screen;
-        this.configureViewEventListener();
+
+        this.configureViewDragListener();
+        this.configureViewClickListener();
     }
 
     public notifyVertexCreated(event: VertexAddedEvent<T>) {
@@ -47,96 +75,186 @@ export default class GraphUniverseEventListener<T> {
         this.events.edgeAddedEvent.trigger(event);
     }
 
-    public listenOn(entity: VertexEntity<T>) {
-        entity.addEventListener("mousedown", (event) => {
-            event.stopPropagation();
-            this.mouseDownVertex = event.target as VertexEntity<T>;
-        });
+    public listenOn(entity: VertexEntity<T>): void {
 
-        this.universe.viewport.addEventListener("mousemove", (event) => {
+        entity.addEventListener("mousedown", (event) => {
+            // We stop propagation so the viewport is not alerted with this event
             event.stopPropagation();
-            if (this.mouseDownVertex !== null && !this.isDragging) {
-                this.isDragging = true;
-                this.events.vertexDragStart.trigger({
-                    x: event.clientX,
-                    y: event.clientY,
-                    vertex: this.mouseDownVertex.graphVertex,
-                });
-            }
+
+            this.mouseState.down = true;
+            this.mouseDownObject = {
+                type: "vertex-entity",
+                object: event.target as VertexEntity<T>,
+            };
         });
 
         entity.addEventListener("mousemove", (event) => {
-            const target = event.target as VertexEntity<T>;
-
-            if (this.intermittantDragVertex === null && this.mouseDownVertex != null){
-                this.intermittantDragVertex = this.mouseDownVertex;
+            // Only execute this handler if there is a drag event that has started on a vertex
+            if (!(this.mouseState.dragging && this.mouseDownObject !== null && this.mouseDownObject.type === "vertex-entity")) {
+                return;
             }
 
-            if (this.intermittantDragVertex !== target && this.isDragging) {
+            const target = event.target as VertexEntity<T>
+            const dragVertexStart = this.mouseDownObject.object as VertexEntity<T>;
+
+            if (this.dragHoveredVertex === null && target !== dragVertexStart) {
                 this.events.vertexToVertexDrag.trigger({
-                    IsDirected: false,
                     targetVertex: target.graphVertex,
-                    sourceVertex: this.intermittantDragVertex!.graphVertex,
+                    sourceVertex: dragVertexStart.graphVertex,
                 })
 
-                this.intermittantDragVertex = target;
+                this.dragHoveredVertex = target;
+            } else if (this.dragHoveredVertex !== null && target !== this.dragHoveredVertex) {
+                this.events.vertexToVertexDrag.trigger({
+                    targetVertex: target.graphVertex,
+                    sourceVertex: this.dragHoveredVertex.graphVertex,
+                });
+
+                this.dragHoveredVertex = target;
             }
         });
-
-        entity.addEventListener("mouseup", (event) => {
-            const target = event.target as VertexEntity<T>;
-
-            if (!this.isDragging || this.mouseDownVertex === target) return;
-
-            this.events.vertexToVertexDrag.trigger({
-                IsDirected: false,
-                targetVertex: target.graphVertex,
-                sourceVertex: this.mouseDownVertex!.graphVertex,
-            })
-        });
-
     }
 
-    private configureViewEventListener() {
-        this.universe.viewport.addEventListener("mousedown", (event) => {
-            this.mouseDownOnView = true;
+    private configureViewClickListener(): void {
+        this.universe.viewport.addEventListener("mouseup", (event) => {
+            if (this.mouseDownObject !== null && this.mouseDownObject.type === "viewport") {
+                const coordinates = this.getEventCoordinates(event);
+
+                this.events.viewClickedEvent.trigger({
+                    sourceEvent: event,
+                    x: coordinates.x,
+                    y: coordinates.y
+                });
+            }
+
+            this.mouseDownObject = null;
+            this.mouseState.down = false;
+            this.dragHoveredVertex = null;
+            this.mouseState.dragging = false;
+        });
+    }
+
+    private configureViewDragListener() {
+        this.universe.viewport.addEventListener("mousedown", () => {
+            this.mouseState.down = true;
+            this.mouseDownObject = {
+                type: "viewport",
+                object: {},
+            };
         })
 
-        this.universe.viewport.addEventListener("mouseup", (event) => {
-            if (this.isDragging) {
-                event.stopPropagation();
-                this.isDragging = false;
-                this.events.vertexDragEnd.trigger({
-                    x: event.clientX,
-                    y: event.clientY,
-                    vertex: this.mouseDownVertex?.graphVertex!,
-                });
-            } else {
-                this.events.viewClickedEvent.trigger({
-                    x: (event.clientX - this.universe.viewport.transform.position.x) / this.universe.viewport.transform.scale.x,
-                    y: (event.clientY - this.universe.viewport.transform.position.y) / this.universe.viewport.transform.scale.y,
-                    sourceEvent: event
-                });
+        this.universe.viewport.addEventListener("mousemove", (event) => {
+            // If the mouse is already down, event listener transitions it to a moving state
+            if (!this.mouseState.down) return;
+
+            if (this.mouseDownObject === null) {
+                throw Error("We detected a dragging event but no down object");
             }
 
-            console.log("Cleaning up on mouse up");
+            if (this.mouseDownObject.type === "vertex-entity") {
+                const coordinates = this.getEventCoordinates(event);
+                const dragTarget = this.mouseDownObject.object as VertexEntity<T>;
 
-            this.mouseDownEdge = null;
-            this.mouseDownVertex = null;
-            this.mouseDownOnView = false;
-            this.intermittantDragVertex = null;
+                if (!this.mouseState.dragging) {
+                    this.mouseState.dragging = true;
+
+                    this.events.vertexDragStart.trigger({
+                        x: coordinates.x,
+                        y: coordinates.y,
+                        start: coordinates,
+                        target: dragTarget.graphVertex,
+                    })
+                } else {
+                    this.events.vertexDrag.trigger({
+                        x: coordinates.x,
+                        y: coordinates.y,
+                        start: {x: 0, y: 0},
+                        target: dragTarget.graphVertex,
+                    })
+                }
+            }
+
+            if (this.mouseDownObject.type === "viewport") {
+                const coordinates = this.getEventCoordinates(event);
+
+                if (!this.mouseState.dragging) {
+                    this.mouseState.dragging = true;
+
+                    this.events.viewportDragStart.trigger({
+                        x: coordinates.x,
+                        y: coordinates.y,
+                        start: coordinates,
+                        target: null,
+                    })
+                } else {
+                    this.events.viewportDrag.trigger({
+                        x: coordinates.x,
+                        y: coordinates.y,
+                        start: {x: 0, y: 0},
+                        target: null,
+                    })
+                }
+            }
+
         });
 
+        this.universe.viewport.addEventListener("mouseup", (event) => {
+            // If the mouse is already down, event listener transitions it to a moving state
+            if (!this.mouseState.dragging) return;
+
+            if (this.mouseDownObject === null) {
+                throw Error("We detected a end of dragging event but there is no mouse down object");
+            }
+
+            if (this.mouseDownObject.type === "vertex-entity") {
+                const coordinates = this.getEventCoordinates(event);
+                const dragTarget = this.mouseDownObject.object as VertexEntity<T>;
+
+                this.events.vertexDragEnd.trigger({
+                    x: coordinates.x,
+                    y: coordinates.y,
+                    start: {x: 0, y: 0},
+                    target: dragTarget.graphVertex,
+                })
+            }
+
+            if (this.mouseDownObject.type === "viewport") {
+                const coordinates = this.getEventCoordinates(event);
+
+                this.events.viewportDragEnd.trigger({
+                    x: coordinates.x,
+                    y: coordinates.y,
+                    start: {x: 0, y: 0},
+                    target: null,
+                })
+            }
+
+            this.mouseDownObject = null;
+            this.mouseState.down = false;
+            this.dragHoveredVertex = null;
+            this.mouseState.dragging = false;
+        });
     }
 
+    private getEventCoordinates(event: FederatedPointerEvent): Coordinates {
+        return {
+            x: (event.clientX - this.universe.viewport.transform.position.x) / this.universe.viewport.transform.scale.x,
+            y: (event.clientY - this.universe.viewport.transform.position.y) / this.universe.viewport.transform.scale.y,
+        };
+    }
 
-    public addEventListener<TEventName extends keyof GraphUniverseEventListener<T>["events"]>(
+    public addEventListener<TEventName extends keyof GraphUniverseEventListener<T> ["events"]>(
         eventName: TEventName,
-        handler: Parameters<GraphUniverseEventListener<T>["events"][TEventName]["addHandler"]>[0]
-    ) {
+        handler: Parameters<GraphUniverseEventListener<T> ["events"][TEventName]["addHandler"]> [0]
+    ): () => void {
         const event = this.events[eventName];
+
         // @ts-ignore
         event.addHandler(handler);
-    }
 
+        return () => {
+            // @ts-ignore
+            event.removeHandler(handler);
+        }
+    }
 }
