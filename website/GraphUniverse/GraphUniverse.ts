@@ -11,8 +11,7 @@ import SimpleGraph from "@/GraphUniverse/Graph/SimpleGraph";
 import Vertex from "@/GraphUniverse/Graph/Vertex";
 import Graph from "@/GraphUniverse/Graph/Graph";
 import GraphRenderingController from "@/GraphUniverse/GraphRenderingController";
-import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
-import {useOnClickOutside} from "next/dist/client/components/react-dev-overlay/internal/hooks/use-on-click-outside";
+import GraphUniverseDesignState from "@/GraphUniverse/States/GraphUniverseDesignState";
 
 export default class GraphUniverse<T> {
     application: Application;
@@ -49,7 +48,7 @@ export default class GraphUniverse<T> {
 
         this.camera = new GraphUniverseCamera(this);
         this.embedding = new PhysicsBasedEmbedding(this);
-        this.state = new GraphUniverseExplorationState(this);
+        this.state = new GraphUniverseDesignState(this);
         this.listener = new GraphUniverseEventListener(this);
         this.renderingController = new GraphRenderingController(this);
     }

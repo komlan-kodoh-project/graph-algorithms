@@ -26,7 +26,7 @@ function GraphContainer() {
 
     return (
         <>
-            <div className="fixed bg-black top-0">
+            <div className="fixed bg-black text-white top-0">
                 <button onClick={() => {
                     graphUniverse.current?.setState(
                         new GraphUniverseDesignState(graphUniverse.current)

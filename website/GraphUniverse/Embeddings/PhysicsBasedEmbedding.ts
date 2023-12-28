@@ -97,6 +97,7 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
         );
 
         particle.restitution = 10;
+        particle.restitution = 0;
 
         World.add(this.engine.world, particle);
 
