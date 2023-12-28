@@ -1,5 +1,7 @@
 import GraphUniverse from "./GraphUniverse";
 import GraphUniverseComponent from "@/GraphUniverse/GraphUniverseComponent";
+import {Drag, Wheel} from "pixi-viewport";
+
 
 export default class GraphUniverseCamera<T> implements GraphUniverseComponent<T> {
     private universe: GraphUniverse<object>;
@@ -15,9 +17,19 @@ export default class GraphUniverseCamera<T> implements GraphUniverseComponent<T>
 
     private initializeZoomController() {
         // this.universe.viewport.plugins.
+        this.universe.viewport.plugins.add("custom-wheel", new Wheel(
+            this.universe.viewport,
+            {
+                keyToPress: ["ControlLeft", "ControlRight"],
+            }));
+
         this.universe.viewport
-            .pinch()
-            .wheel()
+            .wheel({
+                wheelZoom: false,
+            })
+            .drag({
+                pressDrag: false,
+            })
             .decelerate();
     }
 
