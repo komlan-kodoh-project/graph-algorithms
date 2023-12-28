@@ -16,6 +16,7 @@
 /build
 
 /.idea
+/website/.idea
 
 # misc
 .DS_Store
