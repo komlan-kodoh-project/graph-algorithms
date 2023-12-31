@@ -1,7 +1,5 @@
 import {Application} from "pixi.js";
-import GraphUniverseState from "./States/GraphUniverseState";
 import GraphUniverseConfiguration from "./GraphUniverseConfiguration";
-import GraphUniverseExplorationState from "./States/GraphUniverseExplorationState";
 import GraphUniverseCamera from "./GraphUniverseCamera";
 import GraphUniverseEventListener from "./GraphUniverseEventListener";
 import {Viewport} from "pixi-viewport";
@@ -12,6 +10,7 @@ import Vertex from "@/GraphUniverse/Graph/Vertex";
 import Graph from "@/GraphUniverse/Graph/Graph";
 import GraphRenderingController from "@/GraphUniverse/GraphRenderingController";
 import GraphUniverseDesignState from "@/GraphUniverse/States/GraphUniverseDesignState";
+import {WellKnownGraphUniverseState, GraphUniverseState, StateFactory} from "@/GraphUniverse/States/GraphUniverseState";
 
 export default class GraphUniverse<T> {
     application: Application;
@@ -76,14 +75,23 @@ export default class GraphUniverse<T> {
         return this.graph.getNeighbor(vertex);
     }
 
-    public setState(state: GraphUniverseState<T>){
+    public setStateEnum(state: WellKnownGraphUniverseState): void {
+        const newState = StateFactory.getState(
+            state,
+            this
+        );
+
+        this.setState(newState)
+    }
+
+    public setState(state: GraphUniverseState<T>): void {
         this.state.uninstall();
 
         this.state = state;
         this.state.initialize();
     }
 
-    public createVertex(x: number, y: number) {
+    public createVertex(x: number, y: number): void {
         const newVertex = new Vertex<T>();
 
         this.graph.addVertex(newVertex);
@@ -95,16 +103,14 @@ export default class GraphUniverse<T> {
         });
     }
 
-    public createEdge(firstVertex: Vertex<T>, secondVertex: Vertex<T>) : void {
-        const newVertex = new Vertex<T>();
-
+    public createEdge(firstVertex: Vertex<T>, secondVertex: Vertex<T>): void {
         this.graph.addEdge(firstVertex, secondVertex);
 
         this.listener.notifyEdgeCreated(
             {
                 IsDirected: false,
-                sourceVertex:  secondVertex,
-                targetVertex:firstVertex,
+                sourceVertex: secondVertex,
+                targetVertex: firstVertex,
             }
         );
     }
