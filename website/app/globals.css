@@ -3,6 +3,8 @@
 @tailwind utilities;
 
 :root {
+  --primary-color: #7C98CD;
+  --secondary-color: #BBD3F0;
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
@@ -17,6 +19,7 @@
 }
 
 html, body {
+  height: 100%;
   overscroll-behavior-x: none;
 }
 

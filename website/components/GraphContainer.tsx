@@ -1,18 +1,21 @@
 "use client";
 import SimpleGraph from "@/GraphUniverse/Graph/SimpleGraph";
 import GraphUniverse from "@/GraphUniverse/GraphUniverse";
-import {useEffect, useRef} from "react";
-import GraphUniverseDesignState from "@/GraphUniverse/States/GraphUniverseDesignState";
-import GraphUniverseExplorationState from "@/GraphUniverse/States/GraphUniverseExplorationState";
+import {useEffect, useRef, useState} from "react";
+import EditButton from "./svg-buttons/EditButton";
+import PointerButton from "./svg-buttons/PointerButton";
+import {WellKnownGraphUniverseState} from "@/GraphUniverse/States/GraphUniverseState";
 
 function GraphContainer() {
-    const graphUniverse = useRef<GraphUniverse<any> | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const graphUniverse = useRef<GraphUniverse<any> | null>(null);
+    const [editorState, setEditorState] = useState<WellKnownGraphUniverseState>(WellKnownGraphUniverseState.Editing);
 
     useEffect(() => {
         if (containerRef.current == null || graphUniverse.current != null) {
             return;
         }
+        console.log(containerRef.current.clientHeight)
 
         const newUniverse = new GraphUniverse({
             graph: new SimpleGraph(),
@@ -24,27 +27,31 @@ function GraphContainer() {
         graphUniverse.current = newUniverse;
     });
 
-    return (
-        <>
-            <div className="fixed bg-black text-white top-0">
-                <button onClick={() => {
-                    graphUniverse.current?.setState(
-                        new GraphUniverseDesignState(graphUniverse.current)
-                    );
-                }}>
-                    Design
-                </button>
+    const updateEditorState = (newState: WellKnownGraphUniverseState) => {
+        if (graphUniverse.current == null) {
+            throw Error("Attempt to edit state when the universe has not yet been initialized");
+        }
 
-                <button onClick={() => {
-                    graphUniverse.current?.setState(
-                        new GraphUniverseExplorationState(graphUniverse.current)
-                    );
-                }}>
-                    Explore
-                </button>
+        graphUniverse.current?.setStateEnum(newState);
+        setEditorState(newState);
+    }
+
+    return (
+        <div className="relative w-full h-full outline-4 outline-primary-color overflow-hidden">
+            <div className="absolute inline-flex gap-2 top-5 left-5 z-20 h-9 rounded bg-white px-1.5 py-1">
+                <PointerButton
+                    active={editorState === WellKnownGraphUniverseState.Exploring}
+                    onClick={(_) => updateEditorState(WellKnownGraphUniverseState.Exploring)}
+                />
+
+                <EditButton
+                    active={editorState === WellKnownGraphUniverseState.Editing}
+                    onClick={(_) => updateEditorState(WellKnownGraphUniverseState.Editing)}
+                />
             </div>
-            <div className="h-screen w-screen" ref={containerRef}></div>
-        </>
+
+            <div className="absolute top-0 bottom-0 left-0 right-0 z-10" ref={containerRef}></div>
+        </div>
     );
 }
 

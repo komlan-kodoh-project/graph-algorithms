@@ -19,7 +19,7 @@ export default class GraphRenderingController<T> implements GraphUniverseCompone
     public initialize(): void {
         this.universe.configuration.container.appendChild(this.universe.application.view as unknown as Node)
 
-        // Disable default ticker so that the rendering controller can date full control of rendering
+        // Disable default ticker so that the rendering controller can take  full control of rendering
         this.universe.application.ticker.stop();
         this.universe.application.renderer.background.color = 0xF1F5FE;
         this.universe.application.stage.addChild(this.universe.viewport);

@@ -1,5 +1,5 @@
-import GraphUniverseState from "@/GraphUniverse/States/GraphUniverseState";
 import GraphUniverse from "@/GraphUniverse/GraphUniverse";
+import {GraphUniverseState} from "@/GraphUniverse/States/GraphUniverseState";
 
 export default class GraphUniverseDesignState<T> implements GraphUniverseState<T> {
     private universe: GraphUniverse<T>;

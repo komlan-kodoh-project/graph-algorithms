@@ -9,10 +9,10 @@ const GraphContainer = dynamic(() => import("@/components/GraphContainer"), {
   ssr: false,
 }); 
 
-export default function Home() {
+export default function Editor() {
   return (
-    <>
-        Wrong page
-    </>
+    <div className="h-full w-full">
+        <GraphContainer />
+    </div>
   );
 }
