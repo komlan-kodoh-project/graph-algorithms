@@ -1,19 +1,36 @@
-import GraphUniverse from "@/GraphUniverse/GraphUniverse";
 import GraphUniverseComponent from "@/GraphUniverse/GraphUniverseComponent";
 import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
-import Vertex from "@/GraphUniverse/Graph/Vertex";
-import UndirectedEdgeEntity from "@/GraphUniverse/Entity/UndirectedEdge";
+import { Edge, Vertex, getMeta, setMeta } from "@/GraphUniverse/Graph/Graph";
+import GraphUniverse from "./GraphUniverse";
+import { UndirectedEdgeEntity } from "./Entity/UndirectedEdge";
 
-export default class GraphRenderingController<T> implements GraphUniverseComponent<T> {
+export default class GraphRenderingController<V, E> implements GraphUniverseComponent<V, E> {
+    private universe: GraphUniverse<V, E>;
+    private previousRenderingTimeStamp: number = performance.now();
     private static readonly META_PROPERTY_NAME: string = "graph-renderer-meta-property-name";
-    private universe: GraphUniverse<T>;
 
-    constructor(universe: GraphUniverse<T>) {
+    constructor(universe: GraphUniverse<V, E>) {
         this.universe = universe;
     }
 
     public start(): void {
-        this.triggerRendering(0);
+        this.previousRenderingTimeStamp = performance.now();
+        requestAnimationFrame(
+            (timestamp) => this.triggerRendering(timestamp)
+        );
+    }
+
+    private triggerRendering(timestamp: number): void {
+        const delta = timestamp - this.previousRenderingTimeStamp;
+
+        this.universe.embedding.update(delta);
+        this.universe.application.ticker.update(timestamp);
+
+        this.previousRenderingTimeStamp = timestamp;
+
+        requestAnimationFrame(
+            (timestamp) => this.triggerRendering(timestamp)
+        );
     }
 
     public initialize(): void {
@@ -35,13 +52,14 @@ export default class GraphRenderingController<T> implements GraphUniverseCompone
             );
 
             // Attach metadata to the graph vertex to carry a reference to its corresponding universe rendering
-            event.vertex.addMeta(
+            setMeta(
+                event.vertex,
                 GraphRenderingController.META_PROPERTY_NAME,
                 vertexEntity
             );
 
             // Configure the listener, so it detects event targeting the vertex new vertex
-            this.universe.listener.listenOn(
+            this.universe.listener.listenOnVertex(
                 vertexEntity
             );
 
@@ -51,11 +69,11 @@ export default class GraphRenderingController<T> implements GraphUniverseCompone
             );
         })
 
-        this.universe.listener.addEventListener("edgeAddedEvent", event => {
-            const target = this.getVertexEntity(event.targetVertex);
-            const source = this.getVertexEntity(event.sourceVertex);
+        this.universe.listener.addEventListener("edgeAdded", event => {
+            const target = this.getVertexEntity(event.edge.targetVertex);
+            const source = this.getVertexEntity(event.edge.sourceVertex);
 
-            const newEdge = new UndirectedEdgeEntity(
+            const newEdge = new UndirectedEdgeEntity<V, E>(
                 {
                     x: source.x,
                     y: source.y
@@ -63,11 +81,22 @@ export default class GraphRenderingController<T> implements GraphUniverseCompone
                 {
                     x: target.x,
                     y: target.y
-                }
+                },
+                event.edge,
+            );
+
+            setMeta(
+                event.edge,
+                GraphRenderingController.META_PROPERTY_NAME,
+                newEdge
             );
 
             target.inComingEdges.push(newEdge);
             source.outgoingEdges.push(newEdge);
+
+            this.universe.listener.listenOnEdge(
+                newEdge
+            );
 
             // TODO: Attach data to the new create edge
             this.universe.viewport.addChild(
@@ -76,8 +105,9 @@ export default class GraphRenderingController<T> implements GraphUniverseCompone
         })
     }
 
-    public moveVertex(vertex: Vertex<T>, x: number, y: number) {
-        const entity = vertex.getMeta<VertexEntity<T>>(
+    public moveVertex(vertex: Vertex<V>, x: number, y: number) {
+        const entity = getMeta<VertexEntity<V>>(
+            vertex,
             GraphRenderingController.META_PROPERTY_NAME
         );
 
@@ -99,18 +129,17 @@ export default class GraphRenderingController<T> implements GraphUniverseCompone
         }
     }
 
-    public getVertexEntity(vertex: Vertex<T>): VertexEntity<T> {
-        return vertex.getMeta<VertexEntity<T>>(
+    public getVertexEntity(vertex: Vertex<V>): VertexEntity<V> {
+        return getMeta<VertexEntity<V>>(
+            vertex,
             GraphRenderingController.META_PROPERTY_NAME
         );
     }
 
-    private triggerRendering(timestamp: number): void {
-        this.universe.embedding.update(timestamp);
-        this.universe.application.ticker.update(timestamp);
-
-        requestAnimationFrame(
-            (timestamp) => this.triggerRendering(timestamp)
+    public getEdgeEntity(edge: Edge<V, E>): UndirectedEdgeEntity<V, E> {
+        return getMeta<UndirectedEdgeEntity<V, E>>(
+            edge,
+            GraphRenderingController.META_PROPERTY_NAME
         );
     }
 }

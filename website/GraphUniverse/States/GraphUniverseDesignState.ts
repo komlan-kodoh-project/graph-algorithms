@@ -1,12 +1,17 @@
-import GraphUniverse from "@/GraphUniverse/GraphUniverse";
-import {GraphUniverseState} from "@/GraphUniverse/States/GraphUniverseState";
+import GraphUniverse from "@/GraphUniverse/ww";
+import {GraphUniverseState, WellKnownGraphUniverseState} from "@/GraphUniverse/States/GraphUniverseState";
+import {GraphUniverseVertex} from "@/GraphUniverse/Graph/GraphUniverseVertex";
 
-export default class GraphUniverseDesignState<T> implements GraphUniverseState<T> {
+export class GraphUniverseDesignState<T extends GraphUniverseVertex> implements GraphUniverseState<T> {
     private universe: GraphUniverse<T>;
     private cleanup: (() => void)[] = [];
 
     constructor(graphUniverse: GraphUniverse<T>) {
         this.universe = graphUniverse;
+    }
+
+    wellKnownStateName(): WellKnownGraphUniverseState {
+        return WellKnownGraphUniverseState.Editing;
     }
 
     initialize(): void {

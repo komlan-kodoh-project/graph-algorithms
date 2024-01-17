@@ -1,27 +1,27 @@
-import Matter from "matter-js";
-import {ColorSource, Graphics} from "pixi.js";
-import Vertex from "@/GraphUniverse/Graph/Vertex";
-import {underline} from "next/dist/lib/picocolors";
-import UndirectedEdge from "@/GraphUniverse/Entity/UndirectedEdge";
+import { ColorSource, Graphics, Text, TextStyle } from "pixi.js";
+import { Vertex } from "@/GraphUniverse/Graph/Graph";
+import { UndirectedEdgeEntity } from "./UndirectedEdge";
 
-export type VertexDisplayConfiguration = {
-    edgeColor?: ColorSource
-    innerColor?: ColorSource
+export type VertexDisplayConfiguration<T> = {
+    edgeColor: string
+    innerColor: string
+    innerLabelGetter: (vertex: Vertex<T>) => string,
+    underLabelDisplayConfiguration: (vertex: Vertex<T>) => string,
 }
 
-const VertexDefaultDisplayConfiguration: VertexDisplayConfiguration = {
-    edgeColor: 0x7C98CD,
-    innerColor: 0xBBD3F0,
+const VertexDefaultDisplayConfiguration: VertexDisplayConfiguration<any> = {
+    edgeColor: "#7C98CD",
+    innerColor: "#BBD3F0",
+    innerLabelGetter: (vertex) => vertex.id.toString(),
+    underLabelDisplayConfiguration: (vertex) => ""
 }
 
 export default class VertexEntity<T> extends Graphics {
-    private static INSTANCE_NUMBERER = 0;
-
-    public id = ++VertexEntity.INSTANCE_NUMBERER;
     public graphVertex: Vertex<T>;
-    public outgoingEdges: UndirectedEdge<T>[] = [];
-    public inComingEdges: UndirectedEdge<T>[] = [];
-    private displayConfiguration: VertexDisplayConfiguration = VertexDefaultDisplayConfiguration;
+    public outgoingEdges: UndirectedEdgeEntity<T, any>[] = [];
+    public inComingEdges: UndirectedEdgeEntity<T, any>[] = [];
+
+    private displayConfiguration: VertexDisplayConfiguration<T> = VertexDefaultDisplayConfiguration;
 
     constructor(x: number, y: number, vertex: Vertex<T>) {
         super();
@@ -31,24 +31,64 @@ export default class VertexEntity<T> extends Graphics {
         this.y = y;
 
         this.eventMode = 'static';
-        this.drawSelf(this.displayConfiguration);
+        this.drawSelf();
     }
 
-    public updateDisplayConfiguration(displayConfiguration: VertexDisplayConfiguration) {
-        this.displayConfiguration = {...this.displayConfiguration, ...displayConfiguration};
-        this.drawSelf(this.displayConfiguration);
+    public getDisplayConfiguration(): VertexDisplayConfiguration<T> {
+        return { ...this.displayConfiguration };
     }
 
-    private drawSelf(displayConfiguration: VertexDisplayConfiguration) {
+    public updateDisplayConfiguration(displayConfiguration: Partial<VertexDisplayConfiguration<T>>) {
+        this.displayConfiguration = { ...this.displayConfiguration, ...displayConfiguration };
+        this.drawSelf();
+    }
+
+    private drawSelf() {
+        this.clear();
+        this.removeChildren();
+
         this.zIndex = 20;
+
         // border
-        this.beginFill(displayConfiguration.edgeColor);
+        this.beginFill(this.displayConfiguration.edgeColor);
         this.drawCircle(0, 0, 15);
         this.endFill();
 
         // interior
-        this.beginFill(displayConfiguration.innerColor);
+        this.beginFill(this.displayConfiguration.innerColor);
         this.drawCircle(0, 0, 12);
         this.endFill();
+
+        // Add text inside the square
+        const text = new Text(
+            this.displayConfiguration.innerLabelGetter(this.graphVertex),
+            {
+                fontFamily: 'Arial',
+                fontSize: 15,
+                fill: this.displayConfiguration.edgeColor,
+                align: 'center'
+            }
+        );
+
+        text.position.set(0, 0);
+        text.anchor.set(0.5, 0.5);
+
+        // Add text bellow the square
+        const underText = new Text(
+            this.displayConfiguration.underLabelDisplayConfiguration(this.graphVertex),
+            {
+                fontFamily: 'Arial',
+                fontSize: 15,
+                fill: this.displayConfiguration.edgeColor,
+                align: 'center',
+            }
+        );
+
+        underText.position.set(0, 25);
+        underText.anchor.set(0.5, 0.5);
+
+        // this
+        this.addChild(text);
+        this.addChild(underText);
     }
 }

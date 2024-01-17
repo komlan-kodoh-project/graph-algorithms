@@ -1,5 +1,5 @@
 "use client";
-import useWebAssembly from "@/Hooks/useWebAssembly";
+import useWebAssembly from "@/utils/useWebAssembly";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useEffect } from "react";
