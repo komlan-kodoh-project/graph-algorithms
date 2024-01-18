@@ -1,17 +1,17 @@
 import GraphUniverseComponent from "@/GraphUniverse/GraphUniverseComponent";
-import Vertex from "@/GraphUniverse/Graph/Vertex";
+import { Vertex } from "@/GraphUniverse/Graph/Graph";
 
 /**
  * A graph embedding defines how nodes should display on a string. For example a physics based embedding would mimic
  * physical forces to create a graph embedding. On the other hand a community based embedding might group nodes so
  * that nodes of the same community are close to one another
  */
-export default interface Embedding<T> extends GraphUniverseComponent<T> {
+export default interface Embedding<T, E> extends GraphUniverseComponent<T, E> {
     /**
      * Update the graph embedding with consideration to the delta time that has passed.
      * @param delta The time that has based since the last invocation of this method
      */
-    update(delta: number) : void;
+    update(delta: number): void;
 
     /**
      * Request that a vertex be moved at a particular position within the graph embedding

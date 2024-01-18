@@ -1,15 +1,22 @@
+import { UndirectedEdgeEntity } from '@/GraphUniverse/Entity/EdgeEntity';
 import GraphUniverse from "./GraphUniverse";
-import GraphEvents from "@/GraphUniverse/GraphEvents/GraphEvents";
-import VertexAddedEvent, {
+import VertexCreatedEvent, {
     EdgeAddedEvent, GraphDragEvent,
-    VertexClickedEvent,
+    VertexClickedEvent, VertexHoverEvent, VertexSelectedEvent,
     VertexToVertexDrag,
-    ViewClickedEvent
-} from "@/GraphUniverse/GraphEvents/VertexAddedEvent";
-import Vertex from "@/GraphUniverse/Graph/Vertex";
+    ViewClickedEvent, GraphStateUpdateEvent, EdgeClickedEvent
+} from "@/GraphUniverse/GraphEvents/GraphEvents";
 import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
-import {Coordinates} from "@/GraphUniverse/Coordinates";
-import {FederatedPointerEvent} from "pixi.js";
+import { Coordinates } from "@/GraphUniverse/Coordinates";
+import { FederatedPointerEvent } from "pixi.js";
+import { PersistentGraphEvent } from "@/GraphUniverse/GraphEvents/PersistentGraphEvent";
+import { GraphEvent } from "@/GraphUniverse/GraphEvents/GraphEvent";
+import {
+    EventEndHandler,
+    EventStartHandler,
+    PersistentGraphEventHandler
+} from "@/GraphUniverse/GraphEvents/PersistentGraphEventHandler";
+import { Vertex } from "@/GraphUniverse/Graph/Graph";
 
 type MouseState = {
     down: boolean,
@@ -23,39 +30,48 @@ type MouseDownObject = {
 }
 
 
-export default class GraphUniverseEventListener<T> {
-    private universe: GraphUniverse<T>;
+export default class GraphUniverseEventListener<V, E> {
+    private universe: GraphUniverse<V, E>;
 
     private mouseDownObject: MouseDownObject | null = null;
-    private dragHoveredVertex: VertexEntity<T> | null = null;
+    private dragHoveredVertex: VertexEntity<V> | null = null;
 
     private mouseState: MouseState = {
         down: false,
         dragging: false,
-        location: {x: 0, y: 0}
+        location: { x: 0, y: 0 }
     };
 
 
+    private persistentEvents = {
+        vertexHover: new PersistentGraphEvent<VertexHoverEvent<V>>
+    } as const;
+
     private events = {
-        edgeAddedEvent: new GraphEvents<EdgeAddedEvent<T>>(),
+        stateUpdatedEvent: new GraphEvent<GraphStateUpdateEvent<V, E>>(),
+        edgeAdded: new GraphEvent<EdgeAddedEvent<V, E>>(),
 
-        vertexDragStart: new GraphEvents<GraphDragEvent<Vertex<T>>>(),
-        viewportDragStart: new GraphEvents<GraphDragEvent<null>>(),
+        vertexDragStart: new GraphEvent<GraphDragEvent<Vertex<V>>>(),
+        viewportDragStart: new GraphEvent<GraphDragEvent<null>>(),
 
-        vertexDrag: new GraphEvents<GraphDragEvent<Vertex<T>>>(),
-        viewportDrag: new GraphEvents<GraphDragEvent<null>>(),
+        vertexDrag: new GraphEvent<GraphDragEvent<Vertex<V>>>(),
+        viewportDrag: new GraphEvent<GraphDragEvent<null>>(),
 
-        vertexDragEnd: new GraphEvents<GraphDragEvent<Vertex<T>>>(),
-        viewportDragEnd: new GraphEvents<GraphDragEvent<null>>(),
+        vertexDragEnd: new GraphEvent<GraphDragEvent<Vertex<V>>>(),
+        viewportDragEnd: new GraphEvent<GraphDragEvent<null>>(),
 
-        vertexAddedEvent: new GraphEvents<VertexAddedEvent<T>>(),
-        viewClickedEvent: new GraphEvents<ViewClickedEvent<T>>(),
-        vertexClickedEvent: new GraphEvents<VertexClickedEvent<T>>(),
-        vertexToVertexDrag: new GraphEvents<VertexToVertexDrag<T>>(),
+        vertexSelectedEvent: new GraphEvent<VertexSelectedEvent<V>>(),
+
+        edgeClickedEvent: new GraphEvent<EdgeClickedEvent<V, E>>(),
+
+        vertexAddedEvent: new GraphEvent<VertexCreatedEvent<V>>(),
+        viewClickedEvent: new GraphEvent<ViewClickedEvent<V>>(),
+        vertexClickedEvent: new GraphEvent<VertexClickedEvent<V>>(),
+        vertexToVertexDrag: new GraphEvent<VertexToVertexDrag<V>>(),
     } as const;
 
 
-    constructor(universe: GraphUniverse<T>) {
+    constructor(universe: GraphUniverse<V, E>) {
         this.universe = universe
     }
 
@@ -67,16 +83,50 @@ export default class GraphUniverseEventListener<T> {
         this.configureViewClickListener();
     }
 
-    public notifyVertexCreated(event: VertexAddedEvent<T>) {
+    public notifyVertexCreated(event: VertexCreatedEvent<V>) {
         this.events.vertexAddedEvent.trigger(event)
     }
 
-    public notifyEdgeCreated(event: EdgeAddedEvent<T>) {
-        this.events.edgeAddedEvent.trigger(event);
+    public notifyVertexSelected(event: VertexSelectedEvent<V>) {
+        this.events.vertexSelectedEvent.trigger(event)
     }
 
-    public listenOn(entity: VertexEntity<T>): void {
+    public notifyUniverseStateUpdate(event: GraphStateUpdateEvent<V, E>) {
+        this.events.stateUpdatedEvent.trigger(event)
+    }
 
+    public notifyEdgeCreated(event: EdgeAddedEvent<V, E>) {
+        this.events.edgeAdded.trigger(event);
+    }
+
+    public listenOnEdge(entity: UndirectedEdgeEntity<V, E>): void {
+        entity.addEventListener("click", event => {
+            event.stopPropagation();
+            this.events.edgeClickedEvent.trigger({
+                edge: entity.edge 
+            });
+        });
+    }
+
+    public listenOnVertex(entity: VertexEntity<V>): void {
+        // Handles vertex hover event
+        entity.addEventListener("mouseenter", (event) => {
+            const target = event.target as VertexEntity<V>
+            this.persistentEvents.vertexHover.triggerStart({
+                targetVertex: target.graphVertex
+            }
+            );
+        });
+
+        entity.addEventListener("mouseleave", (event) => {
+            const target = event.target as VertexEntity<V>
+            this.persistentEvents.vertexHover.triggerEnd({
+                targetVertex: target.graphVertex
+            }
+            );
+        });
+
+        // Handles vertex click and drag events
         entity.addEventListener("mousedown", (event) => {
             // We stop propagation so the viewport is not alerted with this event
             event.stopPropagation();
@@ -84,18 +134,19 @@ export default class GraphUniverseEventListener<T> {
             this.mouseState.down = true;
             this.mouseDownObject = {
                 type: "vertex-entity",
-                object: event.target as VertexEntity<T>,
+                object: event.target as VertexEntity<V>,
             };
         });
 
+        // Handles vertex drag events
         entity.addEventListener("mousemove", (event) => {
             // Only execute this handler if there is a drag event that has started on a vertex
             if (!(this.mouseState.dragging && this.mouseDownObject !== null && this.mouseDownObject.type === "vertex-entity")) {
                 return;
             }
 
-            const target = event.target as VertexEntity<T>
-            const dragVertexStart = this.mouseDownObject.object as VertexEntity<T>;
+            const target = event.target as VertexEntity<V>
+            const dragVertexStart = this.mouseDownObject.object as VertexEntity<V>;
 
             if (this.dragHoveredVertex === null && target !== dragVertexStart) {
                 this.events.vertexToVertexDrag.trigger({
@@ -104,7 +155,8 @@ export default class GraphUniverseEventListener<T> {
                 })
 
                 this.dragHoveredVertex = target;
-            } else if (this.dragHoveredVertex !== null && target !== this.dragHoveredVertex) {
+            }
+            else if (this.dragHoveredVertex !== null && target !== this.dragHoveredVertex) {
                 this.events.vertexToVertexDrag.trigger({
                     targetVertex: target.graphVertex,
                     sourceVertex: this.dragHoveredVertex.graphVertex,
@@ -116,7 +168,11 @@ export default class GraphUniverseEventListener<T> {
     }
 
     private configureViewClickListener(): void {
-        this.universe.viewport.addEventListener("mouseup", (event) => {
+        this.universe.viewport.addEventListener("click", (event) => {
+            if (this.mouseState.dragging) {
+                return;
+            }
+
             if (this.mouseDownObject !== null && this.mouseDownObject.type === "viewport") {
                 const coordinates = this.getEventCoordinates(event);
 
@@ -124,6 +180,14 @@ export default class GraphUniverseEventListener<T> {
                     sourceEvent: event,
                     x: coordinates.x,
                     y: coordinates.y
+                });
+            }
+
+            if (this.mouseDownObject !== null && this.mouseDownObject.type === "vertex-entity") {
+                const vertexTarget = this.mouseDownObject.object as VertexEntity<V>
+
+                this.events.vertexClickedEvent.trigger({
+                    vertex: vertexTarget.graphVertex
                 });
             }
 
@@ -153,7 +217,7 @@ export default class GraphUniverseEventListener<T> {
 
             if (this.mouseDownObject.type === "vertex-entity") {
                 const coordinates = this.getEventCoordinates(event);
-                const dragTarget = this.mouseDownObject.object as VertexEntity<T>;
+                const dragTarget = this.mouseDownObject.object as VertexEntity<V>;
 
                 if (!this.mouseState.dragging) {
                     this.mouseState.dragging = true;
@@ -164,11 +228,12 @@ export default class GraphUniverseEventListener<T> {
                         start: coordinates,
                         target: dragTarget.graphVertex,
                     })
-                } else {
+                }
+                else {
                     this.events.vertexDrag.trigger({
                         x: coordinates.x,
                         y: coordinates.y,
-                        start: {x: 0, y: 0},
+                        start: { x: 0, y: 0 },
                         target: dragTarget.graphVertex,
                     })
                 }
@@ -186,11 +251,12 @@ export default class GraphUniverseEventListener<T> {
                         start: coordinates,
                         target: null,
                     })
-                } else {
+                }
+                else {
                     this.events.viewportDrag.trigger({
                         x: coordinates.x,
                         y: coordinates.y,
-                        start: {x: 0, y: 0},
+                        start: { x: 0, y: 0 },
                         target: null,
                     })
                 }
@@ -208,12 +274,12 @@ export default class GraphUniverseEventListener<T> {
 
             if (this.mouseDownObject.type === "vertex-entity") {
                 const coordinates = this.getEventCoordinates(event);
-                const dragTarget = this.mouseDownObject.object as VertexEntity<T>;
+                const dragTarget = this.mouseDownObject.object as VertexEntity<V>;
 
                 this.events.vertexDragEnd.trigger({
                     x: coordinates.x,
                     y: coordinates.y,
-                    start: {x: 0, y: 0},
+                    start: { x: 0, y: 0 },
                     target: dragTarget.graphVertex,
                 })
             }
@@ -224,7 +290,7 @@ export default class GraphUniverseEventListener<T> {
                 this.events.viewportDragEnd.trigger({
                     x: coordinates.x,
                     y: coordinates.y,
-                    start: {x: 0, y: 0},
+                    start: { x: 0, y: 0 },
                     target: null,
                 })
             }
@@ -243,10 +309,13 @@ export default class GraphUniverseEventListener<T> {
         };
     }
 
-    public addEventListener<TEventName extends keyof GraphUniverseEventListener<T> ["events"]>(
+    public addEventListener<TEventName extends keyof GraphUniverseEventListener<V, E>["events"]>(
         eventName: TEventName,
-        handler: Parameters<GraphUniverseEventListener<T> ["events"][TEventName]["addHandler"]> [0]
+        handler: Parameters<GraphUniverseEventListener<V, E>["events"][TEventName]["addHandler"]>[0]
     ): () => void {
+        if (eventName=== "edgeAdded"){
+        }
+
         const event = this.events[eventName];
 
         // @ts-ignore
@@ -255,6 +324,36 @@ export default class GraphUniverseEventListener<T> {
         return () => {
             // @ts-ignore
             event.removeHandler(handler);
+        }
+    }
+
+    public addPersistentEventListener<
+        TEventName extends keyof GraphUniverseEventListener<V, E>["persistentEvents"],
+        TEventStartData
+    >(
+        eventName: TEventName,
+        startHandler: EventStartHandler<
+            GraphUniverseEventListener<V, E>["persistentEvents"][TEventName] extends PersistentGraphEvent<infer T> ? T : unknown,
+            TEventStartData
+        >,
+        endHandler: EventEndHandler<
+            GraphUniverseEventListener<V, E>["persistentEvents"][TEventName] extends PersistentGraphEvent<infer T> ? T : unknown,
+            TEventStartData
+        >
+    ): () => void {
+        const event = this.persistentEvents[eventName];
+
+        const newHandler = new PersistentGraphEventHandler(
+            startHandler,
+            endHandler
+        );
+
+        // @ts-ignore
+        event.addHandler(newHandler);
+
+        return () => {
+            // @ts-ignore
+            event.removeHandler(newHandler);
         }
     }
 }

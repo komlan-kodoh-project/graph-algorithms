@@ -1,19 +1,19 @@
-import Vertex from "@/GraphUniverse/Graph/Vertex";
-import GraphUniverse from "@/GraphUniverse/GraphUniverse";
 import Embedding from "@/GraphUniverse/Embeddings/Embedding";
-import Matter, {Bodies, Body, Constraint, Engine, Sleeping, World} from "matter-js";
-import {event} from "next/dist/build/output/log";
+import Matter, { Bodies, Body, Constraint, Engine, Sleeping, World } from "matter-js";
+import { Edge, getMeta, setMeta, Vertex } from "@/GraphUniverse/Graph/Graph";
+import GraphUniverse from "../GraphUniverse";
 
-export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
+export default class PhysicsBasedEmbedding<T, E> implements Embedding<T, E> {
     private static readonly META_PROPERTY_NAME: string = "physics-render-object";
 
     private readonly engine: Engine;
-    private readonly universe: GraphUniverse<any>;
+    private readonly universe: GraphUniverse<T, E>;
 
-    constructor(graphUniverse: GraphUniverse<any>) {
+    constructor(graphUniverse: GraphUniverse<T, E>) {
         this.engine = Engine.create({
-            gravity: {x: 0, y: 0},
+            gravity: { x: 0, y: 0 },
         });
+
         this.universe = graphUniverse;
     }
 
@@ -21,19 +21,20 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
         this.universe.listener.addEventListener("vertexAddedEvent", event => {
             const newPhysicVertex = this.addVertex(event.x, event.y);
 
-            event.vertex.addMeta(
+            setMeta(
+                event.vertex,
                 PhysicsBasedEmbedding.META_PROPERTY_NAME,
                 newPhysicVertex
             );
         });
 
-        this.universe.listener.addEventListener("edgeAddedEvent", event => {
-            this.handleNewEdge(event.sourceVertex, event.targetVertex);
+        this.universe.listener.addEventListener("edgeAdded", event => {
+            this.handleNewEdge(event.edge);
         });
     }
 
     control(target: Vertex<T>): void {
-        const physicsVertex = target.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
+        const physicsVertex = getMeta<Matter.Body>(target, PhysicsBasedEmbedding.META_PROPERTY_NAME);
 
         Body.setStatic(
             physicsVertex,
@@ -42,7 +43,8 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
     }
 
     free(target: Vertex<T>): void {
-        const physicsVertex = target.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
+        const physicsVertex = getMeta<Matter.Body>(target, PhysicsBasedEmbedding.META_PROPERTY_NAME);
+
         Body.setStatic(
             physicsVertex,
             true
@@ -50,39 +52,38 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
     }
 
     moveVertex(target: Vertex<T>, x: number, y: number): void {
-        const physicsVertex = target.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
+        const physicsVertex = getMeta<Matter.Body>(target, PhysicsBasedEmbedding.META_PROPERTY_NAME);
 
         Body.setPosition(
             physicsVertex,
-            {x, y}
+            { x, y }
         );
     }
 
 
     private move(delta: number): void {
-        Engine.update(this.engine, delta);
+        Engine.update(this.engine, delta * 400);
 
-
-        this.universe.graph.getAllNodes().forEach(graphNode => {
-            const body = graphNode.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
+        for (const graphNode of this.universe.graph.getAllVertices()) {
+            const body = getMeta<Matter.Body>(graphNode, PhysicsBasedEmbedding.META_PROPERTY_NAME);
 
             this.universe.renderingController.moveVertex(
                 graphNode,
                 body.position.x,
                 body.position.y
             );
-        });
+        };
     }
 
-    private handleNewEdge(firstVertex: Vertex<any>, secondVertex: Vertex<any>): void {
-        const firstBody = firstVertex.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
-        const secondBody = secondVertex.getMeta<Matter.Body>(PhysicsBasedEmbedding.META_PROPERTY_NAME);
+    private handleNewEdge(newEdge : Edge<T, E>): void {
+        const firstBody = getMeta<Matter.Body>(newEdge.sourceVertex, PhysicsBasedEmbedding.META_PROPERTY_NAME);
+        const secondBody = getMeta<Matter.Body>(newEdge.targetVertex, PhysicsBasedEmbedding.META_PROPERTY_NAME);
 
         const constraint = Constraint.create({
             bodyA: firstBody,
             bodyB: secondBody,
-            damping: 1,
-            stiffness: 1 / 100,
+            damping: 0,
+            stiffness: 1 / 50,
             length: 100
         });
 
@@ -93,11 +94,10 @@ export default class PhysicsBasedEmbedding<T> implements Embedding<T> {
         const particle = Bodies.circle(
             x,
             y,
-            20
+            19
         );
 
-        particle.restitution = 10;
-        particle.restitution = 0;
+        particle.frictionAir = 0.5;
 
         World.add(this.engine.world, particle);
 

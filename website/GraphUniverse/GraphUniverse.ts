@@ -1,34 +1,37 @@
-import {Application} from "pixi.js";
-import GraphUniverseConfiguration from "./GraphUniverseConfiguration";
+import { Application } from "pixi.js";
+import { Viewport } from "pixi-viewport";
+import { Edge, Graph, Vertex } from "./Graph/Graph";
 import GraphUniverseCamera from "./GraphUniverseCamera";
+import { VertexDisplayConfiguration } from './Entity/VertexEntity';
 import GraphUniverseEventListener from "./GraphUniverseEventListener";
-import {Viewport} from "pixi-viewport";
+import GraphUniverseConfiguration from "./GraphUniverseConfiguration";
+import SimpleGraph from "@/GraphUniverse/Graph/SimpleGraph/SimpleGraph";
 import GraphLayoutController from "@/GraphUniverse/Embeddings/Embedding";
-import PhysicsBasedEmbedding from "@/GraphUniverse/Embeddings/PhysicsBasedEmbedding";
-import SimpleGraph from "@/GraphUniverse/Graph/SimpleGraph";
-import Vertex from "@/GraphUniverse/Graph/Vertex";
-import Graph from "@/GraphUniverse/Graph/Graph";
 import GraphRenderingController from "@/GraphUniverse/GraphRenderingController";
-import GraphUniverseDesignState from "@/GraphUniverse/States/GraphUniverseDesignState";
-import {WellKnownGraphUniverseState, GraphUniverseState, StateFactory} from "@/GraphUniverse/States/GraphUniverseState";
+import PhysicsBasedEmbedding from "@/GraphUniverse/Embeddings/PhysicsBasedEmbedding";
+import { GraphUniverseDesignState } from "@/GraphUniverse/States/GraphUniverseDesignState";
+import { WellKnownGraphUniverseState, GraphUniverseState, StateFactory } from "@/GraphUniverse/States/GraphUniverseState";
+import { EdgeDisplayConfiguration } from "./Entity/EdgeEntity";
 
-export default class GraphUniverse<T> {
+export default class GraphUniverse<V, E> {
+    private VERTEX_ID_TRACKER: number = 0;
+    private hasInitialized: boolean = false;
+
     application: Application;
-    configuration: GraphUniverseConfiguration<T>;
-    graph: Graph<Vertex<T>> = new SimpleGraph();
+    configuration: GraphUniverseConfiguration<V, E>;
+    graph: SimpleGraph<V, E> = new SimpleGraph();
 
-    private hasInitialized = false;
 
     viewport: Viewport = null as unknown as Viewport;
 
     // Composite class extensions
-    state: GraphUniverseState<T>;
-    camera: GraphUniverseCamera<T>;
-    embedding: GraphLayoutController<T>;
-    listener: GraphUniverseEventListener<T>;
-    renderingController: GraphRenderingController<T>;
+    state: GraphUniverseState<V, E>;
+    camera: GraphUniverseCamera<V, E>;
+    embedding: GraphLayoutController<V, E>;
+    listener: GraphUniverseEventListener<V, E>;
+    renderingController: GraphRenderingController<V, E>;
 
-    constructor(configuration: GraphUniverseConfiguration<T>) {
+    constructor(configuration: GraphUniverseConfiguration<V, E>) {
         this.application = new Application({
             resolution: window.devicePixelRatio || 1,
             antialias: true,
@@ -42,14 +45,13 @@ export default class GraphUniverse<T> {
         // TODO: Change this to use layers
         this.viewport.sortableChildren = true;
 
-
         this.configuration = configuration;
 
-        this.camera = new GraphUniverseCamera(this);
-        this.embedding = new PhysicsBasedEmbedding(this);
-        this.state = new GraphUniverseDesignState(this);
-        this.listener = new GraphUniverseEventListener(this);
-        this.renderingController = new GraphRenderingController(this);
+        this.camera = new GraphUniverseCamera(this as any);
+        this.embedding = new PhysicsBasedEmbedding(this as any);
+        this.state = new GraphUniverseDesignState(this as any);
+        this.listener = new GraphUniverseEventListener(this as any);
+        this.renderingController = new GraphRenderingController(this as any);
     }
 
 
@@ -71,11 +73,7 @@ export default class GraphUniverse<T> {
         this.hasInitialized = true;
     }
 
-    public getNeighbors(vertex: Vertex<T>): Vertex<T>[] {
-        return this.graph.getNeighbor(vertex);
-    }
-
-    public setStateEnum(state: WellKnownGraphUniverseState): void {
+    public setWellKnownState(state: WellKnownGraphUniverseState): void {
         const newState = StateFactory.getState(
             state,
             this
@@ -84,35 +82,88 @@ export default class GraphUniverse<T> {
         this.setState(newState)
     }
 
-    public setState(state: GraphUniverseState<T>): void {
+    public setState(state: GraphUniverseState<V, E>): void {
+        const previousState = this.state;
         this.state.uninstall();
 
         this.state = state;
         this.state.initialize();
+
+        this.listener.notifyUniverseStateUpdate({
+            previousState: previousState,
+            currentState: this.state,
+        })
     }
 
-    public createVertex(x: number, y: number): void {
-        const newVertex = new Vertex<T>();
+    public createVertex(x: number, y: number): Vertex<V> {
+        const vertexData = this.configuration.getNewVertexData();
 
-        this.graph.addVertex(newVertex);
+        const newVertex = this.graph.createVertex(vertexData);
 
         this.listener.notifyVertexCreated({
             x,
             y,
             vertex: newVertex
         });
+
+        return newVertex;
     }
 
-    public createEdge(firstVertex: Vertex<T>, secondVertex: Vertex<T>): void {
-        this.graph.addEdge(firstVertex, secondVertex);
+    public createEdge(firstVertex: Vertex<V>, secondVertex: Vertex<V>): void {
+        const newEdge = this.graph.addEdge(firstVertex, secondVertex, null);
 
-        this.listener.notifyEdgeCreated(
-            {
-                IsDirected: false,
-                sourceVertex: secondVertex,
-                targetVertex: firstVertex,
+        this.listener.notifyEdgeCreated({
+            edge: newEdge,
+        });
+    }
+
+    public updateVertexRendering(vertex: Vertex<V>, newVertexRendering: Partial<VertexDisplayConfiguration<V>>) {
+        const newVertex = this.renderingController.getVertexEntity(vertex);
+        const previoustConfiguration = newVertex.getDisplayConfiguration();
+
+        newVertex.updateDisplayConfiguration(newVertexRendering);
+
+        return previoustConfiguration;
+    }
+
+    public updateEdgeRendering(edge: Edge<V, E>, newEdgeRendering: Partial<EdgeDisplayConfiguration<V, E>>) {
+        const edgeEntity = this.renderingController.getEdgeEntity(edge);
+        const previoustConfiguration = edgeEntity.getDisplayConfiguration();
+
+        edgeEntity.updateDisplayConfiguration(newEdgeRendering);
+
+        return previoustConfiguration;
+    }
+
+    public updateEdge(edge: Edge<V, E>, weight: number) {
+        edge.weight = weight;
+        const edgeEntity = this.renderingController.getEdgeEntity(edge);
+
+        edgeEntity.forceRerender();
+    }
+
+
+    public generateRandomGraph(numNodes: number) {
+        const vertices = [];
+        const edges = [];
+
+        const generateRandomInteger = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        for (let i = 0; i < numNodes; i++) {
+            const x = generateRandomInteger(20, 1000);
+            const y = generateRandomInteger(20, 1000);
+            const vertex = this.createVertex(x, y);
+            vertices.push(vertex);
+
+            if (i > 0) {
+                const randomVertexIndex = Math.floor(Math.random() * i);
+                const randomExistingVertex = vertices[randomVertexIndex];
+                this.createEdge(vertex, randomExistingVertex);
+                edges.push({ vertex1: vertex, vertex2: randomExistingVertex });
             }
-        );
+        }
+
+        return { vertices, edges };
     }
 }
 

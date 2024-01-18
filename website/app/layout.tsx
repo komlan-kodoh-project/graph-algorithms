@@ -1,7 +1,7 @@
 "use client";
 import "./globals.css";
 import { Inter } from "next/font/google";
-import useWebAssembly from "@/Hooks/useWebAssembly";
+import useWebAssembly from "@/utils/useWebAssembly";
 
 const inter = Inter({ subsets: ["latin"] });
 
