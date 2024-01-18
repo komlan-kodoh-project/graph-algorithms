@@ -1,12 +1,11 @@
-import GraphUniverse from "@/GraphUniverse/ww";
 import {GraphUniverseState, WellKnownGraphUniverseState} from "@/GraphUniverse/States/GraphUniverseState";
-import {GraphUniverseVertex} from "@/GraphUniverse/Graph/GraphUniverseVertex";
+import GraphUniverse from "../GraphUniverse";
 
-export class GraphUniverseDesignState<T extends GraphUniverseVertex> implements GraphUniverseState<T> {
-    private universe: GraphUniverse<T>;
+export class GraphUniverseDesignState<T, E> implements GraphUniverseState<T, E> {
+    private universe: GraphUniverse<T, E>;
     private cleanup: (() => void)[] = [];
 
-    constructor(graphUniverse: GraphUniverse<T>) {
+    constructor(graphUniverse: GraphUniverse<T, E>) {
         this.universe = graphUniverse;
     }
 
@@ -32,7 +31,7 @@ export class GraphUniverseDesignState<T extends GraphUniverseVertex> implements 
                     const entity = this.universe.renderingController.getVertexEntity(event.target);
 
                     entity.updateDisplayConfiguration({
-                        edgeColor: 0x7ccd88,
+                        edgeColor: "#7ccd88",
                     });
                 }
             ),
@@ -44,7 +43,7 @@ export class GraphUniverseDesignState<T extends GraphUniverseVertex> implements 
 
                     entity.updateDisplayConfiguration(
                         {
-                            edgeColor: 0x7C98CD
+                            edgeColor: "#7C98CD"
                         }
                     );
                 }

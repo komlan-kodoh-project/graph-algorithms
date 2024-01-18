@@ -1,10 +1,10 @@
-import { UndirectedEdgeEntity } from '@/GraphUniverse/Entity/UndirectedEdge';
+import { UndirectedEdgeEntity } from '@/GraphUniverse/Entity/EdgeEntity';
 import GraphUniverse from "./GraphUniverse";
 import VertexCreatedEvent, {
     EdgeAddedEvent, GraphDragEvent,
     VertexClickedEvent, VertexHoverEvent, VertexSelectedEvent,
     VertexToVertexDrag,
-    ViewClickedEvent, GraphStateUpdateEvent
+    ViewClickedEvent, GraphStateUpdateEvent, EdgeClickedEvent
 } from "@/GraphUniverse/GraphEvents/GraphEvents";
 import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
 import { Coordinates } from "@/GraphUniverse/Coordinates";
@@ -62,6 +62,8 @@ export default class GraphUniverseEventListener<V, E> {
 
         vertexSelectedEvent: new GraphEvent<VertexSelectedEvent<V>>(),
 
+        edgeClickedEvent: new GraphEvent<EdgeClickedEvent<V, E>>(),
+
         vertexAddedEvent: new GraphEvent<VertexCreatedEvent<V>>(),
         viewClickedEvent: new GraphEvent<ViewClickedEvent<V>>(),
         vertexClickedEvent: new GraphEvent<VertexClickedEvent<V>>(),
@@ -98,12 +100,11 @@ export default class GraphUniverseEventListener<V, E> {
     }
 
     public listenOnEdge(entity: UndirectedEdgeEntity<V, E>): void {
-        entity.addEventListener("click", (event) => {
-            console.log(event);
-        });
-
-        entity.addEventListener("enter", (event) => {
-            console.log(event);
+        entity.addEventListener("click", event => {
+            event.stopPropagation();
+            this.events.edgeClickedEvent.trigger({
+                edge: entity.edge 
+            });
         });
     }
 
@@ -167,7 +168,7 @@ export default class GraphUniverseEventListener<V, E> {
     }
 
     private configureViewClickListener(): void {
-        this.universe.viewport.addEventListener("mouseup", (event) => {
+        this.universe.viewport.addEventListener("click", (event) => {
             if (this.mouseState.dragging) {
                 return;
             }
@@ -313,7 +314,6 @@ export default class GraphUniverseEventListener<V, E> {
         handler: Parameters<GraphUniverseEventListener<V, E>["events"][TEventName]["addHandler"]>[0]
     ): () => void {
         if (eventName=== "edgeAdded"){
-            console.log(handler);
         }
 
         const event = this.events[eventName];

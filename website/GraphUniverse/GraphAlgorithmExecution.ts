@@ -103,7 +103,6 @@ export class BreathFirstSearchAlgorithm implements GraphAlgorithmExecution {
             }
 
             await sleep(100);
-            console.log(nextVertices);
             explorationLevel++;
         }
     }
@@ -111,6 +110,7 @@ export class BreathFirstSearchAlgorithm implements GraphAlgorithmExecution {
 
 
 type DijkstraNode = {
+    source: DijkstraNode | null,
     vertex: Vertex<any>,
     cost: number
 }
@@ -126,8 +126,9 @@ export class DijkstraAlgorithm implements GraphAlgorithmExecution {
         const visitedVertexId = new Set<number>();
 
         let vertexLeftToExplore: DijkstraNode[] = [{
+            source: null,
             vertex: this.config.sourceVertex,
-            cost: 0
+            cost: 0,
         }];
 
         this.universe.updateVertexRendering(
@@ -139,7 +140,9 @@ export class DijkstraAlgorithm implements GraphAlgorithmExecution {
             }
         );
 
-        await sleep(1000);
+        await sleep(300);
+
+        let backtrackingNode: DijkstraNode | null = null;
 
         while (vertexLeftToExplore.length !== 0) {
             const currentVertex = vertexLeftToExplore.shift()!;
@@ -148,11 +151,13 @@ export class DijkstraAlgorithm implements GraphAlgorithmExecution {
                 this.universe.updateVertexRendering(
                     currentVertex.vertex,
                     {
-                        edgeColor: "#cd7ca2",
-                        innerColor: "green",
-                        underLabelDisplayConfiguration: () => `Destination : ${currentVertex.cost} from ${this.config.sourceVertex.id}`,
+                        underLabelDisplayConfiguration: () => `Destination : ${currentVertex.cost} from ${currentVertex.source?.vertex.id}`,
                     }
                 );
+
+                backtrackingNode = currentVertex;
+
+                break;
             }
 
             this.universe.updateVertexRendering(
@@ -206,6 +211,7 @@ export class DijkstraAlgorithm implements GraphAlgorithmExecution {
                     );
 
                     vertexLeftToExplore.push({
+                        source: currentVertex,
                         vertex: adjacentVertex,
                         cost: explorationCost
                     })
@@ -219,6 +225,7 @@ export class DijkstraAlgorithm implements GraphAlgorithmExecution {
                         .filter(x => x.vertex.id != adjacentVertex.id);
 
                     vertexLeftToExplore.push({
+                        source: currentVertex,
                         vertex: adjacentVertex,
                         cost: explorationCost
                     })
@@ -232,12 +239,43 @@ export class DijkstraAlgorithm implements GraphAlgorithmExecution {
                         }
                     );
                 }
-
-                console.log(JSON.stringify(vertexLeftToExplore.map(x => x.vertex.id)));
             }
 
             await sleep(100);
         }
+
+
+        while (backtrackingNode?.source != null) {
+            const relevantEdge = this.universe.graph.getEdge(backtrackingNode.source.vertex, backtrackingNode.vertex);
+
+            this.universe.updateEdgeRendering(
+                relevantEdge,
+                {
+                    edgeColor: "green",
+                }
+            );
+
+            this.universe.updateVertexRendering(
+                backtrackingNode.vertex,
+                {
+                    innerColor: "#f0bbe5",
+                    edgeColor: "green"
+                }
+            );
+
+            await sleep(100);
+
+            backtrackingNode = backtrackingNode.source;
+        }
+
+        this.universe.updateVertexRendering(
+            this.config.sourceVertex,
+            {
+                innerColor: "#f0bbe5",
+                edgeColor: "green"
+            }
+        );
+
     }
 }
 

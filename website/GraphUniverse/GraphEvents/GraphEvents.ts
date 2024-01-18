@@ -47,6 +47,10 @@ export type EdgeAddedEvent<V, E> = {
     edge: Edge<V, E>,
 }
 
+export type EdgeClickedEvent<V, E> = {
+    edge: Edge<V, E>
+}
+
 export type GraphStateUpdateEvent<T, E> = {
     currentState:  GraphUniverseState<T, E>,
     previousState:  GraphUniverseState<T, E>,

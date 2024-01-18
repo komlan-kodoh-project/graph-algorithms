@@ -11,14 +11,14 @@ import GraphRenderingController from "@/GraphUniverse/GraphRenderingController";
 import PhysicsBasedEmbedding from "@/GraphUniverse/Embeddings/PhysicsBasedEmbedding";
 import { GraphUniverseDesignState } from "@/GraphUniverse/States/GraphUniverseDesignState";
 import { WellKnownGraphUniverseState, GraphUniverseState, StateFactory } from "@/GraphUniverse/States/GraphUniverseState";
-import { EdgeDisplayConfiguration } from "./Entity/UndirectedEdge";
+import { EdgeDisplayConfiguration } from "./Entity/EdgeEntity";
 
 export default class GraphUniverse<V, E> {
     private VERTEX_ID_TRACKER: number = 0;
     private hasInitialized: boolean = false;
 
     application: Application;
-    configuration: GraphUniverseConfiguration<V>;
+    configuration: GraphUniverseConfiguration<V, E>;
     graph: SimpleGraph<V, E> = new SimpleGraph();
 
 
@@ -31,7 +31,7 @@ export default class GraphUniverse<V, E> {
     listener: GraphUniverseEventListener<V, E>;
     renderingController: GraphRenderingController<V, E>;
 
-    constructor(configuration: GraphUniverseConfiguration<V>) {
+    constructor(configuration: GraphUniverseConfiguration<V, E>) {
         this.application = new Application({
             resolution: window.devicePixelRatio || 1,
             antialias: true,
@@ -135,6 +135,12 @@ export default class GraphUniverse<V, E> {
         return previoustConfiguration;
     }
 
+    public updateEdge(edge: Edge<V, E>, weight: number) {
+        edge.weight = weight;
+        const edgeEntity = this.renderingController.getEdgeEntity(edge);
+
+        edgeEntity.forceRerender();
+    }
 
 
     public generateRandomGraph(numNodes: number) {

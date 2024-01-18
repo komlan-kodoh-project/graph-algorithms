@@ -1,10 +1,9 @@
-import Vertex from "@/GraphUniverse/Entity/VertexEntity";
-import Graph from "@/GraphUniverse/Graph/Graph";
+import SimpleGraph from "./Graph/SimpleGraph/SimpleGraph";
 
-type GraphUniverseConfiguration<T> = {
-    graph: Graph<T>,
+type GraphUniverseConfiguration<V, E> = {
+    graph: SimpleGraph<V, E>,
     container: HTMLElement,
-    getNewVertexData: () => T
+    getNewVertexData: () => V 
 }
 
 export default GraphUniverseConfiguration; 

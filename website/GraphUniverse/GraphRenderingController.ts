@@ -2,7 +2,7 @@ import GraphUniverseComponent from "@/GraphUniverse/GraphUniverseComponent";
 import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
 import { Edge, Vertex, getMeta, setMeta } from "@/GraphUniverse/Graph/Graph";
 import GraphUniverse from "./GraphUniverse";
-import { UndirectedEdgeEntity } from "./Entity/UndirectedEdge";
+import { UndirectedEdgeEntity } from "./Entity/EdgeEntity";
 
 export default class GraphRenderingController<V, E> implements GraphUniverseComponent<V, E> {
     private universe: GraphUniverse<V, E>;
@@ -38,7 +38,7 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
 
         // Disable default ticker so that the rendering controller can take  full control of rendering
         this.universe.application.ticker.stop();
-        this.universe.application.renderer.background.color = 0xF1F5FE;
+        this.universe.application.renderer.background.color = "#F1F5FE";
         this.universe.application.stage.addChild(this.universe.viewport);
         this.universe.application.resizeTo = this.universe.configuration.container;
 

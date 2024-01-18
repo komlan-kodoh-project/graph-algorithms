@@ -6,6 +6,7 @@ import GraphUniverse from "@/GraphUniverse/GraphUniverse";
 import SimpleGraph from "@/GraphUniverse/Graph/SimpleGraph/SimpleGraph";
 import { WellKnownGraphUniverseState } from "@/GraphUniverse/States/GraphUniverseState";
 import { DijkstraAlgorithmForm } from "./forms/DijkstraAlgorithmForm";
+import { Edge } from "@/GraphUniverse/Graph/Graph";
 
 export type GraphUniverseVertexData = {};
 
@@ -14,6 +15,7 @@ export type GraphUniverseEdgeData = {};
 function GraphContainer() {
   const containerRef = useRef<HTMLDivElement>(null);
   const graphUniverse = useRef<GraphUniverse<any, any> | null>(null);
+  const [selectedEdge, setSelectedEdge] = useState<Edge<any, any> | null>(null);
   const [editorState, setEditorState] = useState<WellKnownGraphUniverseState>();
 
   useEffect(() => {
@@ -33,9 +35,13 @@ function GraphContainer() {
       setEditorState(event.currentState.wellKnownStateName());
     });
 
+    newUniverse.listener.addEventListener("edgeClickedEvent", (event) => {
+      setSelectedEdge(event.edge);
+    });
+
     newUniverse.initialize();
 
-    newUniverse.generateRandomGraph(20);
+    // newUniverse.generateRandomGraph(100);
 
     // const v1 = newUniverse.createVertex(150, 5);
     // const v2 = newUniverse.createVertex(150, 10);
@@ -95,6 +101,26 @@ function GraphContainer() {
           <DijkstraAlgorithmForm universe={graphUniverse.current} />
         )}
       </div>
+
+      {selectedEdge !== null && (
+        <div className="absolute left-0 right-0 mx-auto w-44  z-20 gap-2 top-3.5 rounded bg-white px-1.5 py-1 shadow grid grid-cols-2">
+          <div className="w-fit">Weight :</div>
+          <input
+            autoFocus
+            type="number"
+            className="w-full"
+            onKeyUp={(event) => {
+              if (event.key !== "Enter") return;
+
+              setSelectedEdge(null);
+              graphUniverse.current?.updateEdge(
+                selectedEdge,
+                +event.currentTarget.value
+              );
+            }}
+          ></input>
+        </div>
+      )}
 
       <div
         className="absolute top-0 bottom-0 left-0 right-0 z-10 "

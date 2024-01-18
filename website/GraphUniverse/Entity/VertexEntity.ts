@@ -1,6 +1,6 @@
 import { ColorSource, Graphics, Text, TextStyle } from "pixi.js";
 import { Vertex } from "@/GraphUniverse/Graph/Graph";
-import { UndirectedEdgeEntity } from "./UndirectedEdge";
+import { UndirectedEdgeEntity } from "./EdgeEntity";
 
 export type VertexDisplayConfiguration<T> = {
     edgeColor: string
