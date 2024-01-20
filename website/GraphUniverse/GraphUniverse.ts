@@ -12,9 +12,9 @@ import PhysicsBasedEmbedding from "@/GraphUniverse/Embeddings/PhysicsBasedEmbedd
 import { GraphUniverseDesignState } from "@/GraphUniverse/States/GraphUniverseDesignState";
 import { WellKnownGraphUniverseState, GraphUniverseState, StateFactory } from "@/GraphUniverse/States/GraphUniverseState";
 import { EdgeDisplayConfiguration } from "./Entity/EdgeEntity";
+import { sleep } from "@/utils/helpers";
 
 export default class GraphUniverse<V, E> {
-    private VERTEX_ID_TRACKER: number = 0;
     private hasInitialized: boolean = false;
 
     application: Application;
@@ -96,9 +96,7 @@ export default class GraphUniverse<V, E> {
     }
 
     public createVertex(x: number, y: number): Vertex<V> {
-        const vertexData = this.configuration.getNewVertexData();
-
-        const newVertex = this.graph.createVertex(vertexData);
+        const newVertex = this.graph.createVertex(null);
 
         this.listener.notifyVertexCreated({
             x,
@@ -117,22 +115,17 @@ export default class GraphUniverse<V, E> {
         });
     }
 
-    public updateVertexRendering(vertex: Vertex<V>, newVertexRendering: Partial<VertexDisplayConfiguration<V>>) {
+    public updateVertexRendering(vertex: Vertex<V>, newVertexRendering: Partial<VertexDisplayConfiguration<V>>): () => void {
         const newVertex = this.renderingController.getVertexEntity(vertex);
-        const previoustConfiguration = newVertex.getDisplayConfiguration();
 
-        newVertex.updateDisplayConfiguration(newVertexRendering);
-
-        return previoustConfiguration;
+        return newVertex.updateDisplayConfiguration(newVertexRendering);
     }
 
-    public updateEdgeRendering(edge: Edge<V, E>, newEdgeRendering: Partial<EdgeDisplayConfiguration<V, E>>) {
+    public updateEdgeRendering(edge: Edge<V, E>, newEdgeRendering: Partial<EdgeDisplayConfiguration<V, E>>): () => void {
         const edgeEntity = this.renderingController.getEdgeEntity(edge);
-        const previoustConfiguration = edgeEntity.getDisplayConfiguration();
 
-        edgeEntity.updateDisplayConfiguration(newEdgeRendering);
+        return edgeEntity.updateDisplayConfiguration(newEdgeRendering);
 
-        return previoustConfiguration;
     }
 
     public updateEdge(edge: Edge<V, E>, weight: number) {
@@ -142,8 +135,20 @@ export default class GraphUniverse<V, E> {
         edgeEntity.forceRerender();
     }
 
+    public resetAllDisplayConfiguration() {
+        for (const vertex of this.graph.getAllVertices()) {
+            const vertexEntity = this.renderingController.getVertexEntity(vertex);
+            vertexEntity.resetConfiguration();
+        }
 
-    public generateRandomGraph(numNodes: number) {
+        for (const edges of this.graph.getAllEdges()) {
+            const vertexEntity = this.renderingController.getEdgeEntity(edges);
+            vertexEntity.resetConfiguration();
+        }
+    }
+
+
+    public async generateRandomGraph(numNodes: number): Promise<void> {
         const vertices = [];
         const edges = [];
 
@@ -161,9 +166,9 @@ export default class GraphUniverse<V, E> {
                 this.createEdge(vertex, randomExistingVertex);
                 edges.push({ vertex1: vertex, vertex2: randomExistingVertex });
             }
-        }
 
-        return { vertices, edges };
+            await sleep(400);
+        }
     }
 }
 

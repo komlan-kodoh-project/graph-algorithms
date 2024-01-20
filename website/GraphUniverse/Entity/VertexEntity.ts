@@ -1,29 +1,35 @@
 import { ColorSource, Graphics, Text, TextStyle } from "pixi.js";
 import { Vertex } from "@/GraphUniverse/Graph/Graph";
-import { UndirectedEdgeEntity } from "./EdgeEntity";
+import { EdgeEntity } from "./EdgeEntity";
+import { ConfigurationManager } from "./ConfigurationController";
 
 export type VertexDisplayConfiguration<T> = {
-    edgeColor: string
+    borderColor: string
     innerColor: string
     innerLabelGetter: (vertex: Vertex<T>) => string,
     underLabelDisplayConfiguration: (vertex: Vertex<T>) => string,
 }
 
 const VertexDefaultDisplayConfiguration: VertexDisplayConfiguration<any> = {
-    edgeColor: "#7C98CD",
-    innerColor: "#BBD3F0",
+    borderColor: "black",
+    innerColor: "black",
     innerLabelGetter: (vertex) => vertex.id.toString(),
     underLabelDisplayConfiguration: (vertex) => ""
 }
 
-export default class VertexEntity<T> extends Graphics {
-    public graphVertex: Vertex<T>;
-    public outgoingEdges: UndirectedEdgeEntity<T, any>[] = [];
-    public inComingEdges: UndirectedEdgeEntity<T, any>[] = [];
+export default class VertexEntity<V> extends Graphics {
+    public graphVertex: Vertex<V>;
+    public outgoingEdges: EdgeEntity<V, any>[] = [];
+    public inComingEdges: EdgeEntity<V, any>[] = [];
 
-    private displayConfiguration: VertexDisplayConfiguration<T> = VertexDefaultDisplayConfiguration;
+    private configuration: ConfigurationManager<VertexDisplayConfiguration<V>>;
 
-    constructor(x: number, y: number, vertex: Vertex<T>) {
+    constructor(
+        x: number,
+        y: number,
+        vertex: Vertex<V>,
+        displayConfiguration: Partial<VertexDisplayConfiguration<V>>
+    ) {
         super();
         this.graphVertex = vertex;
 
@@ -31,41 +37,51 @@ export default class VertexEntity<T> extends Graphics {
         this.y = y;
 
         this.eventMode = 'static';
+        this.configuration = new ConfigurationManager({ ...VertexDefaultDisplayConfiguration, ...displayConfiguration });
+
         this.drawSelf();
     }
 
-    public getDisplayConfiguration(): VertexDisplayConfiguration<T> {
-        return { ...this.displayConfiguration };
+    public updateDisplayConfiguration(displayConfiguration: Partial<VertexDisplayConfiguration<V>>): () => void {
+        const remover = this.configuration.addConfiguration(displayConfiguration);
+
+        this.drawSelf();
+
+        return () => {
+            remover();
+            this.drawSelf();
+        };
     }
 
-    public updateDisplayConfiguration(displayConfiguration: Partial<VertexDisplayConfiguration<T>>) {
-        this.displayConfiguration = { ...this.displayConfiguration, ...displayConfiguration };
+    public resetConfiguration() {
+        this.configuration.reset();
         this.drawSelf();
     }
 
     private drawSelf() {
+        const configuration = this.configuration.getCurrentConfiguration();
         this.clear();
         this.removeChildren();
 
         this.zIndex = 20;
 
         // border
-        this.beginFill(this.displayConfiguration.edgeColor);
+        this.beginFill(configuration.borderColor);
         this.drawCircle(0, 0, 15);
         this.endFill();
 
         // interior
-        this.beginFill(this.displayConfiguration.innerColor);
+        this.beginFill(configuration.innerColor);
         this.drawCircle(0, 0, 12);
         this.endFill();
 
         // Add text inside the square
         const text = new Text(
-            this.displayConfiguration.innerLabelGetter(this.graphVertex),
+            configuration.innerLabelGetter(this.graphVertex),
             {
                 fontFamily: 'Arial',
                 fontSize: 15,
-                fill: this.displayConfiguration.edgeColor,
+                fill: configuration.borderColor,
                 align: 'center'
             }
         );
@@ -75,11 +91,11 @@ export default class VertexEntity<T> extends Graphics {
 
         // Add text bellow the square
         const underText = new Text(
-            this.displayConfiguration.underLabelDisplayConfiguration(this.graphVertex),
+            configuration.underLabelDisplayConfiguration(this.graphVertex),
             {
                 fontFamily: 'Arial',
                 fontSize: 15,
-                fill: this.displayConfiguration.edgeColor,
+                fill: configuration.borderColor,
                 align: 'center',
             }
         );

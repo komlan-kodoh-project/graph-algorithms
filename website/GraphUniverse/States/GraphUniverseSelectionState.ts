@@ -19,22 +19,12 @@ export class GraphUniverseSelectionState<T, E> implements GraphUniverseState<T, 
                 (event) => {
                     const vertex = this.universe.renderingController.getVertexEntity(event.targetVertex);
 
-                    const previousDisplayConfiguration = vertex.getDisplayConfiguration();
-
-                    vertex.updateDisplayConfiguration({
+                    return vertex.updateDisplayConfiguration({
                         innerColor: "#e1ebf7",
                     })
-
-                    return {
-                        previousDisplayConfiguration
-                    }
                 },
-                (event, data) => {
-
-                    this.universe
-                        .renderingController
-                        .getVertexEntity(event.targetVertex)
-                        .updateDisplayConfiguration(data.previousDisplayConfiguration);
+                (event, cleanup) => {
+                    cleanup();
                 },
             ),
             this.universe.listener.addEventListener(

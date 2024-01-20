@@ -2,7 +2,7 @@ import GraphUniverseComponent from "@/GraphUniverse/GraphUniverseComponent";
 import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
 import { Edge, Vertex, getMeta, setMeta } from "@/GraphUniverse/Graph/Graph";
 import GraphUniverse from "./GraphUniverse";
-import { UndirectedEdgeEntity } from "./Entity/EdgeEntity";
+import { EdgeEntity } from "./Entity/EdgeEntity";
 
 export default class GraphRenderingController<V, E> implements GraphUniverseComponent<V, E> {
     private universe: GraphUniverse<V, E>;
@@ -38,7 +38,7 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
 
         // Disable default ticker so that the rendering controller can take  full control of rendering
         this.universe.application.ticker.stop();
-        this.universe.application.renderer.background.color = "#F1F5FE";
+        this.universe.application.renderer.background.color = this.universe.configuration.backgroudColor;
         this.universe.application.stage.addChild(this.universe.viewport);
         this.universe.application.resizeTo = this.universe.configuration.container;
 
@@ -48,7 +48,11 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
             const vertexEntity = new VertexEntity(
                 event.x,
                 event.y,
-                event.vertex
+                event.vertex,
+                {
+                    innerColor: this.universe.configuration.theme["light"],
+                    borderColor: this.universe.configuration.theme["dark"],
+                }
             );
 
             // Attach metadata to the graph vertex to carry a reference to its corresponding universe rendering
@@ -73,7 +77,7 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
             const target = this.getVertexEntity(event.edge.targetVertex);
             const source = this.getVertexEntity(event.edge.sourceVertex);
 
-            const newEdge = new UndirectedEdgeEntity<V, E>(
+            const newEdge = new EdgeEntity<V, E>(
                 {
                     x: source.x,
                     y: source.y
@@ -83,6 +87,11 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
                     y: target.y
                 },
                 event.edge,
+                {
+                    texColor: this.universe.configuration.theme["dark"],    
+                    edgeColor: this.universe.configuration.theme["dark"],
+                    labelBackground: this.universe.configuration.theme["light"],
+                }
             );
 
             setMeta(
@@ -136,8 +145,8 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
         );
     }
 
-    public getEdgeEntity(edge: Edge<V, E>): UndirectedEdgeEntity<V, E> {
-        return getMeta<UndirectedEdgeEntity<V, E>>(
+    public getEdgeEntity(edge: Edge<V, E>): EdgeEntity<V, E> {
+        return getMeta<EdgeEntity<V, E>>(
             edge,
             GraphRenderingController.META_PROPERTY_NAME
         );

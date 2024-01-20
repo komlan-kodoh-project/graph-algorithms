@@ -6,37 +6,74 @@ import {
   DijkstraAlgorithmConfig,
 } from "@/GraphUniverse/GraphAlgorithmExecution";
 import { WellKnownGraphUniverseState } from "@/GraphUniverse/States/GraphUniverseState";
+import { Button } from "../building-blocks/Button";
+import { userReactiveRef } from "@/utils/hooks";
 
 export type DijkstraAlgorithmForm = FormProp & {};
 
 export function DijkstraAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
-  const [selectionTarget, setSelectionTarget] = useState<
+  const [inputModeRef, setSelectionTarget] = userReactiveRef<
     keyof DijkstraAlgorithmConfig | null
   >(null);
+
   const [algorithmInput, setAlgorithmInput] = useState<
     Partial<DijkstraAlgorithmConfig>
   >({});
 
   // TODO: update this so it is less inefficient
   useEffect(() => {
-    const cleanup = universe.listener.addEventListener(
+    const cleanupVertexSelected = universe.listener.addEventListener(
       "vertexSelectedEvent",
       (event) => {
-        if (selectionTarget === null) {
+        const inputMode = inputModeRef.current;
+        if (inputMode === null) {
           return;
         }
 
-        setAlgorithmInput((currentSelection) => ({
-          ...currentSelection,
-          [selectionTarget]: event.vertex,
-        }));
+        setAlgorithmInput((currentSelection) => {
+          var previousSelection = currentSelection[inputMode];
+
+          if (previousSelection !== undefined && previousSelection["dijkstra-cleanup"] !== undefined){
+            previousSelection["dijkstra-cleanup"]();
+            delete previousSelection["dijkstra-cleanup"]
+          }
+
+          event.vertex["dijkstra-cleanup"]  ??= universe.updateVertexRendering(
+            event.vertex,
+            {
+              innerColor: universe.configuration.secondaryAccent.light,
+              borderColor: universe.configuration.secondaryAccent.dark,
+            }
+          );
+          
+
+          return {
+            ...currentSelection,
+            [inputMode]: event.vertex,
+          };
+        });
+
+        setSelectionTarget(null);
+      }
+    );
+
+    const cleanupStateUpdate = universe.listener.addEventListener(
+      "stateUpdatedEvent",
+      (event) => {
+        if (
+          event.currentState.wellKnownStateName() !==
+          WellKnownGraphUniverseState.NodeSelection
+        ) {
+          setSelectionTarget(null);
+        }
       }
     );
 
     return () => {
-      cleanup();
+      cleanupVertexSelected();
+      cleanupStateUpdate();
     };
-  }, [selectionTarget, universe.listener]);
+  }, [universe, inputModeRef, setSelectionTarget]);
 
   const setInputMode = (inputMode: keyof DijkstraAlgorithmConfig) => {
     setSelectionTarget(inputMode);
@@ -62,19 +99,18 @@ export function DijkstraAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
   };
 
   return (
-    <form onSubmit={(e) => e.preventDefault()}>
-      <div
-        className={
-          "grid grid-cols-1 gap-y-2 p-3 text-sm rounded bg-white shadow"
-        }
+    <div className={"p-3 text-sm rounded bg-white shadow w-96 h-full"}>
+      <form
+        className="grid grid-cols-1 gap-y-2"
+        onSubmit={(e) => e.preventDefault()}
       >
         <div className="flex justify-between gap-x-2">
-          <button
-            className="h-full p-2 transition duration-250 rounded shadow"
+          <Button
+            active={inputModeRef.current === "sourceVertex"}
             onClick={() => setInputMode("sourceVertex")}
           >
             Source Vertex
-          </button>
+          </Button>
 
           <input
             readOnly={true}
@@ -84,12 +120,12 @@ export function DijkstraAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
         </div>
 
         <div className="flex justify-between gap-x-2">
-          <button
-            className="h-full p-2 transition duration-250 rounded shadow"
+          <Button
+            active={inputModeRef.current === "destinatonVertex"}
             onClick={() => setInputMode("destinatonVertex")}
           >
             Destination Vertex
-          </button>
+          </Button>
 
           <input
             readOnly={true}
@@ -98,7 +134,7 @@ export function DijkstraAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
           ></input>
         </div>
 
-        <div className="p-2 text-gray-700">
+        <div className="p-2">
           Running Dijkstra algorithm from
           <span className={"bg-gray-100 border-b-2 px-0.5 mx-0.5"}>
             {algorithmInput.sourceVertex?.id ?? "_"}
@@ -108,16 +144,34 @@ export function DijkstraAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
             {algorithmInput.destinatonVertex?.id ?? "_"}
           </span>
         </div>
-      </div>
 
-      <div className="flex justify-center gap-x-2 pt-3">
-        <button
-          onClick={() => startAlgorithm()}
-          className="h-full p-2 transition duration-250 rounded bg-white shadow"
-        >
-          Start
-        </button>
-      </div>
-    </form>
+        <div className="flex  gap-3">
+          <Button className="flex-1" onClickAsync={startAlgorithm}>
+            Start
+          </Button>
+
+          <Button
+            className="flex-1"
+            onClick={() => universe.resetAllDisplayConfiguration()}
+          >
+            Reset
+          </Button>
+        </div>
+      </form>
+
+      <h1>Description</h1>
+
+      <p>
+        Dijkstra's algorithm (/ˈdaɪkstrəz/ DYKE-strəz) is an algorithm for
+        finding the shortest paths between nodes in a weighted graph, which may
+        represent, for example, road networks. It was conceived by computer
+        scientist Edsger W. Dijkstra in 1956 and published three years
+        later.[4][5][6] The algorithm exists in many variants. Dijkstra's
+        original algorithm found the shortest path between two given nodes,[6]
+        but a more common variant fixes a single node as the "source" node and
+        finds shortest paths from the source to all other nodes in the graph,
+        producing a shortest-path tree.
+      </p>
+    </div>
   );
 }

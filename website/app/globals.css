@@ -18,6 +18,13 @@
   }
 }
 
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+    outline: none;
+}
+
 html, body {
   height: 100%;
   overscroll-behavior-x: none;

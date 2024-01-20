@@ -1,30 +1,43 @@
 import { Container, Graphics, Text } from "pixi.js";
 import { Edge, GraphOperationMode } from '@/GraphUniverse/Graph/Graph';
 import { Coordinates } from "@/GraphUniverse/Coordinates";
+import { ConfigurationManager } from "./ConfigurationController";
 
 
 export type EdgeDisplayConfiguration<V, E> = {
-    edgeColor: string
     texColor: string
+    edgeColor: string
+    labelBackground: string
+    showWeight: boolean,
+    directed: boolean,
     edgeMiddleLabel: (edge: Edge<V, E>) => string,
 }
 
 const edgeDefaultDisplayConfiguration: EdgeDisplayConfiguration<any, any> = {
     texColor: "black",
-    edgeColor: "#7C98CD",
+    edgeColor: "black",
+    labelBackground: "black",
+    directed: false,
+    showWeight: false,
     edgeMiddleLabel: (edge) => edge.weight.toString(),
 }
 
-export class UndirectedEdgeEntity<V, E> extends Container {
+export class EdgeEntity<V, E> extends Container {
     public edge: Edge<V, E>;
     private length: number = 100;
     private sourceCoordinates: Coordinates;
     private destinationCoordinates: Coordinates;
-    private mode: GraphOperationMode = GraphOperationMode.Undirected;
 
-    private displayConfiguration: EdgeDisplayConfiguration<V, E> = edgeDefaultDisplayConfiguration;
+    private configuration: ConfigurationManager<EdgeDisplayConfiguration<V, E>>;
+    private edgeLine: Graphics = new Graphics();
+    private arrowLabel: Graphics = new Graphics();
 
-    constructor(sourceCoordinates: Coordinates, destinationCoordinates: Coordinates, edge: Edge<V, E>) {
+    constructor(
+        sourceCoordinates: Coordinates,
+        destinationCoordinates: Coordinates,
+        edge: Edge<V, E>,
+        displayConfiguraton: Partial<EdgeDisplayConfiguration<V, E>> = {}
+    ) {
         super();
 
         this.edge = edge;
@@ -32,153 +45,157 @@ export class UndirectedEdgeEntity<V, E> extends Container {
         this.destinationCoordinates = destinationCoordinates;
 
         this.eventMode = 'static';
+        this.sortableChildren = true;
+        this.configuration = new ConfigurationManager({ ...edgeDefaultDisplayConfiguration, ...displayConfiguraton });
 
-        this.initialize();
-        this.drawSelf();
+        this.addChild(this.edgeLine);
+        this.addChild(this.arrowLabel);
+
+        this.redraw_arrow();
+        this.redraw_label();
     }
 
     public updateSourceCoordinates(newSourceCoordinates: Coordinates) {
         this.sourceCoordinates = newSourceCoordinates;
 
-        this.drawSelf();
+        this.handlePositionUpdate();
     }
 
     public updateDestinationCoordinates(newDestinationCoordinates: Coordinates) {
         this.destinationCoordinates = newDestinationCoordinates;
 
-        this.drawSelf();
+        this.handlePositionUpdate();
     }
 
-    public updateDisplayConfiguration(displayConfiguration: Partial<EdgeDisplayConfiguration<V, E>>) {
-        this.displayConfiguration = { ...this.displayConfiguration, ...displayConfiguration };
-        this.initialize();
+    public updateDisplayConfiguration(displayConfiguration: Partial<EdgeDisplayConfiguration<V, E>>): () => void {
+        const remover = this.configuration.addConfiguration(displayConfiguration);
+
+        this.forceRerender();
+
+        return () => {
+            remover();
+            this.forceRerender();
+        };
+    }
+
+    resetConfiguration() {
+        this.configuration.reset();
+        this.forceRerender();
     }
 
     public forceRerender() {
-        this.initialize();
+        this.redraw_arrow();
+        this.redraw_label();
     }
 
-    public getDisplayConfiguration(): EdgeDisplayConfiguration<V, E> {
-        return { ...this.displayConfiguration };
-    }
-
-    private drawSelf() {
+    private handlePositionUpdate() {
         const angle = Math.atan2(this.destinationCoordinates.y - this.sourceCoordinates.y, this.destinationCoordinates.x - this.sourceCoordinates.x);
 
         const distance = Math.sqrt(Math.pow(this.destinationCoordinates.x - this.sourceCoordinates.x, 2) + Math.pow(this.destinationCoordinates.y - this.sourceCoordinates.y, 2));
 
         const scale = distance / this.length;
 
-        this.rotation = angle;
-        this.scale.x = scale;
-        this.position.set(this.sourceCoordinates.x, this.sourceCoordinates.y);
+        this.edgeLine.rotation = angle;
+        this.edgeLine.scale.x = scale;
+        this.edgeLine.position.set(this.sourceCoordinates.x, this.sourceCoordinates.y);
 
-        if (Math.abs(distance - this.length) > 30) {
-            this.length = distance;
-            this.scale.x = 1;
-            this.initialize();
+        this.arrowLabel.position.set(
+            (this.destinationCoordinates.x + this.sourceCoordinates.x) / 2,
+            (this.destinationCoordinates.y + this.sourceCoordinates.y) / 2
+        )
+    }
+
+    private redraw_arrow() {
+        const configuration = this.configuration.getCurrentConfiguration();
+        if (configuration.directed) {
+            this.redraw_directed_arrow();
+        }
+
+        else {
+            this.redraw_undirected_arrow();
         }
     }
 
-    private initialize() {
-        if (this.mode === GraphOperationMode.Undirected) {
-            this.initialize_undirected();
+    private redraw_undirected_arrow() {
+        const configuration = this.configuration.getCurrentConfiguration();
+
+        if (this.edgeLine === null) {
+            const arrow = new Graphics();
+
+            this.edgeLine = arrow;
+            this.addChild(this.edgeLine);
+        }
+        else {
+            this.edgeLine.clear();
         }
 
-        else if (this.mode === GraphOperationMode.Directed) {
-            this.initialize_directed();
-        }
+        this.edgeLine.zIndex = 0;
+        this.edgeLine.beginFill(configuration.edgeColor);
+
+        // Set line style
+        this.edgeLine.drawRect(0, - 1.5, this.length, 3);
     }
 
-    private initialize_undirected() {
-        this.removeChildren();
 
-        this.zIndex = 10;
+    private redraw_directed_arrow() {
+        const configuration = this.configuration.getCurrentConfiguration();
 
+        if (this.edgeLine) {
+            this.removeChild(this.edgeLine)
+        }
 
-        // Create a Graphics object
         const arrow = new Graphics();
-        this.addChild(arrow);
 
-        arrow.beginFill(this.displayConfiguration.edgeColor);
+        arrow.zIndex = 0;
+        arrow.beginFill(configuration.edgeColor);
 
         // Set line style
         arrow.lineStyle(2, "transparent");
-
-
-        // Draw a rotated rectangle that serves as edge
         arrow.drawRect(0, - 1.5, this.length, 3);
 
-        arrow.beginFill("#F1F5FE");
-        const label = this.displayConfiguration.edgeMiddleLabel(this.edge);
-        const width = label.length * 10 + 10;
-        
-        arrow.drawRoundedRect(this.length / 2 - width / 2, -width / 2, width, width, 5);
-
-        const text = new Text(
-            this.displayConfiguration.edgeMiddleLabel(this.edge),
-            {
-                fontSize: 15,
-                align: 'center',
-                fontFamily: 'Arial',
-                fill: this.displayConfiguration.texColor,
-            }
-        );
-
-        text.position.set(this.length / 2, 0);
-        text.anchor.set(0.5, 0.5);
-
-        this.addChild(text)
-
+        this.addChild(arrow);
+        this.edgeLine = arrow;
     }
 
-    private initialize_directed() {
-        this.removeChildren();
+    private redraw_label() {
+        const configuration = this.configuration.getCurrentConfiguration();
 
-        this.zIndex = 10;
+        if (this.arrowLabel) {
+            this.removeChild(this.arrowLabel);
+        }
 
+        const label = configuration.edgeMiddleLabel(this.edge);
+        let height = 20;
+        let width = label.length * 10 + 10;
 
-        // Create a Graphics object
-        const arrow = new Graphics();
-        this.addChild(arrow);
+        const textContainer = new Graphics();
+        this.addChild(textContainer);
 
-        arrow.beginFill(this.displayConfiguration.edgeColor);
+        textContainer.zIndex = 8;
+        textContainer.beginFill(configuration.edgeColor);
+        textContainer.drawRoundedRect(- width / 2, -height / 2, width, height, 8);
 
-        // Set line style
-        arrow.lineStyle(2, "transparent");
-
-
-        // Draw a rotated rectangle
-        arrow.drawRect(15, - 1.5, this.length - 40, 3);
-
-        arrow.moveTo(this.length - 15, 0);
-        arrow.lineTo(this.length - 25, 0 - 5);
-        arrow.lineTo(this.length - 25, 0 + 5);
-        arrow.lineTo(this.length - 15, 0);
-        arrow.closePath();
-        arrow.endFill();
-
-
-        arrow.beginFill("#F1F5FE");
-
-        const label = this.displayConfiguration.edgeMiddleLabel(this.edge);
-        const width = label.length * 10 + 10;
-        
-        arrow.drawRoundedRect(this.length / 2 - width / 2, -width / 2, width, width, 5);
+        width -= 5;
+        height -= 5;
+        textContainer.beginFill(configuration.labelBackground);
+        textContainer.drawRoundedRect(- width / 2, -height / 2, width, height, 5);
 
         const text = new Text(
-            this.displayConfiguration.edgeMiddleLabel(this.edge),
+            configuration.edgeMiddleLabel(this.edge),
             {
                 fontSize: 15,
                 align: 'center',
                 fontFamily: 'Arial',
-                fill: this.displayConfiguration.texColor,
+                fill: configuration.edgeColor,
             }
         );
 
-        text.position.set(this.length / 2, 0);
+        text.scale.y = 0.8
+        text.position.set(0, 0);
         text.anchor.set(0.5, 0.5);
 
-        this.addChild(text)
+        textContainer.addChild(text);
+
+        this.arrowLabel = textContainer;
     }
 }

@@ -5,6 +5,7 @@ import {
   BreathFirstSearchAlgorithmConfig,
 } from "@/GraphUniverse/GraphAlgorithmExecution";
 import { WellKnownGraphUniverseState } from "@/GraphUniverse/States/GraphUniverseState";
+import { Button } from "../building-blocks/Button";
 
 export type BreathFirstSearchAgorithmForm = FormProp & {};
 
@@ -64,12 +65,11 @@ export function BreathFirstSearch({ universe }: BreathFirstSearchAgorithmForm) {
         }
       >
         <div className="flex justify-between gap-x-2">
-          <button
-            className="h-full p-2 transition duration-250 rounded shadow"
+          <Button
             onClick={() => setInputMode("sourceVertex")}
           >
             Source Vertex
-          </button>
+          </Button>
 
           <input
             readOnly={true}

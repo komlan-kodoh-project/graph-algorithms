@@ -26,9 +26,23 @@ function GraphContainer() {
     const newUniverse = new GraphUniverse({
       container: containerRef.current,
       graph: new SimpleGraph<GraphUniverseVertexData, GraphUniverseEdgeData>(),
-      getNewVertexData: () => ({
-        id: Math.random().toString(36).slice(2, 3),
-      }),
+      backgroudColor: "#F1F5FE",
+      theme: {
+        light: "#BBD3F0",
+        dark: "#7C98CD",
+      },
+      primaryAccent: {
+        light: "#e3e0ff",
+        dark: "#8d86db",
+      },
+      secondaryAccent: {
+        light: "#bddbc6",
+        dark: "#54b06b",
+      },
+      darkAccent: {
+        light: "black",
+        dark: "#8d8e8f",
+      },
     });
 
     newUniverse.listener.addEventListener("stateUpdatedEvent", (event) => {
@@ -41,7 +55,7 @@ function GraphContainer() {
 
     newUniverse.initialize();
 
-    // newUniverse.generateRandomGraph(100);
+    newUniverse.generateRandomGraph(10);
 
     // const v1 = newUniverse.createVertex(150, 5);
     // const v2 = newUniverse.createVertex(150, 10);
@@ -65,7 +79,7 @@ function GraphContainer() {
 
     graphUniverse.current = newUniverse;
 
-    updateEditorState(WellKnownGraphUniverseState.Editing);
+    updateEditorState(WellKnownGraphUniverseState.Exploring);
   });
 
   const updateEditorState = (newState: WellKnownGraphUniverseState) => {
@@ -96,7 +110,7 @@ function GraphContainer() {
         />
       </div>
 
-      <div className="absolute gap-2 top-3.5 right-2.5 z-20">
+      <div className="absolute gap-2 top-0 z-20 bottom-3.5 h-full py-0 right-0 ">
         {graphUniverse.current && (
           <DijkstraAlgorithmForm universe={graphUniverse.current} />
         )}
@@ -106,9 +120,9 @@ function GraphContainer() {
         <div className="absolute left-0 right-0 mx-auto w-44  z-20 gap-2 top-3.5 rounded bg-white px-1.5 py-1 shadow grid grid-cols-2">
           <div className="w-fit">Weight :</div>
           <input
+            className="appearance-none w-full rounded px-1 pr-0 border"
             autoFocus
             type="number"
-            className="w-full"
             onKeyUp={(event) => {
               if (event.key !== "Enter") return;
 
