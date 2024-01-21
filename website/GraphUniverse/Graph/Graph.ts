@@ -17,7 +17,7 @@ export type MetaStore = {
 
 export type Vertex<T> = MetaStore & {
     id: number,
-    data: T,
+    data: T | null,
 }
 
 export type Edge<V, E> = MetaStore & {

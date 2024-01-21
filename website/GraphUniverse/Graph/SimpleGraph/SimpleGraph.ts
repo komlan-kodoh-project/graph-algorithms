@@ -13,6 +13,10 @@ export default class SimpleGraph<V, E> implements Graph<V, E> {
         return this.vertexData.values();
     }
 
+    getAllEdges(): Iterable<Readonly<Edge<V, E>>> {
+        return this.edgeData.values();
+    }
+
     getEdge(sourceVertex: Vertex<V>, destinationVertex: Vertex<V>): Readonly<Edge<V, E>> {
         if (this.operationMode === GraphOperationMode.Directed) {
             const edgeId = this.graph.edge_directed(sourceVertex.id, destinationVertex.id);
@@ -29,7 +33,7 @@ export default class SimpleGraph<V, E> implements Graph<V, E> {
         throw new Error("The graph is not in a valid state.");
     }
 
-    createVertex(vertexData: V): Readonly<Vertex<V>> {
+    createVertex(vertexData: V | null): Readonly<Vertex<V>> {
         const vertexId = this.graph.create_vertex();
 
         const newVertex: Vertex<V> = {

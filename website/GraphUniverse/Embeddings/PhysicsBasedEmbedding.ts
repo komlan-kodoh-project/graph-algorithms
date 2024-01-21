@@ -83,8 +83,8 @@ export default class PhysicsBasedEmbedding<T, E> implements Embedding<T, E> {
             bodyA: firstBody,
             bodyB: secondBody,
             damping: 0,
-            stiffness: 1 / 50,
-            length: 100
+            stiffness: 1 / 30,
+            length: 150
         });
 
         World.addConstraint(this.engine.world, constraint);

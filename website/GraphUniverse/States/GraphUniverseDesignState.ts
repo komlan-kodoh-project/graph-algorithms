@@ -1,11 +1,15 @@
-import {GraphUniverseState, WellKnownGraphUniverseState} from "@/GraphUniverse/States/GraphUniverseState";
+import { GraphUniverseState, WellKnownGraphUniverseState } from "@/GraphUniverse/States/GraphUniverseState";
 import GraphUniverse from "../GraphUniverse";
+import VertexEntity, { VertexDisplayConfiguration } from "../Entity/VertexEntity";
 
-export class GraphUniverseDesignState<T, E> implements GraphUniverseState<T, E> {
-    private universe: GraphUniverse<T, E>;
+export class GraphUniverseDesignState<V, E> implements GraphUniverseState<V, E> {
     private cleanup: (() => void)[] = [];
+    private universe: GraphUniverse<V, E>;
 
-    constructor(graphUniverse: GraphUniverse<T, E>) {
+    private modificationCleanup: (() => void) | null = null;
+    private relativeCurrentVertexDragSource: VertexEntity<V> | null = null;
+
+    constructor(graphUniverse: GraphUniverse<V, E>) {
         this.universe = graphUniverse;
     }
 
@@ -30,8 +34,10 @@ export class GraphUniverseDesignState<T, E> implements GraphUniverseState<T, E> 
                 (event) => {
                     const entity = this.universe.renderingController.getVertexEntity(event.target);
 
-                    entity.updateDisplayConfiguration({
-                        edgeColor: "#7ccd88",
+                    this.relativeCurrentVertexDragSource = entity;
+
+                    this.modificationCleanup = entity.updateDisplayConfiguration({
+                        borderColor: this.universe.configuration.primaryAccent["dark"],
                     });
                 }
             ),
@@ -39,20 +45,38 @@ export class GraphUniverseDesignState<T, E> implements GraphUniverseState<T, E> 
             this.universe.listener.addEventListener(
                 "vertexDragEnd",
                 (event) => {
-                    const entity = this.universe.renderingController.getVertexEntity(event.target);
+                    const entity = this.relativeCurrentVertexDragSource;
 
-                    entity.updateDisplayConfiguration(
-                        {
-                            edgeColor: "#7C98CD"
-                        }
-                    );
+                    if (this.modificationCleanup === null || entity === null) {
+                        throw new Error("Can't reset color after drag end because no color has been defined");
+                    }
+
+                    this.modificationCleanup();
+                    this.modificationCleanup = null;
                 }
             ),
 
             this.universe.listener.addEventListener(
                 "vertexToVertexDrag",
                 (event) => {
+                    const sourceVertexEntity = this.universe.renderingController.getVertexEntity(event.sourceVertex);
+                    const targetVertexEntity = this.universe.renderingController.getVertexEntity(event.targetVertex);
+
                     this.universe.createEdge(event.sourceVertex, event.targetVertex);
+
+                    if (this.modificationCleanup === null) {
+                        throw new Error("Can't reset color after drag end because no color has been defined");
+                    }
+
+                    // Reset  color of the source vertex to that it was before drag started
+                    this.modificationCleanup();
+
+                    // Use this target vertex as the drag source for the new edge 
+                    this.modificationCleanup = targetVertexEntity.updateDisplayConfiguration({
+                        borderColor: this.universe.configuration.primaryAccent["dark"],
+                    });
+
+                    this.relativeCurrentVertexDragSource = targetVertexEntity;
                 }
             )
         ]

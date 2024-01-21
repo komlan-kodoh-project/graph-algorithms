@@ -77,7 +77,7 @@ export class BreathFirstSearchAlgorithm implements GraphAlgorithmExecution {
                 this.universe.updateVertexRendering(
                     currentVertex,
                     {
-                        edgeColor: "#cd7ca2",
+                        borderColor: "#cd7ca2",
                         innerColor: "#f0bbe5",
                         underLabelDisplayConfiguration: () => `${explorationLevel}`,
                     }
@@ -134,8 +134,6 @@ export class DijkstraAlgorithm implements GraphAlgorithmExecution {
         this.universe.updateVertexRendering(
             this.config.sourceVertex,
             {
-                edgeColor: "#cd7ca2",
-                innerColor: "#f0bbe5",
                 underLabelDisplayConfiguration: () => `Source : ${0} from self`,
             }
         );
@@ -160,13 +158,28 @@ export class DijkstraAlgorithm implements GraphAlgorithmExecution {
                 break;
             }
 
-            this.universe.updateVertexRendering(
-                currentVertex.vertex,
-                {
-                    edgeColor: "#cd7ca2",
-                    innerColor: "black",
-                }
-            );
+            if (currentVertex.vertex.id !== this.config.sourceVertex.id) {
+                this.universe.updateVertexRendering(
+                    currentVertex.vertex,
+                    {
+                        innerColor: this.universe.configuration.darkAccent.light,
+                        borderColor: this.universe.configuration.darkAccent.dark,
+                    }
+                );
+
+                const sourceEdge = this.universe.graph.getEdge(
+                    currentVertex.source!.vertex,
+                    currentVertex.vertex
+                );
+
+                this.universe.updateEdgeRendering(
+                    sourceEdge,
+                    {
+                        edgeColor: this.universe.configuration.darkAccent.dark,
+                        labelBackground: this.universe.configuration.darkAccent.light,
+                    }
+                );
+            }
 
             visitedVertexId.add(currentVertex.vertex.id);
 
@@ -187,18 +200,21 @@ export class DijkstraAlgorithm implements GraphAlgorithmExecution {
                 this.universe.updateEdgeRendering(
                     edge,
                     {
-                        edgeColor: "#cd7ca2",
+                        labelBackground: this.universe.configuration.primaryAccent.light,
+                        edgeColor: this.universe.configuration.primaryAccent.dark,
                     }
                 );
 
-                this.universe.updateVertexRendering(
-                    adjacentVertex,
-                    {
-                        edgeColor: "#cd7ca2",
-                        innerColor: "#f0bbe5",
-                        underLabelDisplayConfiguration: () => `${explorationCost} from ${currentVertex.vertex.id}`,
-                    }
-                );
+                if (adjacentVertex.id !== this.config.destinatonVertex.id) {
+                    this.universe.updateVertexRendering(
+                        adjacentVertex,
+                        {
+                            borderColor: this.universe.configuration.primaryAccent.dark,
+                            innerColor: this.universe.configuration.primaryAccent.light,
+                        }
+                    );
+                }
+
 
                 if (previousExplorationCost == undefined) {
                     vertexCost.set(adjacentVertex.id, explorationCost);
@@ -251,15 +267,16 @@ export class DijkstraAlgorithm implements GraphAlgorithmExecution {
             this.universe.updateEdgeRendering(
                 relevantEdge,
                 {
-                    edgeColor: "green",
+                    edgeColor: this.universe.configuration.secondaryAccent.dark,
+                    labelBackground: this.universe.configuration.secondaryAccent.light,
                 }
             );
 
             this.universe.updateVertexRendering(
                 backtrackingNode.vertex,
                 {
-                    innerColor: "#f0bbe5",
-                    edgeColor: "green"
+                    innerColor: this.universe.configuration.secondaryAccent.light,
+                    borderColor: this.universe.configuration.secondaryAccent.dark,
                 }
             );
 
@@ -271,15 +288,10 @@ export class DijkstraAlgorithm implements GraphAlgorithmExecution {
         this.universe.updateVertexRendering(
             this.config.sourceVertex,
             {
-                innerColor: "#f0bbe5",
-                edgeColor: "green"
+                innerColor: this.universe.configuration.secondaryAccent.light,
+                borderColor: this.universe.configuration.secondaryAccent.dark,
             }
         );
 
     }
 }
-
-
-
-
-

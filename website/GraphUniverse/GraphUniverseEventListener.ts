@@ -1,4 +1,4 @@
-import { UndirectedEdgeEntity } from '@/GraphUniverse/Entity/EdgeEntity';
+import { EdgeEntity } from '@/GraphUniverse/Entity/EdgeEntity';
 import GraphUniverse from "./GraphUniverse";
 import VertexCreatedEvent, {
     EdgeAddedEvent, GraphDragEvent,
@@ -44,7 +44,7 @@ export default class GraphUniverseEventListener<V, E> {
 
 
     private persistentEvents = {
-        vertexHover: new PersistentGraphEvent<VertexHoverEvent<V>>
+        vertexHover: new PersistentGraphEvent<VertexHoverEvent<V>>,
     } as const;
 
     private events = {
@@ -99,7 +99,7 @@ export default class GraphUniverseEventListener<V, E> {
         this.events.edgeAdded.trigger(event);
     }
 
-    public listenOnEdge(entity: UndirectedEdgeEntity<V, E>): void {
+    public listenOnEdge(entity: EdgeEntity<V, E>): void {
         entity.addEventListener("click", event => {
             event.stopPropagation();
             this.events.edgeClickedEvent.trigger({
