@@ -1,13 +1,24 @@
-import { GraphWrapper } from "wasm-lib";
+import { GraphWrapper, initialize_web_assembly } from "wasm-lib";
 import { GraphOperationMode } from './../Graph';
 import { Edge, Graph, Vertex } from "@/GraphUniverse/Graph/Graph";
+import { AnyValue } from "@/utils/types";
 
-export default class SimpleGraph<V, E> implements Graph<V, E> {
+export default class SimpleGraph<V = AnyValue, E = AnyValue> {
     private edgeData: Map<number, Edge<V, E>> = new Map();
     private vertexData: Map<number, Vertex<V>> = new Map();
     private operationMode: GraphOperationMode = GraphOperationMode.Undirected;
 
     private graph: GraphWrapper = new GraphWrapper();
+
+    constructor(){
+        initialize_web_assembly();
+    }
+
+    public getWasmGraph(): GraphWrapper {
+        return this.graph;
+    }
+
+
 
     getAllVertices(): Iterable<Readonly<Vertex<V>>> {
         return this.vertexData.values();
@@ -15,6 +26,16 @@ export default class SimpleGraph<V, E> implements Graph<V, E> {
 
     getAllEdges(): Iterable<Readonly<Edge<V, E>>> {
         return this.edgeData.values();
+    }
+
+    getVertex(vertexIndex: number): Vertex<V> {
+        const vertexData =  this.vertexData.get(vertexIndex);
+
+        if (vertexData === undefined){
+            throw Error("Vertex data does not exists");
+        }
+
+        return vertexData;
     }
 
     getEdge(sourceVertex: Vertex<V>, destinationVertex: Vertex<V>): Readonly<Edge<V, E>> {

@@ -22,7 +22,7 @@ export function Button({
 
   return (
     <button
-      className={`${className} ${styles.button} ${isActive ? styles.buttonActive : ""}`}
+      className={`${className} ${styles.button} ${isActive ? styles.active : ""}`}
       onClick={async () => {
         if (onClick !== undefined) {
           onClick();
@@ -31,7 +31,7 @@ export function Button({
         if (onClickAsync !== undefined) {
           setIsActive(true);
           await onClickAsync();
-          setIsActive(true);
+          setIsActive(false);
         }
       }}
     >

@@ -1,9 +1,11 @@
-export interface Graph<V, E> {
+import { AnyValue } from "@/utils/types";
+
+export interface Graph<V = AnyValue, E = AnyValue> {
     createVertex(data: V): Readonly<Vertex<V>>;
 
-    getAllVertices() : Iterable<Readonly<Vertex<V>>>;
+    getAllVertices(): Iterable<Readonly<Vertex<V>>>;
 
-    addEdge(sourceVertex: Vertex<V>, destinationVertex: Vertex<V>, edgeData: E): Readonly<Edge<V,E>>;
+    addEdge(sourceVertex: Vertex<V>, destinationVertex: Vertex<V>, edgeData: E): Readonly<Edge<V, E>>;
 }
 
 export enum GraphOperationMode {
@@ -15,16 +17,16 @@ export type MetaStore = {
     [metadata: string]: any
 }
 
-export type Vertex<T> = MetaStore & {
+export type Vertex<T = AnyValue> = MetaStore & {
     id: number,
     data: T | null,
 }
 
-export type Edge<V, E> = MetaStore & {
+export type Edge<V = AnyValue, E = AnyValue> = MetaStore & {
     id: number,
     weight: number,
     data: E | null,
-    sourceVertex : Vertex<V>,
+    sourceVertex: Vertex<V>,
     targetVertex: Vertex<V>,
 }
 
@@ -36,12 +38,12 @@ export function setMeta(store: MetaStore, key: string, value: any) {
     store[key] = value;
 }
 
-export function GetOtherEnd<V, E>(edge: Edge<V,E>, vertex: Vertex<V>): Vertex<V> {
-    if (edge.sourceVertex == vertex){
+export function GetOtherEnd<V, E>(edge: Edge<V, E>, vertex: Vertex<V>): Vertex<V> {
+    if (edge.sourceVertex == vertex) {
         return edge.targetVertex;
     }
 
-    if (edge.targetVertex == vertex){
+    if (edge.targetVertex == vertex) {
         return edge.sourceVertex;
     }
 
