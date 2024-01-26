@@ -4,7 +4,7 @@ import { Coordinates } from "@/GraphUniverse/Coordinates";
 import { ConfigurationManager } from "./ConfigurationController";
 
 
-export type EdgeDisplayConfiguration<V, E> = {
+export type EdgeDisplayConfiguration<V = any, E = any> = {
     texColor: string
     edgeColor: string
     labelBackground: string
@@ -190,6 +190,7 @@ export class EdgeEntity<V, E> extends Container {
             }
         );
 
+        text.resolution = 10;
         text.scale.y = 0.8
         text.position.set(0, 0);
         text.anchor.set(0.5, 0.5);

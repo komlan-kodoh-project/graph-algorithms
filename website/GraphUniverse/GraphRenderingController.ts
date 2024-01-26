@@ -3,6 +3,7 @@ import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
 import { Edge, Vertex, getMeta, setMeta } from "@/GraphUniverse/Graph/Graph";
 import GraphUniverse from "./GraphUniverse";
 import { EdgeEntity } from "./Entity/EdgeEntity";
+import { Assets } from "pixi.js";
 
 export default class GraphRenderingController<V, E> implements GraphUniverseComponent<V, E> {
     private universe: GraphUniverse<V, E>;
@@ -34,6 +35,8 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
     }
 
     public initialize(): void {
+        Assets.load('https://pixijs.com/assets/bitmap-font/desyrel.xml');
+
         this.universe.configuration.container.appendChild(this.universe.application.view as unknown as Node)
 
         // Disable default ticker so that the rendering controller can take  full control of rendering
@@ -88,7 +91,7 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
                 },
                 event.edge,
                 {
-                    texColor: this.universe.configuration.theme["dark"],    
+                    texColor: this.universe.configuration.theme["dark"],
                     edgeColor: this.universe.configuration.theme["dark"],
                     labelBackground: this.universe.configuration.theme["light"],
                 }

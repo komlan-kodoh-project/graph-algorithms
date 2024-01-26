@@ -2,8 +2,9 @@ import { ColorSource, Graphics, Text, TextStyle } from "pixi.js";
 import { Vertex } from "@/GraphUniverse/Graph/Graph";
 import { EdgeEntity } from "./EdgeEntity";
 import { ConfigurationManager } from "./ConfigurationController";
+import { AnyValue } from "@/utils/types";
 
-export type VertexDisplayConfiguration<T> = {
+export type VertexDisplayConfiguration<T = AnyValue> = {
     borderColor: string
     innerColor: string
     innerLabelGetter: (vertex: Vertex<T>) => string,
@@ -86,12 +87,14 @@ export default class VertexEntity<V> extends Graphics {
             }
         );
 
+        text.resolution = 4;
         text.position.set(0, 0);
         text.anchor.set(0.5, 0.5);
 
+        const label = configuration.underLabelDisplayConfiguration(this.graphVertex);
         // Add text bellow the square
         const underText = new Text(
-            configuration.underLabelDisplayConfiguration(this.graphVertex),
+            label,
             {
                 fontFamily: 'Arial',
                 fontSize: 15,
@@ -100,6 +103,7 @@ export default class VertexEntity<V> extends Graphics {
             }
         );
 
+        underText.resolution = 4;
         underText.position.set(0, 25);
         underText.anchor.set(0.5, 0.5);
 

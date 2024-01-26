@@ -1,7 +1,10 @@
 import { Application } from "pixi.js";
+import { sleep } from "@/utils/helpers";
+import { AnyValue } from "@/utils/types";
 import { Viewport } from "pixi-viewport";
 import { Edge, Graph, Vertex } from "./Graph/Graph";
 import GraphUniverseCamera from "./GraphUniverseCamera";
+import { EdgeDisplayConfiguration } from "./Entity/EdgeEntity";
 import { VertexDisplayConfiguration } from './Entity/VertexEntity';
 import GraphUniverseEventListener from "./GraphUniverseEventListener";
 import GraphUniverseConfiguration from "./GraphUniverseConfiguration";
@@ -11,10 +14,8 @@ import GraphRenderingController from "@/GraphUniverse/GraphRenderingController";
 import PhysicsBasedEmbedding from "@/GraphUniverse/Embeddings/PhysicsBasedEmbedding";
 import { GraphUniverseDesignState } from "@/GraphUniverse/States/GraphUniverseDesignState";
 import { WellKnownGraphUniverseState, GraphUniverseState, StateFactory } from "@/GraphUniverse/States/GraphUniverseState";
-import { EdgeDisplayConfiguration } from "./Entity/EdgeEntity";
-import { sleep } from "@/utils/helpers";
 
-export default class GraphUniverse<V, E> {
+export default class GraphUniverse<V = AnyValue, E = AnyValue> {
     private hasInitialized: boolean = false;
 
     application: Application;

@@ -1,4 +1,4 @@
-import rust_wasm_init from 'wasm-lib';
+import rust_wasm_init, { initialize_web_assembly } from 'wasm-lib';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 
 
