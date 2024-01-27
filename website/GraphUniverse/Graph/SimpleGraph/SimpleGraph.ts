@@ -1,4 +1,4 @@
-import { GraphWrapper, initialize_web_assembly } from "wasm-lib";
+import { GraphWrapper } from "wasm-lib";
 import { GraphOperationMode } from './../Graph';
 import { Edge, Graph, Vertex } from "@/GraphUniverse/Graph/Graph";
 import { AnyValue } from "@/utils/types";
@@ -10,9 +10,7 @@ export default class SimpleGraph<V = AnyValue, E = AnyValue> {
 
     private graph: GraphWrapper = new GraphWrapper();
 
-    constructor(){
-        initialize_web_assembly();
-    }
+    constructor() { }
 
     public getWasmGraph(): GraphWrapper {
         return this.graph;
@@ -29,9 +27,9 @@ export default class SimpleGraph<V = AnyValue, E = AnyValue> {
     }
 
     getVertex(vertexIndex: number): Vertex<V> {
-        const vertexData =  this.vertexData.get(vertexIndex);
+        const vertexData = this.vertexData.get(vertexIndex);
 
-        if (vertexData === undefined){
+        if (vertexData === undefined) {
             throw Error("Vertex data does not exists");
         }
 

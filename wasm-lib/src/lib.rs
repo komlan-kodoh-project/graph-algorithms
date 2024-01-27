@@ -14,11 +14,6 @@ extern "C" {
 #[wasm_bindgen]
 pub fn initialize_web_assembly() {
     set_panic_hook();
-    log!("hello world {}", 45);
-    alert("Hello, wasm-lib!");
+    log!("Rust wasm has been initialized {}", 45);
 }
 
-#[wasm_bindgen]
-pub fn current_state() -> String {
-    return "Dead".into();
-}

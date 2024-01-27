@@ -9,6 +9,7 @@ import { Edge } from "@/GraphUniverse/Graph/Graph";
 import { AlgorithmDopdownValue, AlgorithmDropdown } from "./Algorithms/AlgorithmDropdown";
 import { GraphAlgorithmSelection } from "./Algorithms/GraphAlgorithmSelection";
 import { AnimatePresence, motion } from "framer-motion";
+import { useWebAssembly } from "@/utils/hooks";
 
 export type GraphUniverseVertexData = {};
 
@@ -16,9 +17,12 @@ export type GraphUniverseVertexData = {};
 // Node excentricity
 export type GraphUniverseEdgeData = {};
 
-function GraphContainer() {
+export type GraphContainerProps = {}
+
+function GraphContainerInner(props: GraphContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const graphUniverse = useRef<GraphUniverse<any, any> | null>(null);
+
   const [selectedEdge, setSelectedEdge] = useState<Edge<any, any> | null>(null);
   const [editorState, setEditorState] = useState<WellKnownGraphUniverseState>();
 
@@ -144,4 +148,9 @@ function GraphContainer() {
   );
 }
 
+function GraphContainer(props: GraphContainerProps){
+  var hasInit = useWebAssembly();
+
+  return hasInit ?  <GraphContainerInner {...props}></GraphContainerInner>: <></>;
+}
 export default GraphContainer;

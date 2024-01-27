@@ -1,4 +1,5 @@
 "use client";
+import { useWebAssembly } from "@/utils/hooks";
 import dynamic from "next/dynamic";
 
 const GraphContainer = dynamic(() => import("@/components/GraphContainer"), {

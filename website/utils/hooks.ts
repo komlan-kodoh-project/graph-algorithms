@@ -49,7 +49,20 @@ export function userReactiveRef<T>(initialValue: T): [MutableRefObject<T>, Dispa
 }
 
 export function useWebAssembly() {
+    const [hasInitialized, setHasInitialized] = useState<boolean>(false)
+
     useEffect(() => {
-        rust_wasm_init();
+        new Promise<void>(async (resolve, reject) => {
+            await rust_wasm_init();
+            await initialize_web_assembly();
+
+            setHasInitialized(true);
+
+            resolve()
+        });
+
     }, []);
+
+
+    return hasInitialized;
 }

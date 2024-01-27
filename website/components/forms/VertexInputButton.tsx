@@ -53,7 +53,7 @@ export function VertexInputButton<T, K extends keyof T>({
       cleanupVertexSelected();
       cleanupStateUpdate();
     };
-  }, [universe, active]);
+  }, [universe, active, updateFormInput, updateFormInputMode]);
 
   return (
     <Button
