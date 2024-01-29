@@ -1,5 +1,5 @@
 use petgraph::{
-    graph::Neighbors,
+    graph::{Neighbors, NodeIndices},
     stable_graph::NodeIndex,
     visit::EdgeRef,
     Directed,
@@ -7,16 +7,32 @@ use petgraph::{
     Graph,
 };
 use wasm_bindgen::prelude::*;
-use web_sys::js_sys::Int32Array;
+use web_sys::js_sys::{Int32Array, Uint32Array};
+
+#[wasm_bindgen]
+pub enum GraphMode {
+    Directed,
+    Undirected,
+}
 
 #[wasm_bindgen]
 pub struct GraphWrapper {
+    mode: GraphMode,
     graph: Graph<(), u32, Directed, u32>,
 }
 
 impl GraphWrapper {
+    pub fn _all_vertices(&self) -> NodeIndices {
+        return self.graph.node_indices();
+    }
+
     pub fn _neighbors(&self, node_index: NodeIndex<u32>) -> Neighbors<'_, u32> {
-        self.graph.neighbors(node_index)
+        let node_indexes = match self.mode {
+            GraphMode::Undirected => self.graph.neighbors_undirected(node_index),
+            GraphMode::Directed => self.graph.neighbors_directed(node_index, Outgoing),
+        };
+
+        return node_indexes;
     }
 
     pub fn _total_connection_weight(
@@ -24,11 +40,20 @@ impl GraphWrapper {
         node_index: NodeIndex<u32>,
         neighbor: NodeIndex<u32>,
     ) -> Option<u32> {
-        let sum = self
-            .graph
-            .edges_connecting(node_index, neighbor)
-            .map(|edge| edge.weight())
-            .sum();
+        let sum = match self.mode {
+            GraphMode::Directed => self
+                .graph
+                .edges_connecting(node_index, neighbor)
+                .map(|edge| edge.weight())
+                .sum(),
+
+            GraphMode::Undirected => self
+                .graph
+                .edges_connecting(node_index, neighbor)
+                .chain(self.graph.edges_connecting(neighbor, node_index))
+                .map(|edge| edge.weight())
+                .sum(),
+        };
 
         if sum == 0 {
             return None;
@@ -44,7 +69,10 @@ impl GraphWrapper {
     pub fn new() -> GraphWrapper {
         let graph = Graph::<(), u32, Directed, u32>::new();
 
-        GraphWrapper { graph: graph }
+        GraphWrapper {
+            graph: graph,
+            mode: GraphMode::Undirected,
+        }
     }
 
     pub fn len(&self) -> u32 {
@@ -55,16 +83,15 @@ impl GraphWrapper {
         self.graph.add_node(()).index()
     }
 
-    pub fn neighbors(&self, node_id: usize) -> Int32Array {
+    pub fn neighbors(&self, node_id: usize) -> Uint32Array {
         let node_index = NodeIndex::<u32>::new(node_id);
 
-        let node_indexes: Vec<i32> = self
-            .graph
-            .neighbors_undirected(node_index)
-            .map(|node| node.index() as i32)
+        let node_indexes: Vec<u32> = self
+            ._neighbors(node_index)
+            .map(|node| node.index() as u32)
             .collect();
 
-        Int32Array::from(&node_indexes[..])
+        return Uint32Array::from(&node_indexes[..]);
     }
 
     pub fn edge(&self, first_node_id: usize, second_node_id: usize) -> Result<u32, String> {
@@ -90,11 +117,15 @@ impl GraphWrapper {
         return Ok(all_edges[0]);
     }
 
-    pub fn edge_directed(&self, first_node_id: usize, second_node_id: usize) -> Result<u32, String> {
+    pub fn edge_directed(
+        &self,
+        first_node_id: usize,
+        second_node_id: usize,
+    ) -> Result<u32, String> {
         let first_node = NodeIndex::<u32>::new(first_node_id);
         let second_node = NodeIndex::<u32>::new(second_node_id);
 
-        let edges : Vec<u32> = self
+        let edges: Vec<u32> = self
             .graph
             .edges_connecting(first_node, second_node)
             .map(|edge| edge.id().index() as u32)
@@ -105,7 +136,6 @@ impl GraphWrapper {
         }
 
         return Ok(edges[0]);
-
     }
 
     pub fn adjacent_egdes(&self, node_id: usize) -> Int32Array {

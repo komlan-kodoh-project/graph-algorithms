@@ -9,7 +9,6 @@ import { AnyValue } from "@/utils/types";
 import {
   ExhaustiveMinimumNodeColoring,
   exhaustive_minimum_node_coloring,
-  initialize_web_assembly,
 } from "wasm-lib";
 
 export type BruteForceMinimumNodecoloringConfig = {};

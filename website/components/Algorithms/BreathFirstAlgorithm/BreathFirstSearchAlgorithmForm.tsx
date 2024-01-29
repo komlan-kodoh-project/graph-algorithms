@@ -96,3 +96,5 @@ export function BreathFirstSearch({ universe }: BreathFirstSearchAgorithmForm) {
     </div>
   );
 }
+
+export default BreathFirstSearch;

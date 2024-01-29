@@ -138,3 +138,6 @@ export function DijkstraAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
     </div>
   );
 }
+
+
+export default DijkstraAlgorithmForm;

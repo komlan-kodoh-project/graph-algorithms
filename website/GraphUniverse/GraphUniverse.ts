@@ -22,7 +22,6 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
     configuration: GraphUniverseConfiguration<V, E>;
     graph: SimpleGraph<V, E> = new SimpleGraph();
 
-
     viewport: Viewport = null as unknown as Viewport;
 
     // Composite class extensions
@@ -55,6 +54,13 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
         this.renderingController = new GraphRenderingController(this as any);
     }
 
+    public enableEmbedding(): void {
+        this.renderingController.enableEmbedding();
+    }
+
+    public disableEmbedding(): void {
+        this.renderingController.disableEmbedding();
+    }
 
     public initialize() {
         if (this.hasInitialized) {
@@ -151,9 +157,10 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
 
     public async generateRandomGraph(numNodes: number): Promise<void> {
         const vertices = [];
-        const edges = [];
 
         const generateRandomInteger = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        this.disableEmbedding();
 
         for (let i = 0; i < numNodes; i++) {
             const x = generateRandomInteger(20, 1000);
@@ -165,11 +172,14 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
                 const randomVertexIndex = Math.floor(Math.random() * i);
                 const randomExistingVertex = vertices[randomVertexIndex];
                 this.createEdge(vertex, randomExistingVertex);
-                edges.push({ vertex1: vertex, vertex2: randomExistingVertex });
             }
 
-            await sleep(400);
+            await sleep(50);
         }
+
+        await sleep(200);
+
+        this.enableEmbedding();
     }
 }
 

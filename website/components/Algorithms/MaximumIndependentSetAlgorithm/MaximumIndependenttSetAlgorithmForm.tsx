@@ -1,15 +1,29 @@
+import { useState } from "react";
 import { FormProp, useGraphUniverseForm } from "@/components/forms/FormProp";
 import { Button } from "../../building-blocks/Button";
-import { GraphAlgorithmExecution as GraphAlgorithmExecutor } from "@/GraphUniverse/Algorithm/AlgorithmExecutor";
-import { BruteForceMinimumNodecoloring } from "./BruteForceMinimumNodeColoring";
+import { VertexInputButton } from "@/components/forms/VertexInputButton";
+import {
+  MaximumIndependentSetAlgorithm,
+  MaximumIndependentSetAlgorithmConfig,
+} from "./MaximumIndependentSetAlgorithm";
+import { GraphAlgorithmExecution } from "@/GraphUniverse/Algorithm/AlgorithmExecutor";
 
-export type BreathFirstSearchAgorithmForm = FormProp & {};
+export type DijkstraAlgorithmForm = FormProp & {};
 
-export function BruteForceMinimumNodeColoringForm({ universe }: BreathFirstSearchAgorithmForm) {
+export function MaximumIndependentSetAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
+  const { registerGraphInput, formValues } =
+    useGraphUniverseForm<MaximumIndependentSetAlgorithmConfig>(universe);
+
   const startAlgorithm = async () => {
-    const algorithm = new BruteForceMinimumNodecoloring(universe.graph);
+    const newAlgorithmExecution = new MaximumIndependentSetAlgorithm({
+      graph: universe.graph,
+      setVertexStyle: {
+        innerColor: universe.configuration.darkAccent.light,
+        borderColor: universe.configuration.darkAccent.dark,
+      },
+    });
 
-    const newAlgorithmExecutor = new GraphAlgorithmExecutor(algorithm, universe);
+    const newAlgorithmExecutor = new GraphAlgorithmExecution(newAlgorithmExecution, universe);
 
     await newAlgorithmExecutor.StartExecution();
   };
@@ -17,9 +31,7 @@ export function BruteForceMinimumNodeColoringForm({ universe }: BreathFirstSearc
   return (
     <div className={"h-full"}>
       <form className="grid grid-cols-1 gap-y-2" onSubmit={(e) => e.preventDefault()}>
-        <div className="p-2">
-          Click start to generate of the following grpah minimum node coloring
-        </div>
+        <div className="p-2">Reveal maximum independent set</div>
 
         <div className="flex  gap-3">
           <Button className="flex-1 bg-green-300 text-green-950" onClickAsync={startAlgorithm}>
@@ -47,4 +59,4 @@ export function BruteForceMinimumNodeColoringForm({ universe }: BreathFirstSearc
   );
 }
 
-export default BruteForceMinimumNodeColoringForm;
+export default MaximumIndependentSetAlgorithmForm;

@@ -1,18 +1,38 @@
-import GraphUniverse from "@/GraphUniverse/GraphUniverse";
-import { DijkstraAlgorithmForm } from "./DijkstraAlgorithm/DijkstraAlgorithmForm";
-import {
-  AlgorithmDopdownValue as AlgorithmDropdownValue,
-  GraphAlgorithms,
-} from "./AlgorithmDropdown";
-import { BreathFirstSearch } from "./BreathFirstAlgorithm/BreathFirstSearchAlgorithmForm";
-import { BruteForceMinimumNodeColoringForm } from "./BruteForceMinimumNodecoloring/BruteForceMinimumNodeColoringForm";
+import { ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
-import { ReactComponentElement, ReactNode } from "react";
+import GraphUniverse from "@/GraphUniverse/GraphUniverse";
+import { AlgorithmDopdownValue } from "./AlgorithmDropdown";
 
 type GraphAlgorithmSelectionProps = {
   universe: GraphUniverse;
-  name: AlgorithmDropdownValue;
+  name: AlgorithmDopdownValue;
 };
+
+const BreathFirstSearch = dynamic(
+  () => import("./BreathFirstAlgorithm/BreathFirstSearchAlgorithmForm"),
+  { ssr: false }
+);
+
+const DijkstraAlgorithmForm = dynamic(
+  () => import("@/components/Algorithms/DijkstraAlgorithm/DijkstraAlgorithmForm"),
+  { ssr: false }
+);
+
+const BruteForceMinimumNodeColoringForm = dynamic(
+  () => import("./BruteForceMinimumNodecoloring/BruteForceMinimumNodeColoringForm"),
+  { ssr: false }
+);
+
+const ExcentricityAglgorithmForm = dynamic(
+  () => import("./ExcentricityAlgorithm/ExcentricityAlgorithmForm"),
+  { ssr: false }
+);
+
+const MaximumIndependentSetAlgorithmForm = dynamic(
+  () => import("./MaximumIndependentSetAlgorithm/MaximumIndependenttSetAlgorithmForm"),
+  { ssr: false }
+);
 
 function AnimationStuff({ children }: { children: ReactNode }) {
   return (
@@ -57,14 +77,28 @@ const componentMap = {
       </AnimationStuff>
     );
   },
+
+  "vertex-excentricity-algorithm": (universe: GraphUniverse) => {
+    return (
+      <AnimationStuff key={4}>
+        <ExcentricityAglgorithmForm universe={universe}></ExcentricityAglgorithmForm>
+      </AnimationStuff>
+    );
+  },
+
+  "maximum-independent-set-exhaustive": (universe: GraphUniverse) => {
+    return (
+      <AnimationStuff key={5}>
+        <MaximumIndependentSetAlgorithmForm universe={universe}></MaximumIndependentSetAlgorithmForm>
+      </AnimationStuff>
+    );
+  },
 } as const;
 
 export function GraphAlgorithmSelection({ name, universe }: GraphAlgorithmSelectionProps) {
   return (
     <div className="relative">
-      <AnimatePresence>
-        {name != null? componentMap[name](universe): <></>}
-      </AnimatePresence>
+      <AnimatePresence>{name != null ? componentMap[name](universe) : <></>}</AnimatePresence>
     </div>
   );
 }

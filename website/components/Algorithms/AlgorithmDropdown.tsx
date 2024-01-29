@@ -12,6 +12,8 @@ export const GraphAlgorithms = [
   { value: "dijkstra", label: "Dijkstra Algorithm" },
   { value: "minimum-node-coloring-brute", label: "Exhaustive Minimum Node Coloring" },
   { value: "breath-first-traversal", label: "Breath First Traversal" },
+  { value: "vertex-excentricity-algorithm", label: "Find Vertex Excentricity" },
+  { value: "maximum-independent-set-exhaustive", label: "Find Maximum Independent Set" },
 ] as const;
 
 export function AlgorithmDropdown({ onChange }: AlgorithmDropdownProp) {

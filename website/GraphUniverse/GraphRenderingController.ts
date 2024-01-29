@@ -7,6 +7,7 @@ import { Assets } from "pixi.js";
 
 export default class GraphRenderingController<V, E> implements GraphUniverseComponent<V, E> {
     private universe: GraphUniverse<V, E>;
+    private embeddingIsEnable: boolean = true;
     private previousRenderingTimeStamp: number = performance.now();
     private static readonly META_PROPERTY_NAME: string = "graph-renderer-meta-property-name";
 
@@ -24,7 +25,7 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
     private triggerRendering(timestamp: number): void {
         const delta = timestamp - this.previousRenderingTimeStamp;
 
-        this.universe.embedding.update(delta);
+        this.embeddingIsEnable && this.universe.embedding.update(delta);
         this.universe.application.ticker.update(timestamp);
 
         this.previousRenderingTimeStamp = timestamp;
@@ -32,6 +33,14 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
         requestAnimationFrame(
             (timestamp) => this.triggerRendering(timestamp)
         );
+    }
+
+    public enableEmbedding(): void {
+        this.embeddingIsEnable = true;
+    }
+
+    public disableEmbedding(): void {
+        this.embeddingIsEnable = false;
     }
 
     public initialize(): void {
