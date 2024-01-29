@@ -11,6 +11,7 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
+js-sys = "0.3.67"
 petgraph = {version =  "0.6.4"}
 wasm-bindgen = {version =  "0.2.84"}
 gloo-console = { version = "0.3.0"}

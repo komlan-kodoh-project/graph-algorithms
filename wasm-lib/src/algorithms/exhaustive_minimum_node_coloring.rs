@@ -1,22 +1,22 @@
-use crate::graph::suzaku_graph::GraphWrapper;
-use petgraph::stable_graph::NodeIndex;
 use wasm_bindgen::prelude::*;
+use petgraph::stable_graph::NodeIndex;
+use crate::graph::suzaku_graph::GraphWrapper;
 
 #[wasm_bindgen]
 #[derive(Debug)]
 pub struct ExhaustiveMinimumNodeColoring {
     #[wasm_bindgen(skip)]
-    pub node_colorings: Vec<Vec<u32>>,
+    pub independent_sets: Vec<Vec<u32>>,
 }
 
 #[wasm_bindgen]
 impl ExhaustiveMinimumNodeColoring {
     pub fn len(&self) -> usize {
-        return self.node_colorings.len();
+        return self.independent_sets.len();
     }
 
     pub fn get_node_coloring(&self, index: usize) -> Vec<u32> {
-        return self.node_colorings[index].clone();
+        return self.independent_sets[index].clone();
     }
 }
 
@@ -35,7 +35,7 @@ pub fn exhaustive_minimum_node_coloring(graph: &GraphWrapper) -> ExhaustiveMinim
     recursion(graph, &mut coloring, &mut coloring_count);
 
     return ExhaustiveMinimumNodeColoring {
-        node_colorings: coloring_count.minimum_coloring,
+        independent_sets: coloring_count.minimum_coloring,
     };
 }
 
