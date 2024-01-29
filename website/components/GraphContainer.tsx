@@ -65,7 +65,7 @@ function GraphContainerInner(props: GraphContainerProps) {
 
     newUniverse.initialize();
 
-    newUniverse.generateRandomGraph(10);
+    // newUniverse.generateRandomGraph(10);
 
 
     graphUniverse.current = newUniverse;

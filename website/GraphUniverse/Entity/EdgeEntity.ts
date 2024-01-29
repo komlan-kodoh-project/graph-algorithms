@@ -53,6 +53,8 @@ export class EdgeEntity<V, E> extends Container {
 
         this.redraw_arrow();
         this.redraw_label();
+
+        this.handlePositionUpdate();
     }
 
     public updateSourceCoordinates(newSourceCoordinates: Coordinates) {
