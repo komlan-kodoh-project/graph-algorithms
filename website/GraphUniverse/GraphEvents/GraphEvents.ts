@@ -11,9 +11,19 @@ export type GraphEvents<T> = {
     vertex: Vertex<T>
 }
 
+
 export type VertexToVertexDrag<T> = {
     sourceVertex:  Vertex<T>,
     targetVertex:  Vertex<T>,
+}
+
+
+export type VertexDeletedEvent<V> = {
+    target: Vertex<V>;
+}
+
+export type EdgeDeletedEvent<V, E> = {
+    target: Edge<V, E>
 }
 
 export type VertexClickedEvent<T> = {

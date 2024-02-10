@@ -4,7 +4,7 @@ import VertexCreatedEvent, {
     EdgeAddedEvent, GraphDragEvent,
     VertexClickedEvent, VertexHoverEvent, VertexSelectedEvent,
     VertexToVertexDrag,
-    ViewClickedEvent, GraphStateUpdateEvent, EdgeClickedEvent
+    ViewClickedEvent, GraphStateUpdateEvent, EdgeClickedEvent, VertexDeletedEvent, EdgeDeletedEvent
 } from "@/GraphUniverse/GraphEvents/GraphEvents";
 import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
 import { Coordinates } from "@/GraphUniverse/Coordinates";
@@ -68,6 +68,10 @@ export default class GraphUniverseEventListener<V, E> {
         viewClickedEvent: new GraphEvent<ViewClickedEvent<V>>(),
         vertexClickedEvent: new GraphEvent<VertexClickedEvent<V>>(),
         vertexToVertexDrag: new GraphEvent<VertexToVertexDrag<V>>(),
+
+
+        vertexDeletedEvent: new GraphEvent<VertexDeletedEvent<V>>(),
+        edgeDeletedEvent: new GraphEvent<EdgeDeletedEvent<V, E>>(),
     } as const;
 
 
@@ -83,13 +87,20 @@ export default class GraphUniverseEventListener<V, E> {
         this.configureViewClickListener();
     }
 
+
+
     public notifyVertexCreated(event: VertexCreatedEvent<V>) {
-        this.events.vertexAddedEvent.trigger(event)
+        this.events.vertexAddedEvent.trigger(event);
     }
 
     public notifyVertexSelected(event: VertexSelectedEvent<V>) {
         this.events.vertexSelectedEvent.trigger(event)
     }
+
+    public notifyVertexDeleted(event: VertexDeletedEvent<V>) {
+        this.events.vertexDeletedEvent.trigger(event);
+    }
+
 
     public notifyUniverseStateUpdate(event: GraphStateUpdateEvent<V, E>) {
         this.events.stateUpdatedEvent.trigger(event)
@@ -97,6 +108,10 @@ export default class GraphUniverseEventListener<V, E> {
 
     public notifyEdgeCreated(event: EdgeAddedEvent<V, E>) {
         this.events.edgeAdded.trigger(event);
+    }
+
+    public notifyEdgeDeleted(event: EdgeDeletedEvent<V, E>) {
+        this.events.edgeDeletedEvent.trigger(event);
     }
 
     public listenOnEdge(entity: EdgeEntity<V, E>): void {

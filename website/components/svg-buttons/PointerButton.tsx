@@ -4,7 +4,7 @@ export type PointerSVGProps = InteractiveButtonProps & {}
 
 function PointerButton({active, onClick}: PointerSVGProps) {
     const restColor = "#444647";
-    const activeColor = "#2466e0";
+    const activeColor = "rgb(59 130 246)";
 
     return <button
         onClick={onClick}

@@ -4,6 +4,7 @@ import { Button } from "../../building-blocks/Button";
 import { VertexInputButton } from "@/components/forms/VertexInputButton";
 import { ExcentricityAlgorithm, ExcentricityAlgorithmConfig } from "./ExcentricityAlgorithm";
 import { GraphAlgorithmExecution } from "@/GraphUniverse/Algorithm/AlgorithmExecutor";
+import Markdown from "react-markdown";
 
 export type DijkstraAlgorithmForm = FormProp & {};
 
@@ -59,7 +60,7 @@ export function ExcentricityAglgorithmForm({ universe }: DijkstraAlgorithmForm) 
         </div>
 
         <div className="flex  gap-3">
-          <Button className="flex-1 bg-green-300 text-green-950" onClickAsync={startAlgorithm}>
+          <Button className="flex-1 bg-blue-500 text-white" onClickAsync={startAlgorithm}>
             Start
           </Button>
 
@@ -69,19 +70,44 @@ export function ExcentricityAglgorithmForm({ universe }: DijkstraAlgorithmForm) 
         </div>
       </form>
 
-      <h1>Description</h1>
 
-      <p>
-        Dijkstra's algorithm (/ˈdaɪkstrəz/ DYKE-strəz) is an algorithm for finding the shortest
-        paths between nodes in a weighted graph, which may represent, for example, road networks. It
-        was conceived by computer scientist Edsger W. Dijkstra in 1956 and published three years
-        later.[4][5][6] The algorithm exists in many variants. Dijkstra's original algorithm found
-        the shortest path between two given nodes,[6] but a more common variant fixes a single node
-        as the "source" node and finds shortest paths from the source to all other nodes in the
-        graph, producing a shortest-path tree.
-      </p>
+      <div className="separator"></div>
+
+      <Markdown className={"markdown py-2"}>{markdown}</Markdown>
     </div>
   );
 }
+
+const markdown = `
+# Understanding Vertex Eccentricity
+
+Vertex eccentricity is a concept in graph theory that measures the maximum distance from a given vertex to all other vertices in the graph. It provides valuable insights into the centrality and reachability of individual vertices within a graph.
+
+## The Significance of Vertex Eccentricity
+
+In graph theory, vertex eccentricity serves as a fundamental metric for understanding the structure and connectivity of graphs. It helps identify central vertices, which play crucial roles in communication, transportation, and information flow within networks. Additionally, vertex eccentricity is instrumental in various graph algorithms and can aid in network analysis, community detection, and pathfinding.
+
+## How Vertex Eccentricity is Calculated
+
+1. **Initialization**: The algorithm initializes the eccentricity of each vertex to zero.
+
+2. **Exploration**: For each vertex in the graph, the algorithm systematically explores all possible paths to other vertices, calculating the distance from the current vertex to each reachable vertex.
+
+3. **Updating Eccentricity**: The algorithm updates the eccentricity of the current vertex to the maximum distance found during the exploration process.
+
+4. **Repeat**: Steps 2 and 3 are repeated for every vertex in the graph until the eccentricity of all vertices is determined.
+
+## Applications of Vertex Eccentricity
+
+- **Centrality Analysis**: Vertex eccentricity helps identify central vertices, which have high eccentricity values and are crucial for maintaining connectivity within the graph.
+- **Network Routing**: It aids in determining efficient routing paths within networks by identifying vertices with low eccentricity, which serve as effective intermediaries.
+- **Community Detection**: Vertex eccentricity can assist in detecting communities or clusters within a graph, as vertices with similar eccentricity values often belong to the same structural group.
+
+## Conclusion
+
+Vertex eccentricity provides valuable insights into the structural characteristics of graphs and plays a vital role in various graph analysis tasks. By understanding the eccentricity of vertices, researchers and practitioners can gain deeper insights into the connectivity, centrality, and resilience of networks, ultimately facilitating more informed decision-making and efficient network management.
+
+** **Crafted with insights from ChatGPT** **
+`;
 
 export default ExcentricityAglgorithmForm;

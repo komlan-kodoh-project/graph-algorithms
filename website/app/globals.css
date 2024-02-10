@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --primary-color: #7C98CD;
-  --secondary-color: #BBD3F0;
+  --primary-color: #7c98cd;
+  --secondary-color: #bbd3f0;
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
@@ -22,14 +22,38 @@ input:focus,
 select:focus,
 textarea:focus,
 button:focus {
-    outline: none;
+  outline: none;
 }
 
-html, body {
+html,
+body {
   height: 100%;
+  font-weight: 400;
   overscroll-behavior-x: none;
 }
 
 body {
   overscroll-behavior-x: none;
+}
+
+/* scroll bar styles */
+
+/* Scrollbar Styling */
+.scroll-bar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.scroll-bar::-webkit-scrollbar-track {
+  padding-left: 44;;
+  -webkit-border-radius: 10px;
+  
+  background-color: transparent;
+  padding: 30px 3px;
+  border-radius: 10px;
+}
+
+.scroll-bar::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 10px;
+  border: 2px solid #ebebeb;
+  background: rgb(112, 112, 112);
 }

@@ -1,5 +1,6 @@
 "use client";
 import "./globals.css";
+import "./markdown.css";
 import { useWebAssembly } from "@/utils/hooks";
 import { Inter } from "next/font/google";
 
