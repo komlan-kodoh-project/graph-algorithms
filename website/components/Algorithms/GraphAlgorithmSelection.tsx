@@ -38,7 +38,7 @@ function AnimationStuff({ children }: { children: ReactNode }) {
   return (
     <motion.div
       key={1}
-      className="absolute top-0"
+      className="h-full"
       initial={{ translateY: "6px", opacity: 0 }}
       animate={{ translateY: "0px", opacity: 1 }}
       exit={{ translateY: "6px", opacity: 0 }}
@@ -97,8 +97,6 @@ const componentMap = {
 
 export function GraphAlgorithmSelection({ name, universe }: GraphAlgorithmSelectionProps) {
   return (
-    <div className="relative">
-      <AnimatePresence>{name != null ? componentMap[name](universe) : <></>}</AnimatePresence>
-    </div>
+    <AnimatePresence>{name != null ? componentMap[name](universe) : <></>}</AnimatePresence>
   );
 }

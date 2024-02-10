@@ -28,7 +28,8 @@ export function AlgorithmDropdown({ onChange }: AlgorithmDropdownProp) {
           minHeight: "100%",
           border: "none",
           boxShadow: "none",
-          padding: "0px 3px "
+          padding: "0px 3px ",
+          backgroundColor: "rgb(248 250 252)",
         }),
 
         valueContainer: (provided, state) => ({
@@ -37,6 +38,7 @@ export function AlgorithmDropdown({ onChange }: AlgorithmDropdownProp) {
           width: "100%",
           maxWidth: "100%",
           padding: "0 6px",
+          backgroundColor: "rgb(248 250 252)",
         }),
 
         input: (provided, state) => ({

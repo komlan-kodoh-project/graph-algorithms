@@ -10,6 +10,7 @@ import { AlgorithmDopdownValue, AlgorithmDropdown } from "./Algorithms/Algorithm
 import { GraphAlgorithmSelection } from "./Algorithms/GraphAlgorithmSelection";
 import { AnimatePresence, motion } from "framer-motion";
 import { useWebAssembly } from "@/utils/hooks";
+import { DeleteButton } from "./svg-buttons/DeleteButton";
 
 export type GraphUniverseVertexData = {};
 
@@ -17,7 +18,7 @@ export type GraphUniverseVertexData = {};
 // Node excentricity
 export type GraphUniverseEdgeData = {};
 
-export type GraphContainerProps = {}
+export type GraphContainerProps = {};
 
 function GraphContainerInner(props: GraphContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -60,13 +61,14 @@ function GraphContainerInner(props: GraphContainerProps) {
     });
 
     newUniverse.listener.addEventListener("edgeClickedEvent", (event) => {
-      setSelectedEdge(event.edge);
+      if (graphUniverse.current?.getWellKnownState() === WellKnownGraphUniverseState.Editing) {
+        setSelectedEdge(event.edge);
+      }
     });
 
     newUniverse.initialize();
 
-    // newUniverse.generateRandomGraph(10);
-
+    newUniverse.generateRandomGraph(10);
 
     graphUniverse.current = newUniverse;
 
@@ -82,7 +84,7 @@ function GraphContainerInner(props: GraphContainerProps) {
   };
 
   return (
-    <div className="relative w-full h-full outline-4 outline-primary-color overflow-hidden text-sm ">
+    <div className="relative w-full h-full outline-4 outline-primary-color text-sm">
       <div className="absolute inline-flex gap-2 top-3.5 left-3.5 z-20 h-9 rounded bg-white px-1.5 py-1 shadow">
         <PointerButton
           active={editorState === WellKnownGraphUniverseState.Exploring}
@@ -93,17 +95,22 @@ function GraphContainerInner(props: GraphContainerProps) {
           active={editorState === WellKnownGraphUniverseState.Editing}
           onClick={(_) => updateEditorState(WellKnownGraphUniverseState.Editing)}
         />
+
+        <DeleteButton
+          active={editorState === WellKnownGraphUniverseState.Deleting}
+          onClick={(_) => updateEditorState(WellKnownGraphUniverseState.Deleting)}
+        />
       </div>
 
       <motion.div
         initial={{ top: "0.875rem", right: "0.875rem", width: "20rem" }}
         animate={
           selectedAlgorithm === null || selectedAlgorithm === "None"
-            ? { top: "0.875rem", right: "0.875rem", width: "20rem", background: "white" }
-            : { top: "0rem", right: "0rem", width: "24rem", background: "white" }
+            ? { top: "0.875rem", right: "0.875rem", width: "20rem" }
+            : { top: "0rem", right: "0rem", width: "24rem" }
         }
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className="absolute inline-flex gap-2 top-3.5 z-30 h-9 border-top rounded  py-1 shadow"
+        className="absolute inline-flex gap-2 top-3.5 z-30 h-9 bg-slate-50 border-top rounded  py-1 shadow"
       >
         <AlgorithmDropdown onChange={setSelectedAlgorithm} />
       </motion.div>
@@ -112,11 +119,11 @@ function GraphContainerInner(props: GraphContainerProps) {
         initial={{ opacity: 0 }}
         animate={
           selectedAlgorithm === null || selectedAlgorithm === "None"
-            ? { opacity: 0, translateY:"0px" }
-            : { opacity: 1, translateY:"0px"  }
+            ? { opacity: 0, translateY: "0px" }
+            : { opacity: 1, translateY: "0px" }
         }
         transition={{ duration: 0.5, ease: "easeOut", delayChildren: 0.5 }}
-        className="absolute gap-2 top-9 z-20 bottom-3.5 h-full py-0 right-0 w-96 p-3 mt-3 pt-3 border-green-400 border-t-2 shadow rounded bg-slate-50"
+        className="absolute gap-2 top-9 bottom-0 z-20 py-0 right-0 w-[35em] p-3 mt-3 pt-3 border-blue-400 border-t-2 shadow overflow-y-scroll scroll-bar rounded bg-slate-50"
       >
         {graphUniverse.current !== null && (
           <GraphAlgorithmSelection
@@ -148,9 +155,9 @@ function GraphContainerInner(props: GraphContainerProps) {
   );
 }
 
-function GraphContainer(props: GraphContainerProps){
+function GraphContainer(props: GraphContainerProps) {
   var hasInit = useWebAssembly();
 
-  return hasInit ?  <GraphContainerInner {...props}></GraphContainerInner>: <></>;
+  return hasInit ? <GraphContainerInner {...props}></GraphContainerInner> : <></>;
 }
 export default GraphContainer;

@@ -2,11 +2,9 @@ import { useState } from "react";
 import { FormProp, useGraphUniverseForm } from "@/components/forms/FormProp";
 import { Button } from "../../building-blocks/Button";
 import { VertexInputButton } from "@/components/forms/VertexInputButton";
-import {
-  DijkstraAlgorithm,
-  DijkstraAlgorithmConfig,
-} from "./DijkstraAlgorithm";
+import { DijkstraAlgorithm, DijkstraAlgorithmConfig } from "./DijkstraAlgorithm";
 import { GraphAlgorithmExecution } from "@/GraphUniverse/Algorithm/AlgorithmExecutor";
+import Markdown from "react-markdown";
 
 export type DijkstraAlgorithmForm = FormProp & {};
 
@@ -15,13 +13,8 @@ export function DijkstraAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
     useGraphUniverseForm<DijkstraAlgorithmConfig>(universe);
 
   const startAlgorithm = async () => {
-    if (
-      formValues.sourceVertex === undefined ||
-      formValues.destinatonVertex == undefined
-    ) {
-      throw new Error(
-        "You must select start and end before starting the algorithm"
-      );
+    if (formValues.sourceVertex === undefined || formValues.destinatonVertex == undefined) {
+      throw new Error("You must select start and end before starting the algorithm");
     }
 
     const newAlgorithmExecution = new DijkstraAlgorithm({
@@ -58,7 +51,6 @@ export function DijkstraAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
       },
     });
 
-
     const newAlgorithmExecutor = new GraphAlgorithmExecution(newAlgorithmExecution, universe);
 
     await newAlgorithmExecutor.StartExecution();
@@ -66,10 +58,7 @@ export function DijkstraAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
 
   return (
     <div className={"h-full"}>
-      <form
-        className="grid grid-cols-1 gap-y-2"
-        onSubmit={(e) => e.preventDefault()}
-      >
+      <form className="grid grid-cols-1 gap-y-2" onSubmit={(e) => e.preventDefault()}>
         <div className="flex justify-between gap-x-2">
           <VertexInputButton {...registerGraphInput("sourceVertex")}>
             Source Vertex
@@ -106,38 +95,53 @@ export function DijkstraAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
         </div>
 
         <div className="flex  gap-3">
-          <Button
-            className="flex-1 bg-green-300 text-green-950"
-            onClickAsync={startAlgorithm}
-          >
+          <Button className="flex-1 bg-blue-500 text-white" onClickAsync={startAlgorithm}>
             Start
           </Button>
 
-          <Button
-            className="flex-1"
-            onClick={() => universe.resetAllDisplayConfiguration()}
-          >
+          <Button className="flex-1" onClick={() => universe.resetAllDisplayConfiguration()}>
             Reset
           </Button>
         </div>
       </form>
 
-      <h1>Description</h1>
+      <div className="separator"></div>
 
-      <p>
-        Dijkstra's algorithm (/ˈdaɪkstrəz/ DYKE-strəz) is an algorithm for
-        finding the shortest paths between nodes in a weighted graph, which may
-        represent, for example, road networks. It was conceived by computer
-        scientist Edsger W. Dijkstra in 1956 and published three years
-        later.[4][5][6] The algorithm exists in many variants. Dijkstra's
-        original algorithm found the shortest path between two given nodes,[6]
-        but a more common variant fixes a single node as the "source" node and
-        finds shortest paths from the source to all other nodes in the graph,
-        producing a shortest-path tree.
-      </p>
+      <Markdown className={"markdown py-2"}>{markdown}</Markdown>
     </div>
   );
 }
 
+const markdown = `
+# Introduction to Dijkstra's Algorithm
+
+Dijkstra's algorithm is a fundamental algorithm used in computer science for finding the shortest paths between nodes in a weighted graph. It's named after its inventor, Dutch computer scientist Edsger W. Dijkstra, and is particularly useful in scenarios where finding the shortest path is crucial.
+
+## How Dijkstra's Algorithm Works
+
+1. **Starting Point**: Dijkstra's algorithm begins at a designated starting point, typically called the "source" node.
+
+2. **Initializing Distances**: It initializes the distance to all nodes from the source node to infinity, except for the source node itself, which is set to zero.
+
+3. **Exploring Neighbors**: It systematically explores the neighboring nodes of the current node. For each neighboring node, it calculates the distance from the source node through the current node.
+
+4. **Updating Distances**: If the newly calculated distance to a node is shorter than the previously known distance, Dijkstra's algorithm updates the distance and records the current node as the "previous node" for the shortest path.
+
+5. **Priority Queue**: To efficiently select the next node to explore, Dijkstra's algorithm typically uses a priority queue. Nodes are prioritized based on their current distance from the source node.
+
+6. **Visiting Nodes**: Dijkstra's algorithm continues this process, visiting nodes and updating distances until it has visited all reachable nodes or until the destination node is reached.
+
+7. **Backtracking**: After reaching the destination node, Dijkstra's algorithm backtracks from the destination node to the source node using the recorded "previous node" information, thereby determining the shortest path.
+
+## Applications
+
+- **Routing Algorithms**: Dijkstra's algorithm is widely used in network routing protocols to find the shortest path between nodes in computer networks.
+- **Transportation Networks**: It can optimize transportation routes by finding the shortest path between locations, considering factors such as distance or time.
+- **Robotics and Autonomous Vehicles**: Dijkstra's algorithm can assist in path planning for robots and autonomous vehicles, ensuring efficient and safe navigation.
+
+Dijkstra's algorithm is a powerful tool with various applications in computer science, transportation, and engineering.
+
+** **Generated with the help of ChatGPT** **
+`;
 
 export default DijkstraAlgorithmForm;

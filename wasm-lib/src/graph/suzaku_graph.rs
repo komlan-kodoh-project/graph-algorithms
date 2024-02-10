@@ -94,6 +94,16 @@ impl GraphWrapper {
         return Uint32Array::from(&node_indexes[..]);
     }
 
+    pub fn delete_vertex(&mut self, node_id: usize) {
+        let node_index = NodeIndex::<u32>::new(node_id);
+        self.graph.remove_node(node_index);
+    }
+
+    pub fn delete_edge(&mut self, edge_id: usize) {
+        let edge_index = petgraph::graph::EdgeIndex::<u32>::new(edge_id);
+        self.graph.remove_edge(edge_index);
+    }
+
     pub fn edge(&self, first_node_id: usize, second_node_id: usize) -> Result<u32, String> {
         let first_node = NodeIndex::<u32>::new(first_node_id);
         let second_node = NodeIndex::<u32>::new(second_node_id);
