@@ -11,7 +11,7 @@ export function DeleteButton({ active, onClick }: Readonly<PointerSVGProps>) {
       onClick={onClick}
       className={`h-full p-1 transition-all duration-250 ease-in-out ${active && "rounded shadow"}`}
     >
-      <svg className="h-full" fill="none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <svg  style={{scale: 0.8}} className="h-full" fill="none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
        <path
           d="M80 20L20 80M20.0001 20L80 80"
           stroke={active ? activeColor : restColor}

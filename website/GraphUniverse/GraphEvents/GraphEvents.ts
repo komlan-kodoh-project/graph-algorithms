@@ -69,7 +69,12 @@ export type GraphStateUpdateEvent<T, E> = {
 /***************************** Persistent Graph Events *************************/
 
 export type VertexHoverEvent<T> = {
-    targetVertex:  Vertex<T>,
+    target:  Vertex<T>,
+}
+
+
+export type EdgeHoverEvent<V, E> = {
+    target:  Edge<V, E>,
 }
 
 export default GraphEvents;

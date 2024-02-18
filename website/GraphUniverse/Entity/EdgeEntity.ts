@@ -23,7 +23,7 @@ const edgeDefaultDisplayConfiguration: EdgeDisplayConfiguration<any, any> = {
 }
 
 export class EdgeEntity<V, E> extends Container {
-    public edge: Edge<V, E>;
+    public graphEdge: Edge<V, E>;
     private length: number = 100;
     private sourceCoordinates: Coordinates;
     private destinationCoordinates: Coordinates;
@@ -40,7 +40,7 @@ export class EdgeEntity<V, E> extends Container {
     ) {
         super();
 
-        this.edge = edge;
+        this.graphEdge = edge;
         this.sourceCoordinates = sourceCoordinates;
         this.destinationCoordinates = destinationCoordinates;
 
@@ -166,7 +166,7 @@ export class EdgeEntity<V, E> extends Container {
             this.removeChild(this.arrowLabel);
         }
 
-        const label = configuration.edgeMiddleLabel(this.edge);
+        const label = configuration.edgeMiddleLabel(this.graphEdge);
         let height = 20;
         let width = label.length * 10 + 10;
 
@@ -183,7 +183,7 @@ export class EdgeEntity<V, E> extends Container {
         textContainer.drawRoundedRect(- width / 2, -height / 2, width, height, 5);
 
         const text = new Text(
-            configuration.edgeMiddleLabel(this.edge),
+            configuration.edgeMiddleLabel(this.graphEdge),
             {
                 fontSize: 15,
                 align: 'center',

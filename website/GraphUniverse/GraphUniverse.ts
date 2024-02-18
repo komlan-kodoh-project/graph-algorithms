@@ -119,19 +119,19 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
   }
 
   public deleteVertex(vertex: Vertex<V>) {
-    this.graph.deleteVertex(vertex);
-
     this.listener.notifyVertexDeleted({
         target: vertex,
     });
+    
+    this.graph.deleteVertex(vertex);
   }
 
   public deleteEdge(edge: Edge<V, E>): void {
-    this.graph.deleteEdge(edge);
-
     this.listener.notifyEdgeDeleted({
       target: edge,
     });
+
+    this.graph.deleteEdge(edge);
   }
 
   public createEdge(firstVertex: Vertex<V>, secondVertex: Vertex<V>): void {

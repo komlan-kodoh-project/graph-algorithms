@@ -94,7 +94,6 @@ export default class PhysicsBasedEmbedding<V, E> implements Embedding<V, E> {
   private removeEdgeConstraint(edge: Edge<V, E>) {
     const constraint = getMeta<Constraint>(edge, PhysicsBasedEmbedding.META_PROPERTY_NAME);
 
-    console.log(edge, World);
     World.remove(this.engine.world, constraint);
   }
 
@@ -102,7 +101,11 @@ export default class PhysicsBasedEmbedding<V, E> implements Embedding<V, E> {
     const body = getMeta<Matter.Body>(vertex, PhysicsBasedEmbedding.META_PROPERTY_NAME);
 
     World.remove(this.engine.world, body);
-    // TODO : Consider if you should remove the constraint yourself
+
+    for (const edge of this.universe.graph.getNeighborEdges(vertex)) {
+        this.removeEdgeConstraint(edge);
+    }
+
   }
 
   private addVertex(x: number, y: number): Matter.Body {

@@ -17,7 +17,7 @@ export class GraphUniverseSelectionState<T, E> implements GraphUniverseState<T, 
             this.universe.listener.addPersistentEventListener(
                 "vertexHover",
                 (event) => {
-                    const vertex = this.universe.renderingController.getVertexEntity(event.targetVertex);
+                    const vertex = this.universe.renderingController.getVertexEntity(event.target);
 
                     return vertex.updateDisplayConfiguration({
                         innerColor: "#e1ebf7",

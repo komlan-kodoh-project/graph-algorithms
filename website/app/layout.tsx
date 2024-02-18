@@ -8,10 +8,9 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
-  useWebAssembly();
+}>) {
   return (
     <html lang="en">
       <body className={inter.className}>{children}</body>

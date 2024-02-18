@@ -8,6 +8,10 @@ type GraphUniverseConfiguration<V, E> = {
         dark: string,
         light: string, 
     },
+    dangerAccent: {
+        light: string,
+        dark: string,
+    };
     primaryAccent: {
         light: string,
         dark: string, 

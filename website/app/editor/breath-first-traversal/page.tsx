@@ -1,18 +1,8 @@
-import { useEffect, useState } from "react";
-import { FormProp, useGraphUniverseForm } from "@/components/forms/FormProp";
-import { WellKnownGraphUniverseState } from "@/GraphUniverse/States/GraphUniverseState";
-import { Button } from "../../building-blocks/Button";
-import {
-  BreathFirstSearchAlgorithm,
-  BFSAlgorightmConfig,
-} from "@/components/Algorithms/BreathFirstAlgorithm/BreathFirstSearchAlgorithm";
 import { GraphAlgorithmExecution as GraphAlgorithmExecutor } from "@/GraphUniverse/Algorithm/AlgorithmExecutor";
-import { userReactiveRef } from "@/utils/hooks";
+import { FormProp } from "@/components/forms/FormProp";
 import { VertexInputButton } from "@/components/forms/VertexInputButton";
-import { Vertex } from "@/GraphUniverse/Graph/Graph";
-import Markdown from "react-markdown";
 
-export type BreathFirstSearchAgorithmForm = FormProp & {};
+export type BreathFirstSearchAgorithmForm = FormProp;
 
 export function BreathFirstSearch({ universe }: BreathFirstSearchAgorithmForm) {
   const { registerGraphInput, formValues } = useGraphUniverseForm<BFSAlgorightmConfig>(universe);

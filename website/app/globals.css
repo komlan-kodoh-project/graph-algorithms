@@ -44,9 +44,7 @@ body {
 }
 
 .scroll-bar::-webkit-scrollbar-track {
-  padding-left: 44;;
   -webkit-border-radius: 10px;
-  
   background-color: transparent;
   padding: 30px 3px;
   border-radius: 10px;
@@ -56,4 +54,14 @@ body {
   -webkit-border-radius: 10px;
   border: 2px solid #ebebeb;
   background: rgb(112, 112, 112);
+}
+
+h1 {
+  font-weight: 900;
+  font-size: medium;
+}
+
+h2 {
+  font-weight: 700;
+  font-size: medium;
 }
