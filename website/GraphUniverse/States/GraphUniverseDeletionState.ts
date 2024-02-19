@@ -33,10 +33,26 @@ export class GraphUniverseDeletionState<V, E> implements GraphUniverseState<V, E
       this.universe.listener.addPersistentEventListener(
         "vertexHover",
         (event) => {
-          const vertex = this.universe.renderingController.getVertexEntity(event.targetVertex);
+          const vertex = this.universe.renderingController.getVertexEntity(event.target);
 
           return vertex.updateDisplayConfiguration({
-            innerColor: "#e1ebf7",
+            innerColor: this.universe.configuration.dangerAccent.light,
+            borderColor: this.universe.configuration.dangerAccent.dark,
+          });
+        },
+        (event, cleanup) => {
+          cleanup();
+        }
+      ),
+
+      this.universe.listener.addPersistentEventListener(
+        "edgeHover",
+        (event) => {
+          const edge = this.universe.renderingController.getEdgeEntity(event.target);
+
+          return edge.updateDisplayConfiguration({
+            edgeColor: this.universe.configuration.dangerAccent.dark,
+            labelBackground: this.universe.configuration.dangerAccent.light,
           });
         },
         (event, cleanup) => {

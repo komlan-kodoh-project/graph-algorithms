@@ -18,7 +18,6 @@ export class GraphUniverseDesignState<V, E> implements GraphUniverseState<V, E> 
     }
 
     initialize(): void {
-        console.log("initi design state");
         this.cleanup = [
             this.universe.listener.addEventListener(
                 "viewClickedEvent",
@@ -45,8 +44,7 @@ export class GraphUniverseDesignState<V, E> implements GraphUniverseState<V, E> 
 
             this.universe.listener.addEventListener(
                 "vertexDragEnd",
-                (event) => {
-                    console.log("drag end")
+                () => {
                     const entity = this.relativeCurrentVertexDragSource;
 
                     if (this.modificationCleanup === null || entity === null) {
@@ -61,8 +59,6 @@ export class GraphUniverseDesignState<V, E> implements GraphUniverseState<V, E> 
             this.universe.listener.addEventListener(
                 "vertexToVertexDrag",
                 (event) => {
-                    console.log("vertex to vertex drag")
-                    const sourceVertexEntity = this.universe.renderingController.getVertexEntity(event.sourceVertex);
                     const targetVertexEntity = this.universe.renderingController.getVertexEntity(event.targetVertex);
 
                     this.universe.createEdge(event.sourceVertex, event.targetVertex);

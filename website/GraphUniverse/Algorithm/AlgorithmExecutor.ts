@@ -1,44 +1,103 @@
-import { GraphAlgorithm } from './GraphAlgorithm';
+import { GraphAlgorithm } from "./GraphAlgorithm";
 import GraphUniverse from "../GraphUniverse";
-import { sleep } from '@/utils/helpers';
+import { sleep } from "@/utils/helpers";
+import { AlgorithmCommand } from "./AlgorithmCommands";
 
 export class GraphAlgorithmExecution {
-    private universe : GraphUniverse;
-    private isExecuting: boolean = false;
-    private graphAlgorithm: GraphAlgorithm;
+  private universe: GraphUniverse;
+  private isExecuting: boolean = false;
+  private executionCancelRequested: boolean = false;
+  private algorithmSteps: IterableIterator<AlgorithmCommand>;
 
-    constructor(graphAlgorithm: GraphAlgorithm, universe: GraphUniverse) {
-        this.universe = universe;
-        this.graphAlgorithm = graphAlgorithm;
+  private pauseRequestCallBack: (() => void) | null = null;
+
+  constructor(graphAlgorithm: GraphAlgorithm, universe: GraphUniverse) {
+    this.universe = universe;
+    this.algorithmSteps = GraphAlgorithmExecution.getAlgorithmIterator(graphAlgorithm);
+  }
+
+  private static *getAlgorithmIterator(
+    graphAlgorithm: GraphAlgorithm
+  ): IterableIterator<AlgorithmCommand> {
+    let nextInstructions = graphAlgorithm.nexts();
+
+    while (nextInstructions.length > 0) {
+      for (const instruction of nextInstructions) {
+        yield instruction;
+      }
+
+      nextInstructions = graphAlgorithm.nexts();
+    }
+  }
+
+  private async ExecuteNext(applyDelay: boolean): Promise<AlgorithmCommand | null> {
+    const { value: instruction, done } = this.algorithmSteps.next();
+
+    if (done) {
+      return null;
     }
 
-    async StartExecution() {
-        let nextInstructions = this.graphAlgorithm.nexts();
+    instruction.execute(this.universe);
 
-        while (nextInstructions.length > 0) { 
-            for (const instruction of nextInstructions) {
-                instruction.execute(this.universe);
-                
-                if (instruction.cofiguration().delay === 0){
-                    continue;
-                }
-
-                await sleep(instruction.cofiguration().delay * 100);
-            }
-
-            nextInstructions = this.graphAlgorithm.nexts();
-        }
+    if (instruction.cofiguration().delay !== 0 && applyDelay) {
+      await sleep(instruction.cofiguration().delay * 100);
     }
 
-    async PauseExecution() {
+    return instruction;
+  }
 
+  async StartExecution() {
+    this.isExecuting = true;
+
+    while (await this.ExecuteNext(true)) {
+      if (this.executionCancelRequested) {
+        this.isExecuting = false;
+        this.executionCancelRequested = false;
+
+        this.pauseRequestCallBack && this.pauseRequestCallBack();
+        break;
+      }
     }
 
-    async MoveForward() {
+    this.isExecuting = false;
+  }
 
+  async PauseExecution() {
+    this.executionCancelRequested = true;
+
+    return new Promise<void>((resolve) => {
+      this.pauseRequestCallBack = resolve;
+    });
+  }
+
+  async MoveForward() {
+    this.isExecuting = true;
+
+    while (true) {
+      const instruction = await this.ExecuteNext(true);
+
+      if (instruction === null) {
+        this.isExecuting = false;
+        break;
+      }
+
+      if (instruction?.cofiguration().isStep) {
+        break;
+      }
+
+      if (this.executionCancelRequested) {
+        this.isExecuting = false;
+        this.executionCancelRequested = false;
+
+        this.pauseRequestCallBack && this.pauseRequestCallBack();
+        break;
+      }
     }
 
-    async MoveBackward() {
+    return this.ExecuteNext(false);
+  }
 
-    }
+  async MoveBackward() {
+    throw new Error("Not implemented");
+  }
 }

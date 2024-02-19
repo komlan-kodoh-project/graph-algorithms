@@ -56,10 +56,8 @@ export class ExcentricityAlgorithm implements GraphAlgorithm {
             vertex.id
         );
 
-        console.log(node_excentricity);
 
         yield this.generateNodeExcentricityAction(vertex, node_excentricity);
-        // }
     }
 
 

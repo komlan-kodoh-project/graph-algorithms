@@ -3,7 +3,6 @@ import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
 import { Edge, Vertex, getMeta, setMeta } from "@/GraphUniverse/Graph/Graph";
 import GraphUniverse from "./GraphUniverse";
 import { EdgeEntity } from "./Entity/EdgeEntity";
-import { Assets } from "pixi.js";
 
 export default class GraphRenderingController<V, E> implements GraphUniverseComponent<V, E> {
   private universe: GraphUniverse<V, E>;
@@ -40,8 +39,6 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
   }
 
   public initialize(): void {
-    Assets.load("https://pixijs.com/assets/bitmap-font/desyrel.xml");
-
     this.universe.configuration.container.appendChild(
       this.universe.application.view as unknown as Node
     );
@@ -110,12 +107,30 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
 
       this.universe.viewport.removeChild(entity);
 
-      for (const edge of entity.outgoingEdges) {
-        this.universe.viewport.removeChild(edge);
-      }
+      const neighbors = this.universe.graph.getAllNeighbors(event.target);
 
-      for (const edge of entity.inComingEdges) {
-        this.universe.viewport.removeChild(edge);
+      for (const vertex of neighbors) {
+        const edge = this.universe.graph.getEdge(event.target, vertex);
+
+        const neighborEntity = getMeta<VertexEntity<V>>(
+          vertex,
+          GraphRenderingController.META_PROPERTY_NAME
+        );
+
+        const edgeEntity = getMeta<EdgeEntity<V, E>>(
+          edge,
+          GraphRenderingController.META_PROPERTY_NAME
+        );
+
+        neighborEntity.outgoingEdges = neighborEntity.outgoingEdges.filter(
+          (neighborEdge: EdgeEntity<V, E>) => edgeEntity !== neighborEdge
+        );
+
+        neighborEntity.inComingEdges = neighborEntity.inComingEdges.filter(
+          (neighborEdge: EdgeEntity<V, E>) => edgeEntity !== neighborEdge
+        );
+
+        this.universe.viewport.removeChild(edgeEntity);
       }
     });
 
@@ -126,6 +141,24 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
       );
 
       this.universe.viewport.removeChild(entity);
+
+      const sourceVertexEntity = getMeta<VertexEntity<V>>(
+        event.target.sourceVertex,
+        GraphRenderingController.META_PROPERTY_NAME
+      );
+
+      const destinationVertexEntity = getMeta<VertexEntity<V>>(
+        event.target.targetVertex,
+        GraphRenderingController.META_PROPERTY_NAME
+      );
+
+      sourceVertexEntity.outgoingEdges = sourceVertexEntity.outgoingEdges.filter(
+        (edge: EdgeEntity<V, E>) => edge !== entity
+      );
+
+      destinationVertexEntity.inComingEdges = destinationVertexEntity.inComingEdges.filter(
+        (edge: EdgeEntity<V, E>) => edge !== entity
+      );
     });
   }
 

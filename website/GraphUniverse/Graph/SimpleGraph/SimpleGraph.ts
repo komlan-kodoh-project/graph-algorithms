@@ -1,6 +1,6 @@
 import { GraphWrapper } from "wasm-lib";
 import { GraphOperationMode } from "./../Graph";
-import { Edge, Graph, Vertex } from "@/GraphUniverse/Graph/Graph";
+import { Edge, Vertex } from "@/GraphUniverse/Graph/Graph";
 import { AnyValue } from "@/utils/types";
 
 export default class SimpleGraph<V = AnyValue, E = AnyValue> {
@@ -9,8 +9,6 @@ export default class SimpleGraph<V = AnyValue, E = AnyValue> {
   private operationMode: GraphOperationMode = GraphOperationMode.Undirected;
 
   private graph: GraphWrapper = new GraphWrapper();
-
-  constructor() {}
 
   public getWasmGraph(): GraphWrapper {
     return this.graph;
@@ -108,7 +106,7 @@ export default class SimpleGraph<V = AnyValue, E = AnyValue> {
     return edgesData;
   }
 
-  getNeighbors(sourceVertex: Vertex<V>): Vertex<V>[] {
+  getAllNeighbors(sourceVertex: Vertex<V>): Vertex<V>[] {
     const neighbors = this.graph.neighbors(sourceVertex.id);
 
     const vertexData = new Array<Vertex<V>>(neighbors.length);

@@ -1,19 +1,18 @@
-import { useState } from "react";
 import Select from "react-select";
 
-export type AlgorithmDopdownValue = (typeof GraphAlgorithms)[number]["value"] | null;
+export type AlgorithmDropdownValue = (typeof GraphAlgorithms)[number]["value"] | null;
 
-export type AlgorithmDropdownProp = {
-  onChange: (algorithm: AlgorithmDopdownValue) => void;
-};
+export type AlgorithmDropdownProp = Readonly<{
+  onChange: (algorithm: AlgorithmDropdownValue) => void;
+}>;
 
 export const GraphAlgorithms = [
   { value: "None", label: "Select An Algorithm" },
-  { value: "dijkstra", label: "Dijkstra Algorithm" },
-  { value: "minimum-node-coloring-brute", label: "Exhaustive Minimum Node Coloring" },
-  { value: "breath-first-traversal", label: "Breath First Traversal" },
-  { value: "vertex-excentricity-algorithm", label: "Find Vertex Excentricity" },
-  { value: "maximum-independent-set-exhaustive", label: "Find Maximum Independent Set" },
+  { value: "dijkstra-shortest-path", label: "Dijkstra Algorithm" },
+  { value: "breath-first-traversal", label: "Exhaustive Minimum Node Coloring" },
+  { value: "brute-force-minimum-node-coloring", label: "Breath First Traversal" },
+  { value: "node-excentricity", label: "Find Vertex Excentricity" },
+  { value: "maximum-independent-set", label: "Find Maximum Independent Set" },
 ] as const;
 
 export function AlgorithmDropdown({ onChange }: AlgorithmDropdownProp) {
@@ -22,7 +21,7 @@ export function AlgorithmDropdown({ onChange }: AlgorithmDropdownProp) {
       className="w-full"
       placeholder="Select An Algorithm"
       styles={{
-        control: (provided, state) => ({
+        control: (provided) => ({
           ...provided,
           height: "100%",
           minHeight: "100%",
@@ -32,7 +31,7 @@ export function AlgorithmDropdown({ onChange }: AlgorithmDropdownProp) {
           backgroundColor: "rgb(248 250 252)",
         }),
 
-        valueContainer: (provided, state) => ({
+        valueContainer: (provided) => ({
           ...provided,
           height: "100%",
           width: "100%",

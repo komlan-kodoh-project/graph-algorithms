@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { FormProp, useGraphUniverseForm } from "@/components/forms/FormProp";
 import { Button } from "../../building-blocks/Button";
-import { VertexInputButton } from "@/components/forms/VertexInputButton";
 import {
   MaximumIndependentSetAlgorithm,
   MaximumIndependentSetAlgorithmConfig,
@@ -12,8 +10,7 @@ import Markdown from "react-markdown";
 export type DijkstraAlgorithmForm = FormProp & {};
 
 export function MaximumIndependentSetAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
-  const { registerGraphInput, formValues } =
-    useGraphUniverseForm<MaximumIndependentSetAlgorithmConfig>(universe);
+  useGraphUniverseForm<MaximumIndependentSetAlgorithmConfig>(universe);
 
   const startAlgorithm = async () => {
     const newAlgorithmExecution = new MaximumIndependentSetAlgorithm({

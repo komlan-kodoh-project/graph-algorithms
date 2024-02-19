@@ -21,7 +21,7 @@ export class GraphUniverseExplorationState<V, E> implements GraphUniverseState<V
             this.universe.listener.addPersistentEventListener(
                 "vertexHover",
                 (event) => {
-                    const vertexEntity = this.universe.renderingController.getVertexEntity(event.targetVertex);
+                    const vertexEntity = this.universe.renderingController.getVertexEntity(event.target);
 
                     return vertexEntity.updateDisplayConfiguration(
                         {
@@ -36,7 +36,7 @@ export class GraphUniverseExplorationState<V, E> implements GraphUniverseState<V
                         return;
                     }
 
-                    const vertexEntity = this.universe.renderingController.getVertexEntity(event.targetVertex);
+                    const vertexEntity = this.universe.renderingController.getVertexEntity(event.target);
 
                     hoverCleanup();
                 },
@@ -45,7 +45,6 @@ export class GraphUniverseExplorationState<V, E> implements GraphUniverseState<V
             this.universe.listener.addEventListener(
                 "vertexDragStart",
                 (event) => {
-
                     const vertexEntity = this.universe.renderingController.getVertexEntity(event.target);
 
                     this.dragModificationCleanup = vertexEntity.updateDisplayConfiguration(

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Vertex } from "@/GraphUniverse/Graph/Graph";
 import { WellKnownGraphUniverseState } from "@/GraphUniverse/States/GraphUniverseState";
 
-export type VertexInputButtonProps<T, K extends keyof T> = {
+export type VertexInputButtonProps<T, K extends keyof T> = Readonly<{
   formValues: T;
   children: string;
   className?: string;
@@ -14,7 +14,7 @@ export type VertexInputButtonProps<T, K extends keyof T> = {
   active: boolean,
   universe: GraphUniverse;
   updateFormInputMode: (previous: K | null) => void;
-};
+}>;
 
 export function VertexInputButton<T, K extends keyof T>({
   type,
