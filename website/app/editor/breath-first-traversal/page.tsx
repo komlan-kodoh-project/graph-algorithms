@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 "use client"
 
 import { FormProp, GraphAlgorithmBuilder, useGraphUniverseForm } from "@/components/forms/FormProp";
@@ -14,13 +13,6 @@ const bfsBuilder: GraphAlgorithmBuilder<BFSAlgorightmConfig, BreathFirstSearchAl
   if (config.sourceVertex === undefined) {
     throw new Error("You must select start and end before starting the algorithm");
   }
-=======
-import { GraphAlgorithmExecution as GraphAlgorithmExecutor } from "@/GraphUniverse/Algorithm/AlgorithmExecutor";
-import { FormProp } from "@/components/forms/FormProp";
-import { VertexInputButton } from "@/components/forms/VertexInputButton";
-
-export type BreathFirstSearchAgorithmForm = FormProp;
->>>>>>> origin/main
 
   const algorithm = new BreathFirstSearchAlgorithm(universe.graph, {
     exploredEdgeColor: universe.configuration.darkAccent.dark,

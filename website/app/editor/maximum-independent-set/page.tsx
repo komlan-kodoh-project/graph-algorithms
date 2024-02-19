@@ -1,17 +1,7 @@
-<<<<<<< HEAD
 "use client";
 
 import { GraphAlgorithmBuilder, useGraphUniverseForm } from "@/components/forms/FormProp";
 import { MaximumIndependentSetAlgorithm } from "./MaximumIndependentSetAlgorithm";
-=======
-import { FormProp, useGraphUniverseForm } from "@/components/forms/FormProp";
-import { Button } from "../../building-blocks/Button";
-import {
-  MaximumIndependentSetAlgorithm,
-  MaximumIndependentSetAlgorithmConfig,
-} from "./MaximumIndependentSetAlgorithm";
-import { GraphAlgorithmExecution } from "@/GraphUniverse/Algorithm/AlgorithmExecutor";
->>>>>>> origin/main
 import Markdown from "react-markdown";
 import { Button } from "@/components/building-blocks/Button";
 
@@ -27,13 +17,8 @@ const MaximumIndependentSetAlgorithmBuilder: GraphAlgorithmBuilder<
     },
   });
 
-<<<<<<< HEAD
   return algorithm;
 };
-=======
-export function MaximumIndependentSetAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
-  useGraphUniverseForm<MaximumIndependentSetAlgorithmConfig>(universe);
->>>>>>> origin/main
 
 export default function MaximumIndependentSetAlgorithmForm() {
   const { execution } = useGraphUniverseForm(MaximumIndependentSetAlgorithmBuilder);
