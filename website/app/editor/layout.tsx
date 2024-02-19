@@ -36,6 +36,10 @@ const GraphContainer = dynamic(() => import("@/components/GraphContainer"), { ss
 function extractAlgorithmName(): AlgorithmDropdownValue | null {
   const regex = /\/editor\/([a-zA-Z-]+)/; // Regular expression to match the algorithm name
   const match = RegExp(regex).exec(window.location.href); // Matching the regex with the URL
+<<<<<<< HEAD
+=======
+  console.log(match);
+>>>>>>> origin/main
   if (match) {
     return match[1] as AlgorithmDropdownValue; // Returning the matched algorithm name
   } else {
@@ -68,7 +72,11 @@ export function Layout({ children }: LayoutProps) {
       setUniverseEngine(event.currentEmbedding.wellKnownEmbedingName());
     });
 
+<<<<<<< HEAD
     universe().generateRandomGraph(10, 1);
+=======
+    universe().generateRandomGraph(10);
+>>>>>>> origin/main
 
     updateEditorState(WellKnownGraphUniverseState.Exploring);
 
@@ -109,6 +117,11 @@ export function Layout({ children }: LayoutProps) {
   };
 
   const toggleActiveEngine = (): void => {
+<<<<<<< HEAD
+=======
+    console.log("Embedding", currentEngine);
+
+>>>>>>> origin/main
     if (currentEngine === WellKnownGraphUniverseEmbedding.PhysicsBasedEmbedding) {
       updateEditorEngine(WellKnownGraphUniverseEmbedding.DormantEmbedding);
       return;

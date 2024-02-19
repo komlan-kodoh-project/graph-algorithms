@@ -221,6 +221,7 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
 
       await sleep(50);
     }
+<<<<<<< HEAD
 
 
     for (let i =0; i < additionalEdges; i++) {
@@ -232,5 +233,7 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
 
       this.createEdge(randomExistingVertex, randomExistingVertex2);
     }
+=======
+>>>>>>> origin/main
   }
 }

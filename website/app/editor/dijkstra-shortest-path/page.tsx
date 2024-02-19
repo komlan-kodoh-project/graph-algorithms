@@ -45,7 +45,11 @@ const buildDijkstraAlgorithmExecution: GraphAlgorithmBuilder<
   });
 };
 
+<<<<<<< HEAD
 export default function DijkstraAlgorithmForm() {
+=======
+export function DijkstraAlgorithmForm() {
+>>>>>>> origin/main
   const { registerGraphInput, formValues, execution } = useGraphUniverseForm<
     DijkstraAlgorithmConfig,
     DijkstraAlgorithm
