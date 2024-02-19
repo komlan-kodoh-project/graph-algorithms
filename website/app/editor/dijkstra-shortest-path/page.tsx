@@ -45,7 +45,7 @@ const buildDijkstraAlgorithmExecution: GraphAlgorithmBuilder<
   });
 };
 
-export function DijkstraAlgorithmForm() {
+export default function DijkstraAlgorithmForm() {
   const { registerGraphInput, formValues, execution } = useGraphUniverseForm<
     DijkstraAlgorithmConfig,
     DijkstraAlgorithm
@@ -147,4 +147,3 @@ Dijkstra's algorithm is a powerful tool with various applications in computer sc
 ** **Generated with the help of ChatGPT** **
 `;
 
-export default DijkstraAlgorithmForm;

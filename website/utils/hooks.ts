@@ -52,7 +52,6 @@ export function useWebAssembly() {
     const [hasInitialized, setHasInitialized] = useState<boolean>(false)
 
     useEffect(() => {
-        console.log("running shit")
         new Promise<void>(async (resolve, reject) => {
             await rust_wasm_init();
             await initialize_web_assembly();

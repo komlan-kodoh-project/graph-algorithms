@@ -4,8 +4,6 @@ import { UpdateVertexRenderingConfiguration } from "@/GraphUniverse/Algorithm/Co
 import { GraphAlgorithm } from "@/GraphUniverse/Algorithm/GraphAlgorithm";
 import SimpleGraph from "@/GraphUniverse/Graph/SimpleGraph/SimpleGraph";
 import { ColorGenerator } from "@/utils/ColorGenerator";
-import { getRandomColor } from "@/utils/helpers";
-import { AnyValue } from "@/utils/types";
 import {
   ExhaustiveMinimumNodeColoring,
   exhaustive_minimum_node_coloring,
@@ -56,7 +54,6 @@ export class BruteForceMinimumNodecoloring implements GraphAlgorithm {
       commands[i] = new UpdateVertexRenderingConfiguration(vertex, {
         borderColor: color,
         innerColor: "#1c1c1c",
-        // underLabelDisplayConfiguration: () => value.toString(),
       });
     }
 

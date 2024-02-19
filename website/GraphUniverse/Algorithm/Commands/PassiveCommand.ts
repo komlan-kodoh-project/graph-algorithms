@@ -1,13 +1,13 @@
 import { AnyValue } from "@/utils/types";
-import { AlgorithmCommand, ComandConfiguraiton } from "../AlgorithmCommands";
+import { AlgorithmCommand, ComandConfiguraiton, DefaultCommandConfiguration } from "../AlgorithmCommands";
 
 export class PassiveCommand implements AlgorithmCommand<AnyValue, AnyValue> {
     private configuraton : ComandConfiguraiton;  
 
     constructor(
-        configuration: ComandConfiguraiton,
+        configuration: Partial<ComandConfiguraiton>,
     ) {
-        this.configuraton = configuration;
+        this.configuraton = {...DefaultCommandConfiguration, ...configuration};
     }
 
     cofiguration(): ComandConfiguraiton {

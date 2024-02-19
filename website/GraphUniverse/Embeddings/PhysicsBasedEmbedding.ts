@@ -31,7 +31,6 @@ export default class PhysicsBasedEmbedding<V, E> implements Embedding<V, E> {
     // Remove all added metadata
     for (const vertex of this.universe.graph.getAllVertices()) {
       deleteMeta(vertex, PhysicsBasedEmbedding.META_PROPERTY_NAME);
-      console.log("uninstalled all the shit", vertex.id);
     }
 
     // Remove all added metadata

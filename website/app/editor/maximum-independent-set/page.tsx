@@ -1,30 +1,27 @@
-import { FormProp, useGraphUniverseForm } from "@/components/forms/FormProp";
-import { Button } from "../../building-blocks/Button";
-import {
-  MaximumIndependentSetAlgorithm,
-  MaximumIndependentSetAlgorithmConfig,
-} from "./MaximumIndependentSetAlgorithm";
-import { GraphAlgorithmExecution } from "@/GraphUniverse/Algorithm/AlgorithmExecutor";
+"use client";
+
+import { GraphAlgorithmBuilder, useGraphUniverseForm } from "@/components/forms/FormProp";
+import { MaximumIndependentSetAlgorithm } from "./MaximumIndependentSetAlgorithm";
 import Markdown from "react-markdown";
+import { Button } from "@/components/building-blocks/Button";
 
-export type DijkstraAlgorithmForm = FormProp & {};
+const MaximumIndependentSetAlgorithmBuilder: GraphAlgorithmBuilder<
+  {},
+  MaximumIndependentSetAlgorithm
+> = (_, universe) => {
+  const algorithm = new MaximumIndependentSetAlgorithm({
+    graph: universe.graph,
+    setVertexStyle: {
+      innerColor: universe.configuration.darkAccent.light,
+      borderColor: universe.configuration.darkAccent.dark,
+    },
+  });
 
-export function MaximumIndependentSetAlgorithmForm({ universe }: DijkstraAlgorithmForm) {
-  useGraphUniverseForm<MaximumIndependentSetAlgorithmConfig>(universe);
+  return algorithm;
+};
 
-  const startAlgorithm = async () => {
-    const newAlgorithmExecution = new MaximumIndependentSetAlgorithm({
-      graph: universe.graph,
-      setVertexStyle: {
-        innerColor: universe.configuration.darkAccent.light,
-        borderColor: universe.configuration.darkAccent.dark,
-      },
-    });
-
-    const newAlgorithmExecutor = new GraphAlgorithmExecution(newAlgorithmExecution, universe);
-
-    await newAlgorithmExecutor.StartExecution();
-  };
+export default function MaximumIndependentSetAlgorithmForm() {
+  const { execution } = useGraphUniverseForm(MaximumIndependentSetAlgorithmBuilder);
 
   return (
     <div className={"h-full"}>
@@ -32,11 +29,15 @@ export function MaximumIndependentSetAlgorithmForm({ universe }: DijkstraAlgorit
         <div className="p-2">Reveal maximum independent set</div>
 
         <div className="flex  gap-3">
-          <Button className="flex-1 bg-blue-500 text-white" onClickAsync={startAlgorithm}>
-            Start
+          <Button className="flex-1 bg-blue-500 text-white" onClick={execution.start}>
+           Show All 
           </Button>
 
-          <Button className="flex-1" onClick={() => universe.resetAllDisplayConfiguration()}>
+          <Button className="flex-1 bg-green-400 text-white" onClick={execution.moveForward}>
+            Show One
+          </Button>
+
+          <Button className="flex-1" onClick={execution.reset}>
             Reset
           </Button>
         </div>
@@ -83,5 +84,3 @@ The maximum independent set problem is a challenging optimization problem with d
 ** **Crafted with insights from ChatGPT** **
 
 `;
-
-export default MaximumIndependentSetAlgorithmForm;

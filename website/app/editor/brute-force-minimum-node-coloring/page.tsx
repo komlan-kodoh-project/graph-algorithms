@@ -1,33 +1,37 @@
-import { FormProp, useGraphUniverseForm } from "@/components/forms/FormProp";
-import { Button } from "../../building-blocks/Button";
-import { GraphAlgorithmExecution as GraphAlgorithmExecutor } from "@/GraphUniverse/Algorithm/AlgorithmExecutor";
-import { BruteForceMinimumNodecoloring } from "./BruteForceMinimumNodeColoring";
+"use client"
+
+import { GraphAlgorithmBuilder, useGraphUniverseForm } from "@/components/forms/FormProp";
+import {
+  BruteForceMinimumNodecoloring,
+  BruteForceMinimumNodecoloringConfig,
+} from "./BruteForceMinimumNodeColoring";
 import Markdown from "react-markdown";
+import { Button } from "@/components/building-blocks/Button";
 
-export type BreathFirstSearchAgorithmForm = FormProp & {};
+const BruteForceMinimumNodeColoringBuilder: GraphAlgorithmBuilder<
+  BruteForceMinimumNodecoloringConfig,
+  BruteForceMinimumNodecoloring
+> = (_, universe) => {
+  return new BruteForceMinimumNodecoloring(universe.graph);
+};
 
-export function BruteForceMinimumNodeColoringForm({ universe }: BreathFirstSearchAgorithmForm) {
-  const startAlgorithm = async () => {
-    const algorithm = new BruteForceMinimumNodecoloring(universe.graph);
-
-    const newAlgorithmExecutor = new GraphAlgorithmExecutor(algorithm, universe);
-
-    await newAlgorithmExecutor.StartExecution();
-  };
+export default function BruteForceMinimumNodeColoringForm() {
+  const { execution } = useGraphUniverseForm<
+    BruteForceMinimumNodecoloringConfig,
+    BruteForceMinimumNodecoloring
+  >(BruteForceMinimumNodeColoringBuilder);
 
   return (
     <div className={"h-full"}>
       <form className="grid grid-cols-1 gap-y-2" onSubmit={(e) => e.preventDefault()}>
-        <div className="p-2">
-          Click start to exhaustively search for the minimum node coloring 
-        </div>
+        <div className="p-2">Click start to exhaustively search for the minimum node coloring</div>
 
         <div className="flex  gap-3">
-          <Button className="flex-1 bg-blue-500 text-white" onClickAsync={startAlgorithm}>
+          <Button className="flex-1 bg-blue-500 text-white" onClick={execution.start}>
             Start
           </Button>
 
-          <Button className="flex-1" onClick={() => universe.resetAllDisplayConfiguration()}>
+          <Button className="flex-1" onClick={execution.reset}>
             Reset
           </Button>
         </div>
@@ -84,5 +88,3 @@ Node coloring is a challenging problem with broad applications in various fields
 ** **Crafted with insights from ChatGPT** **
 
 `;
-
-export default BruteForceMinimumNodeColoringForm;

@@ -9,8 +9,8 @@ export type AlgorithmDropdownProp = Readonly<{
 export const GraphAlgorithms = [
   { value: "None", label: "Select An Algorithm" },
   { value: "dijkstra-shortest-path", label: "Dijkstra Algorithm" },
-  { value: "breath-first-traversal", label: "Exhaustive Minimum Node Coloring" },
-  { value: "brute-force-minimum-node-coloring", label: "Breath First Traversal" },
+  { value: "brute-force-minimum-node-coloring", label: "Exhaustive Minimum Node Coloring" },
+  { value: "breath-first-traversal", label: "Breath First Traversal" },
   { value: "node-excentricity", label: "Find Vertex Excentricity" },
   { value: "maximum-independent-set", label: "Find Maximum Independent Set" },
 ] as const;

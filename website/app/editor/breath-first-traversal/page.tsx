@@ -1,27 +1,33 @@
-import { GraphAlgorithmExecution as GraphAlgorithmExecutor } from "@/GraphUniverse/Algorithm/AlgorithmExecutor";
-import { FormProp } from "@/components/forms/FormProp";
+"use client"
+
+import { FormProp, GraphAlgorithmBuilder, useGraphUniverseForm } from "@/components/forms/FormProp";
 import { VertexInputButton } from "@/components/forms/VertexInputButton";
+import { BFSAlgorightmConfig, BreathFirstSearchAlgorithm } from "./BreathFirstSearchAlgorithm";
+import { Button } from "@/components/building-blocks/Button";
+import Markdown from "react-markdown";
 
-export type BreathFirstSearchAgorithmForm = FormProp;
+const bfsBuilder: GraphAlgorithmBuilder<BFSAlgorightmConfig, BreathFirstSearchAlgorithm> = (
+  config,
+  universe
+) => {
+  if (config.sourceVertex === undefined) {
+    throw new Error("You must select start and end before starting the algorithm");
+  }
 
-export function BreathFirstSearch({ universe }: BreathFirstSearchAgorithmForm) {
-  const { registerGraphInput, formValues } = useGraphUniverseForm<BFSAlgorightmConfig>(universe);
+  const algorithm = new BreathFirstSearchAlgorithm(universe.graph, {
+    exploredEdgeColor: universe.configuration.darkAccent.dark,
+    exploredTextBackgroundColor: universe.configuration.darkAccent.light,
+    sourceVertex: config.sourceVertex,
+  });
 
-  const startAlgorithm = async () => {
-    if (formValues.sourceVertex === undefined) {
-      throw new Error("You must select start and end before starting the algorithm");
-    }
+  return algorithm;
+};
 
-    const algorithm = new BreathFirstSearchAlgorithm(universe.graph, {
-      exploredEdgeColor: universe.configuration.darkAccent.dark,
-      exploredTextBackgroundColor: universe.configuration.darkAccent.light,
-      sourceVertex: formValues.sourceVertex,
-    });
-
-    const newAlgorithmExecutor = new GraphAlgorithmExecutor(algorithm, universe);
-
-    await newAlgorithmExecutor.StartExecution();
-  };
+function BreathFirstSearch() {
+  const { registerGraphInput, formValues, execution } = useGraphUniverseForm<
+    BFSAlgorightmConfig,
+    BreathFirstSearchAlgorithm
+  >(bfsBuilder);
 
   return (
     <div className={"h-full"}>
@@ -39,18 +45,18 @@ export function BreathFirstSearch({ universe }: BreathFirstSearchAgorithmForm) {
         </div>
 
         <div className="py-2 px-1">
-          Running BFS centered on
+          Running BFS centered on{" "}
           <span className={"bg-gray-100 border-b-2 px-0.5 mx-0.5"}>
             {formValues.sourceVertex?.id ?? "_"}
           </span>
         </div>
 
         <div className="flex  gap-3">
-          <Button className="flex-1 bg-blue-500 text-white" onClickAsync={startAlgorithm}>
+          <Button className="flex-1 bg-blue-500 text-white" onClick={execution.start}>
             Start
           </Button>
 
-          <Button className="flex-1" onClick={() => universe.resetAllDisplayConfiguration()}>
+          <Button className="flex-1" onClick={execution.reset}>
             Reset
           </Button>
         </div>
