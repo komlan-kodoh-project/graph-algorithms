@@ -69,8 +69,11 @@ function GraphContainer(props: GraphContainerProps) {
 
       newUniverse.initialize();
 
+<<<<<<< HEAD
+=======
       newUniverse.generateRandomGraph(10);
 
+>>>>>>> origin/main
       if (hasInitiated) {
         throw Error("Attempt to update the universe context but it has already been initialized");
       }

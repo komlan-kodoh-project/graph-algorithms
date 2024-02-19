@@ -26,7 +26,10 @@ export default class DormantEmbeding<V, E> implements Embedding<V, E> {
   }
 
   moveVertex(target: Vertex<V>, x: number, y: number): void {
+<<<<<<< HEAD
+=======
     console.log(x, y)
+>>>>>>> origin/main
     this.universe.renderingController.moveVertex(target, x, y);
   }
 

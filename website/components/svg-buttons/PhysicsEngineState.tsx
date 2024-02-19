@@ -6,9 +6,7 @@ export type PointerSVGProps = InteractiveButtonProps & {};
 export function PhysiscsEngineState({ active, onClick }: PointerSVGProps) {
   const restColor = "#444647";
   const activeColor = "rgb(59 130 246)";
-
-  console.log(active);
-
+  
   return (
     <button
       onClick={onClick}

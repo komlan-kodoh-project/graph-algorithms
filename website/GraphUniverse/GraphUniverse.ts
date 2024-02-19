@@ -201,7 +201,7 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
     }
   }
 
-  public async generateRandomGraph(numNodes: number): Promise<void> {
+  public async generateRandomGraph(numNodes: number, additionalEdges: number): Promise<void> {
     const vertices = [];
 
     const generateRandomInteger = (min: number, max: number) =>
@@ -221,5 +221,19 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
 
       await sleep(50);
     }
+<<<<<<< HEAD
+
+
+    for (let i =0; i < additionalEdges; i++) {
+      const randomVertexIndex = Math.floor(Math.random() * numNodes);
+      const randomExistingVertex = vertices[randomVertexIndex];
+
+      const randomVertexIndex2 = Math.floor(Math.random() * numNodes);
+      const randomExistingVertex2 = vertices[randomVertexIndex2];
+
+      this.createEdge(randomExistingVertex, randomExistingVertex2);
+    }
+=======
+>>>>>>> origin/main
   }
 }

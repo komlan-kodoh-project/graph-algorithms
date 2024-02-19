@@ -1,41 +1,39 @@
-import { useState } from "react";
-import { FormProp, useGraphUniverseForm } from "@/components/forms/FormProp";
-import { Button } from "../../building-blocks/Button";
-import { VertexInputButton } from "@/components/forms/VertexInputButton";
-import { ExcentricityAlgorithm, ExcentricityAlgorithmConfig } from "./ExcentricityAlgorithm";
-import { GraphAlgorithmExecution } from "@/GraphUniverse/Algorithm/AlgorithmExecutor";
+"use client"
 import Markdown from "react-markdown";
+import { Button } from "@/components/building-blocks/Button";
+import { VertexInputButton } from "@/components/forms/VertexInputButton";
+import { GraphAlgorithmBuilder, useGraphUniverseForm } from "@/components/forms/FormProp";
+import { ExcentricityAlgorithm, ExcentricityAlgorithmConfig } from "./ExcentricityAlgorithm";
 
-export type DijkstraAlgorithmForm = FormProp & {};
+const NodeExcentricityAlgorithm: GraphAlgorithmBuilder<
+  ExcentricityAlgorithmConfig,
+  ExcentricityAlgorithm
+> = (config, universe) => {
+  if (config.sourceVertex === undefined) {
+    throw new Error("You must select start and end before starting the algorithm");
+  }
 
-export function ExcentricityAglgorithmForm({ universe }: DijkstraAlgorithmForm) {
-  const { registerGraphInput, formValues } =
-    useGraphUniverseForm<ExcentricityAlgorithmConfig>(universe);
+  const newAlgorithmExecution = new ExcentricityAlgorithm({
+    graph: universe.graph,
 
-  const startAlgorithm = async () => {
-    if (formValues.sourceVertex === undefined) {
-      throw new Error("You must select start and end before starting the algorithm");
-    }
+    sourceVertex: config.sourceVertex,
 
-    const newAlgorithmExecution = new ExcentricityAlgorithm({
-      graph: universe.graph,
+    pathEdge: {
+      edgeColor: universe.configuration.secondaryAccent.dark,
+      labelBackground: universe.configuration.secondaryAccent.light,
+    },
+    pathVertex: {
+      borderColor: universe.configuration.secondaryAccent.dark,
+      innerColor: universe.configuration.secondaryAccent.light,
+    },
+  });
 
-      sourceVertex: formValues.sourceVertex,
+  return newAlgorithmExecution;
+};
 
-      pathEdge: {
-        edgeColor: universe.configuration.secondaryAccent.dark,
-        labelBackground: universe.configuration.secondaryAccent.light,
-      },
-      pathVertex: {
-        borderColor: universe.configuration.secondaryAccent.dark,
-        innerColor: universe.configuration.secondaryAccent.light,
-      },
-    });
-
-    const newAlgorithmExecutor = new GraphAlgorithmExecution(newAlgorithmExecution, universe);
-
-    await newAlgorithmExecutor.StartExecution();
-  };
+export default function ExcentricityAglgorithmForm() {
+  const { registerGraphInput, formValues, execution } =
+    useGraphUniverseForm(NodeExcentricityAlgorithm);
 
   return (
     <div className={"h-full"}>
@@ -60,16 +58,15 @@ export function ExcentricityAglgorithmForm({ universe }: DijkstraAlgorithmForm) 
         </div>
 
         <div className="flex  gap-3">
-          <Button className="flex-1 bg-blue-500 text-white" onClickAsync={startAlgorithm}>
+          <Button className="flex-1 bg-blue-500 text-white" onClick={execution.start}>
             Start
           </Button>
 
-          <Button className="flex-1" onClick={() => universe.resetAllDisplayConfiguration()}>
+          <Button className="flex-1" onClick={execution.reset}>
             Reset
           </Button>
         </div>
       </form>
-
 
       <div className="separator"></div>
 
@@ -109,5 +106,3 @@ Vertex eccentricity provides valuable insights into the structural characteristi
 
 ** **Crafted with insights from ChatGPT** **
 `;
-
-export default ExcentricityAglgorithmForm;
