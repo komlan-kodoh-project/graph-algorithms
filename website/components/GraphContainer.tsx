@@ -76,7 +76,7 @@ function GraphContainer(props: GraphContainerProps) {
       }
 
       setUniverse(newUniverse);
-    }, 2 * 1000 );
+    }, 500 );
   });
 
   return (

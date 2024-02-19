@@ -65,3 +65,17 @@ h2 {
   font-weight: 700;
   font-size: medium;
 }
+
+.spin {
+  transition: transform 2s;
+  animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

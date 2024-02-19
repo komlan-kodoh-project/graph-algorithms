@@ -13,6 +13,7 @@ import VertexCreatedEvent, {
   VertexDeletedEvent,
   EdgeDeletedEvent,
   EdgeHoverEvent,
+  GraphEmbeddingUpdatedEvent,
 } from "@/GraphUniverse/GraphEvents/GraphEvents";
 import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
 import { Coordinates } from "@/GraphUniverse/Coordinates";
@@ -56,6 +57,8 @@ export default class GraphUniverseEventListener<V, E> {
 
   private events = {
     stateUpdatedEvent: new GraphEvent<GraphStateUpdateEvent<V, E>>(),
+    embeddingUpdatedEvent: new GraphEvent<GraphEmbeddingUpdatedEvent<V, E>>(),
+    
     edgeAdded: new GraphEvent<EdgeAddedEvent<V, E>>(),
 
     vertexDragStart: new GraphEvent<GraphDragEvent<Vertex<V>>>(),
@@ -102,6 +105,10 @@ export default class GraphUniverseEventListener<V, E> {
 
   public notifyVertexDeleted(event: VertexDeletedEvent<V>) {
     this.events.vertexDeletedEvent.trigger(event);
+  }
+
+  public notifyUniverseEmbeddingUpdated(event: GraphEmbeddingUpdatedEvent<V, E>) {
+    this.events.embeddingUpdatedEvent.trigger(event);
   }
 
   public notifyUniverseStateUpdate(event: GraphStateUpdateEvent<V, E>) {

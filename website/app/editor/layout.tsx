@@ -1,5 +1,6 @@
 "use client";
 
+import { WellKnownGraphUniverseEmbedding } from "@/GraphUniverse/Embeddings/Embedding";
 import { WellKnownGraphUniverseState } from "@/GraphUniverse/States/GraphUniverseState";
 import {
   AlgorithmDropdown,
@@ -11,6 +12,7 @@ import {
 } from "@/components/GraphUniverseContext";
 import { DeleteButton } from "@/components/svg-buttons/DeleteButton";
 import EditButton from "@/components/svg-buttons/EditButton";
+import { PhysiscsEngineState } from "@/components/svg-buttons/PhysicsEngineState";
 import PointerButton from "@/components/svg-buttons/PointerButton";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -34,7 +36,7 @@ const GraphContainer = dynamic(() => import("@/components/GraphContainer"), { ss
 function extractAlgorithmName(): AlgorithmDropdownValue | null {
   const regex = /\/editor\/([a-zA-Z-]+)/; // Regular expression to match the algorithm name
   const match = RegExp(regex).exec(window.location.href); // Matching the regex with the URL
-  console.log(match)
+  console.log(match);
   if (match) {
     return match[1] as AlgorithmDropdownValue; // Returning the matched algorithm name
   } else {
@@ -46,7 +48,11 @@ export function Layout({ children }: LayoutProps) {
   const router = useRouter();
 
   const { hasInitiated, universe } = useContext(GraphUniverseContext);
+
   const [editorState, setEditorState] = useState<WellKnownGraphUniverseState>();
+  const [currentEngine, setUniverseEngine] = useState<WellKnownGraphUniverseEmbedding>(
+    WellKnownGraphUniverseEmbedding.DormantEmbedding
+  );
 
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<AlgorithmDropdownValue | null>(null);
 
@@ -59,9 +65,17 @@ export function Layout({ children }: LayoutProps) {
       setEditorState(event.currentState.wellKnownStateName());
     });
 
+    universe().listener.addEventListener("embeddingUpdatedEvent", (event) => {
+      setUniverseEngine(event.currentEmbedding.wellKnownEmbedingName());
+    });
+
     universe().generateRandomGraph(10);
 
     updateEditorState(WellKnownGraphUniverseState.Exploring);
+
+    setTimeout(() => {
+      updateEditorEngine(WellKnownGraphUniverseEmbedding.PhysicsBasedEmbedding);
+    }, 1 * 1000);
   }, [universe]);
 
   useEffect(() => {
@@ -87,6 +101,27 @@ export function Layout({ children }: LayoutProps) {
     universe().setWellKnownState(newState);
   };
 
+  const updateEditorEngine = (newEmbedding: WellKnownGraphUniverseEmbedding) => {
+    if (!hasInitiated) {
+      throw Error("Attempt to edit active engine when the universe has not yet been initialized");
+    }
+
+    universe().setWellKnownEmbedding(newEmbedding);
+  };
+
+  const toggleActiveEngine = (): void => {
+    console.log("Embedding", currentEngine);
+
+    if (currentEngine === WellKnownGraphUniverseEmbedding.PhysicsBasedEmbedding) {
+      updateEditorEngine(WellKnownGraphUniverseEmbedding.DormantEmbedding);
+      return;
+    }
+
+    if (currentEngine === WellKnownGraphUniverseEmbedding.DormantEmbedding) {
+      updateEditorEngine(WellKnownGraphUniverseEmbedding.PhysicsBasedEmbedding);
+    }
+  };
+
   return (
     <div className="relative w-full h-full outline-4 outline-primary-color text-sm">
       <div className="absolute inline-flex gap-2 top-3.5 left-3.5 z-20 h-9 rounded bg-white px-1.5 py-1 shadow">
@@ -103,6 +138,11 @@ export function Layout({ children }: LayoutProps) {
         <DeleteButton
           active={editorState === WellKnownGraphUniverseState.Deleting}
           onClick={(_) => updateEditorState(WellKnownGraphUniverseState.Deleting)}
+        />
+
+        <PhysiscsEngineState
+          active={currentEngine === WellKnownGraphUniverseEmbedding.PhysicsBasedEmbedding}
+          onClick={(_) => toggleActiveEngine()}
         />
       </div>
 

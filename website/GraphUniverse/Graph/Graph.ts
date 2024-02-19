@@ -38,6 +38,14 @@ export function setMeta(store: MetaStore, key: string, value: any) {
     store[key] = value;
 }
 
+export function deleteMeta(store: MetaStore, key: string) {
+    if (store[key] === undefined) {
+        throw new Error("Cannot delete meta because meta does not exist")
+    }
+
+    delete store[key];
+}
+
 export function GetOtherEnd<V, E>(edge: Edge<V, E>, vertex: Vertex<V>): Vertex<V> {
     if (edge.sourceVertex == vertex) {
         return edge.targetVertex;

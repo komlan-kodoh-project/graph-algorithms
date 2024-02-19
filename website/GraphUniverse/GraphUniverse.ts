@@ -9,15 +9,15 @@ import { VertexDisplayConfiguration } from "./Entity/VertexEntity";
 import GraphUniverseEventListener from "./GraphUniverseEventListener";
 import GraphUniverseConfiguration from "./GraphUniverseConfiguration";
 import SimpleGraph from "@/GraphUniverse/Graph/SimpleGraph/SimpleGraph";
-import GraphLayoutController from "@/GraphUniverse/Embeddings/Embedding";
+import Embedding, { EmbeddingFActory, WellKnownGraphUniverseEmbedding } from "@/GraphUniverse/Embeddings/Embedding";
 import GraphRenderingController from "@/GraphUniverse/GraphRenderingController";
-import PhysicsBasedEmbedding from "@/GraphUniverse/Embeddings/PhysicsBasedEmbedding";
 import { GraphUniverseDesignState } from "@/GraphUniverse/States/GraphUniverseDesignState";
 import {
   WellKnownGraphUniverseState,
   GraphUniverseState,
   StateFactory,
 } from "@/GraphUniverse/States/GraphUniverseState";
+import DormantEmbeding from "./Embeddings/DormantEmbedding";
 
 export default class GraphUniverse<V = AnyValue, E = AnyValue> {
   private hasInitialized: boolean = false;
@@ -31,7 +31,7 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
   // Composite class extensions
   state: GraphUniverseState<V, E>;
   camera: GraphUniverseCamera<V, E>;
-  embedding: GraphLayoutController<V, E>;
+  embedding: Embedding<V, E>;
   listener: GraphUniverseEventListener<V, E>;
   renderingController: GraphRenderingController<V, E>;
 
@@ -50,11 +50,11 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
 
     this.configuration = configuration;
 
-    this.camera = new GraphUniverseCamera(this as any);
-    this.embedding = new PhysicsBasedEmbedding(this as any);
-    this.state = new GraphUniverseDesignState(this as any);
-    this.listener = new GraphUniverseEventListener(this as any);
-    this.renderingController = new GraphRenderingController(this as any);
+    this.embedding = new DormantEmbeding(this);
+    this.camera = new GraphUniverseCamera(this);
+    this.state = new GraphUniverseDesignState(this);
+    this.listener = new GraphUniverseEventListener(this);
+    this.renderingController = new GraphRenderingController(this);
   }
 
   public enableEmbedding(): void {
@@ -71,14 +71,15 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
     }
 
     // Initialize universe components
+    this.embedding.initialize();
     this.renderingController.initialize();
     this.listener.initialize();
 
     this.camera.initialize();
-    this.embedding.initialize();
     this.state.initialize();
 
     this.renderingController.start();
+
 
     this.hasInitialized = true;
   }
@@ -87,6 +88,27 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
     const newState = StateFactory.getState(state, this);
 
     this.setState(newState);
+  }
+
+
+  public setWellKnownEmbedding(embedding: WellKnownGraphUniverseEmbedding): void {
+    const newEmbedding = EmbeddingFActory.getEmbedding(embedding, this);
+
+    this.setEmbedding(newEmbedding);
+  }
+
+
+  public setEmbedding(embedding: Embedding<V, E>): void {
+    const previousEmbedding =  this.embedding;
+    this.embedding.uninstall();
+
+    this.embedding = embedding;
+    this.embedding.initialize();
+
+    this.listener.notifyUniverseEmbeddingUpdated({
+     previousEmbedding: previousEmbedding,
+     currentEmbedding : this.embedding 
+    })
   }
 
   public setState(state: GraphUniverseState<V, E>): void {
@@ -185,8 +207,6 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
     const generateRandomInteger = (min: number, max: number) =>
       Math.floor(Math.random() * (max - min + 1)) + min;
 
-    this.disableEmbedding();
-
     for (let i = 0; i < numNodes; i++) {
       const x = generateRandomInteger(20, 1000);
       const y = generateRandomInteger(20, 1000);
@@ -201,9 +221,5 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
 
       await sleep(50);
     }
-
-    await sleep(200);
-
-    this.enableEmbedding();
   }
 }

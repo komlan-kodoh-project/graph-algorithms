@@ -3,6 +3,7 @@ import {Coordinates} from "@/GraphUniverse/Coordinates";
 import {Edge, Vertex} from "@/GraphUniverse/Graph/Graph";
 import {GraphUniverseSelectionState} from "@/GraphUniverse/States/GraphUniverseSelectionState";
 import {GraphUniverseState} from "@/GraphUniverse/States/GraphUniverseState";
+import Embedding from "../Embeddings/Embedding";
 
 /***************************** Simple Graph Events *************************/
 export type GraphEvents<T> = {
@@ -64,6 +65,11 @@ export type EdgeClickedEvent<V, E> = {
 export type GraphStateUpdateEvent<T, E> = {
     currentState:  GraphUniverseState<T, E>,
     previousState:  GraphUniverseState<T, E>,
+}
+
+export type GraphEmbeddingUpdatedEvent<T, E> = {
+    currentEmbedding:  Embedding<T, E>,
+    previousEmbedding:  Embedding<T, E>,
 }
 
 /***************************** Persistent Graph Events *************************/

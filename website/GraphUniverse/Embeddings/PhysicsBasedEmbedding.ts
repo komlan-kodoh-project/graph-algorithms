@@ -1,12 +1,16 @@
-import Embedding from "@/GraphUniverse/Embeddings/Embedding";
-import Matter, { Bodies, Body, Constraint, Engine, Sleeping, World } from "matter-js";
-import { Edge, getMeta, setMeta, Vertex } from "@/GraphUniverse/Graph/Graph";
 import GraphUniverse from "../GraphUniverse";
+import Embedding, { WellKnownGraphUniverseEmbedding } from "@/GraphUniverse/Embeddings/Embedding";
+import Matter, { Bodies, Body, Constraint, Engine, World } from "matter-js";
+import { deleteMeta, Edge, getMeta, setMeta, Vertex } from "@/GraphUniverse/Graph/Graph";
+import { render } from "react-dom";
+import { renderToStaticNodeStream } from "react-dom/server";
 
 export default class PhysicsBasedEmbedding<V, E> implements Embedding<V, E> {
   private static readonly META_PROPERTY_NAME: string = "physics-render-object";
 
+  private isInstalled: boolean = false;
   private readonly engine: Engine;
+  private cleanup: (() => void)[] = [];
   private readonly universe: GraphUniverse<V, E>;
 
   constructor(graphUniverse: GraphUniverse<V, E>) {
@@ -17,27 +21,66 @@ export default class PhysicsBasedEmbedding<V, E> implements Embedding<V, E> {
     this.universe = graphUniverse;
   }
 
+  wellKnownEmbedingName(): WellKnownGraphUniverseEmbedding {
+    return WellKnownGraphUniverseEmbedding.PhysicsBasedEmbedding;
+  }
+
+  uninstall(): void {
+    this.isInstalled = false;
+
+    // Remove all added metadata
+    for (const vertex of this.universe.graph.getAllVertices()) {
+      deleteMeta(vertex, PhysicsBasedEmbedding.META_PROPERTY_NAME);
+      console.log("uninstalled all the shit", vertex.id);
+    }
+
+    // Remove all added metadata
+    for (const edge of this.universe.graph.getAllEdges()) {
+      deleteMeta(edge, PhysicsBasedEmbedding.META_PROPERTY_NAME);
+    }
+
+    this.cleanup.forEach((callback) => callback());
+  }
+
   initialize(): void {
-    this.universe.listener.addEventListener("vertexAddedEvent", (event) => {
-      const newPhysicVertex = this.addVertex(event.x, event.y);
+    this.cleanup = [
+      this.universe.listener.addEventListener("vertexAddedEvent", (event) => {
+        const newPhysicVertex = this.addVertex(event.x, event.y);
 
-      setMeta(event.vertex, PhysicsBasedEmbedding.META_PROPERTY_NAME, newPhysicVertex);
-    });
+        setMeta(event.vertex, PhysicsBasedEmbedding.META_PROPERTY_NAME, newPhysicVertex);
+      }),
 
-    this.universe.listener.addEventListener("edgeAdded", (event) => {
-      const constraint = this.createContraint(event.edge);
+      this.universe.listener.addEventListener("edgeAdded", (event) => {
+        const constraint = this.createContraint(event.edge);
 
-      setMeta(event.edge, PhysicsBasedEmbedding.META_PROPERTY_NAME, constraint);
-    });
+        setMeta(event.edge, PhysicsBasedEmbedding.META_PROPERTY_NAME, constraint);
+      }),
 
-
-    this.universe.listener.addEventListener("edgeDeletedEvent", (event) => {
+      this.universe.listener.addEventListener("edgeDeletedEvent", (event) => {
         this.removeEdgeConstraint(event.target);
-    });
+      }),
 
-    this.universe.listener.addEventListener("vertexDeletedEvent", (event) => {
+      this.universe.listener.addEventListener("vertexDeletedEvent", (event) => {
         this.removeVertex(event.target);
-    });
+      }),
+    ];
+
+    // Initializes all necessary physcis vertex
+    for (const vertex of this.universe.graph.getAllVertices()) {
+      const renderedVertex = this.universe.renderingController.getVertexEntity(vertex);
+
+      const newPhysicVertex = this.addVertex(renderedVertex.x, renderedVertex.y);
+      setMeta(vertex, PhysicsBasedEmbedding.META_PROPERTY_NAME, newPhysicVertex);
+    }
+
+    // Initializes all necessary physics constraint
+    for (const edge of this.universe.graph.getAllEdges()) {
+      const constraint = this.createContraint(edge);
+
+      setMeta(edge, PhysicsBasedEmbedding.META_PROPERTY_NAME, constraint);
+    }
+
+    this.isInstalled = true;
   }
 
   control(target: Vertex<V>): void {
@@ -59,6 +102,12 @@ export default class PhysicsBasedEmbedding<V, E> implements Embedding<V, E> {
   }
 
   private move(delta: number): void {
+    if (!this.isInstalled) {
+      throw new Error(
+        "Cannot perform operation on an uninstalled embedding. Please install the embedding first."
+      );
+    }
+
     Engine.update(this.engine, delta * 400);
 
     for (const graphNode of this.universe.graph.getAllVertices()) {
@@ -103,9 +152,8 @@ export default class PhysicsBasedEmbedding<V, E> implements Embedding<V, E> {
     World.remove(this.engine.world, body);
 
     for (const edge of this.universe.graph.getNeighborEdges(vertex)) {
-        this.removeEdgeConstraint(edge);
+      this.removeEdgeConstraint(edge);
     }
-
   }
 
   private addVertex(x: number, y: number): Matter.Body {
