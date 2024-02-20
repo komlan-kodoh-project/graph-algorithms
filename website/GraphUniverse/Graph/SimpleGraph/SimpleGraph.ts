@@ -62,19 +62,19 @@ export default class SimpleGraph<V = AnyValue, E = AnyValue> {
   }
 
   deleteVertex(vertex: Vertex<V>): void {
+    // We MUST ALWAYS delete the edges first
+    for (const edge of this.getNeighborEdges(vertex)) {
+      this.deleteEdge(edge);
+    }
+
     this.graph.delete_vertex(vertex.id);
 
     const lastVertex = this.vertexData.get(this.vertexData.size - 1)!;
-    
 
     // Move last element to the place
     lastVertex.id = vertex.id;
     this.vertexData.set(vertex.id, lastVertex);
     this.vertexData.delete(this.vertexData.size - 1);
-
-    for (const edge of this.getNeighborEdges(vertex)) {
-      this.deleteEdge(edge);
-    }
   }
 
   deleteEdge(edge: Edge<V, E>): void {

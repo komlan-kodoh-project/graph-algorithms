@@ -8,9 +8,6 @@
     inset 0px 0px 0px rgba(255, 255, 255, 0.5);
 }
 
-.button:hover {
-  border-radius: 6px;
-}
 
 .button.active {
   background: transparent;
@@ -18,4 +15,12 @@
   box-shadow: 0px 0px 0px rgba(255, 255, 255, 0.7),
     0px 0px 0px rgba(255, 255, 255, 0.5), inset 2px 2px 2px #d7dade,
     inset -2px -2px 2px #ffffff;
+}
+
+.button.disabled{
+  background: transparent;
+  color: rgb(171, 171, 171);
+  box-shadow: 0px 0px 0px rgba(255, 255, 255, 0.7),
+    0px 0px 0px rgba(255, 255, 255, 0.5), inset 0px 0px 0px #d7dade,
+    inset -0px -0px 0px #ffffff;
 }

@@ -6,6 +6,7 @@ import {
   AlgorithmDropdown,
   AlgorithmDropdownValue,
 } from "@/components/Algorithms/AlgorithmDropdown";
+import { EditorTutorial } from "@/components/EditorTutorial";
 import {
   GraphUniverseContext,
   GraphUniverseContextProvider,
@@ -16,8 +17,8 @@ import { PhysiscsEngineState } from "@/components/svg-buttons/PhysicsEngineState
 import PointerButton from "@/components/svg-buttons/PointerButton";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useContext, useEffect, useState, useTransition } from "react";
 
 type LayoutProps = Readonly<{
   children: React.ReactNode;
@@ -45,15 +46,17 @@ function extractAlgorithmName(): AlgorithmDropdownValue | null {
 
 export function Layout({ children }: LayoutProps) {
   const router = useRouter();
+  const path = usePathname();
 
   const { hasInitiated, universe } = useContext(GraphUniverseContext);
 
   const [editorState, setEditorState] = useState<WellKnownGraphUniverseState>();
-  const [currentEngine, setUniverseEngine] = useState<WellKnownGraphUniverseEmbedding>(
+  const [universeEngine, setUniverseEngine] = useState<WellKnownGraphUniverseEmbedding>(
     WellKnownGraphUniverseEmbedding.DormantEmbedding
   );
 
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<AlgorithmDropdownValue | null>(null);
+  const [pageTransition, startPageTransition] = useTransition();
 
   useEffect(() => {
     if (!hasInitiated) {
@@ -78,6 +81,10 @@ export function Layout({ children }: LayoutProps) {
   }, [universe]);
 
   useEffect(() => {
+    updateSelectedAlgorithm();
+  }, [selectedAlgorithm]);
+
+  async function updateSelectedAlgorithm(): Promise<void> {
     if (selectedAlgorithm === null) {
       setSelectedAlgorithm(extractAlgorithmName());
       return;
@@ -86,11 +93,15 @@ export function Layout({ children }: LayoutProps) {
     const newUrl = `/editor/${selectedAlgorithm}`;
 
     if (selectedAlgorithm === "None") {
-      router.push(`/editor`);
+      startPageTransition(() => {
+        router.push(`/editor`);
+      });
     } else if (!window.location.href.includes(newUrl)) {
-      router.push(`/editor/${selectedAlgorithm}`);
+      startPageTransition(() => {
+        router.push(`/editor/${selectedAlgorithm}`);
+      });
     }
-  }, [selectedAlgorithm]);
+  }
 
   const updateEditorState = (newState: WellKnownGraphUniverseState) => {
     if (!hasInitiated) {
@@ -109,12 +120,12 @@ export function Layout({ children }: LayoutProps) {
   };
 
   const toggleActiveEngine = (): void => {
-    if (currentEngine === WellKnownGraphUniverseEmbedding.PhysicsBasedEmbedding) {
+    if (universeEngine === WellKnownGraphUniverseEmbedding.PhysicsBasedEmbedding) {
       updateEditorEngine(WellKnownGraphUniverseEmbedding.DormantEmbedding);
       return;
     }
 
-    if (currentEngine === WellKnownGraphUniverseEmbedding.DormantEmbedding) {
+    if (universeEngine === WellKnownGraphUniverseEmbedding.DormantEmbedding) {
       updateEditorEngine(WellKnownGraphUniverseEmbedding.PhysicsBasedEmbedding);
     }
   };
@@ -138,10 +149,12 @@ export function Layout({ children }: LayoutProps) {
         />
 
         <PhysiscsEngineState
-          active={currentEngine === WellKnownGraphUniverseEmbedding.PhysicsBasedEmbedding}
+          active={universeEngine === WellKnownGraphUniverseEmbedding.PhysicsBasedEmbedding}
           onClick={(_) => toggleActiveEngine()}
         />
       </div>
+
+      <EditorTutorial />
 
       <motion.div
         initial={{ top: "0.875rem", right: "0.875rem", width: "20rem" }}
@@ -153,7 +166,7 @@ export function Layout({ children }: LayoutProps) {
         transition={{ duration: 0.2, ease: "easeOut" }}
         className="absolute inline-flex gap-2 top-3.5 z-30 h-9 bg-slate-50 border-top rounded  py-1 shadow"
       >
-        <AlgorithmDropdown onChange={setSelectedAlgorithm} />
+        <AlgorithmDropdown value={selectedAlgorithm ?? "None"} onChange={setSelectedAlgorithm} />
       </motion.div>
 
       <motion.div
@@ -164,9 +177,9 @@ export function Layout({ children }: LayoutProps) {
             : { opacity: 1 }
         }
         transition={{ duration: 0.5, ease: "easeOut", delayChildren: 0.5 }}
-        className="absolute gap-2 top-9 bottom-0 z-20 py-0 right-0 w-[35em] p-3 mt-3 pt-3 border-blue-400 border-t-2 shadow overflow-y-scroll scroll-bar rounded bg-slate-50"
+        className="absolute gap-2 top-9 bottom-0 z-20 py-0 right-0 w-[35em] p-4 mt-3 pt-4 border-blue-400 border-t-2 shadow overflow-y-scroll scroll-bar rounded bg-slate-50"
       >
-        {children}
+        {pageTransition ? "Loading ..." : children}
       </motion.div>
 
       <div className="absolute top-0 bottom-0 left-0 right-0 z-10 ">

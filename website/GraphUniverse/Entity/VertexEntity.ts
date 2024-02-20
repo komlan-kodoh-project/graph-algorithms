@@ -100,6 +100,7 @@ export default class VertexEntity<V> extends Graphics {
                 fontSize: 15,
                 fill: configuration.borderColor,
                 align: 'center',
+                fontWeight: "bolder" 
             }
         );
 

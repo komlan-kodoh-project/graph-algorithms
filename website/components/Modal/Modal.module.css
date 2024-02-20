@@ -1,0 +1,32 @@
+.modalContainer {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  z-index: 100;
+  position: fixed;
+  color: white;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.343);
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  z-index: 1000;
+  max-width: vw;
+  max-height: vh;
+  border-radius: 3px;
+
+  background-color: white;
+  box-shadow: 2px 2px 2px rgba(118, 118, 118, 0.343), -2px -2px 2px rgba(203, 203, 203, 0.343);
+}
+
+.modalContainer.open {
+  opacity: 1;
+  pointer-events: all;
+}

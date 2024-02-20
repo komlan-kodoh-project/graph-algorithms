@@ -130,6 +130,14 @@ export default class GraphUniverseEventListener<V, E> {
         edge: entity.graphEdge,
       });
     });
+    
+    entity.addEventListener("mousedown", (event) => {
+      event.stopPropagation();
+
+      this.events.edgeClickedEvent.trigger({
+        edge: entity.graphEdge,
+      });
+    });
 
     // Handles vertex hover event
     entity.addEventListener("mouseenter", (event) => {
@@ -156,7 +164,7 @@ export default class GraphUniverseEventListener<V, E> {
       });
     });
 
-    entity.addEventListener("mouseleave", (event) => {
+    entity.addEventListener("pointer", (event) => {
       const target = event.target as VertexEntity<V>;
       this.persistentEvents.vertexHover.triggerEnd({
         target: target.graphVertex,
