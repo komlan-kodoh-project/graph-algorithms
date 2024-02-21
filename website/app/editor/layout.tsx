@@ -173,8 +173,8 @@ export function Layout({ children }: LayoutProps) {
         initial={{ opacity: 0 }}
         animate={
           selectedAlgorithm === null || selectedAlgorithm === "None"
-            ? { opacity: 0 }
-            : { opacity: 1 }
+            ? { opacity: 0, pointerEvents: "none"}
+            : { opacity: 1 , pointerEvents: "all"}
         }
         transition={{ duration: 0.5, ease: "easeOut", delayChildren: 0.5 }}
         className="absolute gap-2 top-9 bottom-0 z-20 py-0 right-0 w-[35em] p-4 mt-3 pt-4 border-blue-400 border-t-2 shadow overflow-y-scroll scroll-bar rounded bg-slate-50"

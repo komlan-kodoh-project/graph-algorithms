@@ -1,6 +1,4 @@
-import {GraphEventHandler} from "@/GraphUniverse/GraphEvents/GraphEvent";
-import {PersistentGraphEventHandler} from "@/GraphUniverse/GraphEvents/PersistentGraphEventHandler";
-
+import { PersistentGraphEventHandler } from "@/GraphUniverse/GraphEvents/PersistentGraphEventHandler";
 
 /**
  * A persistent graph event is a form of graph event that is lived. Instead of simply firing ones. It fires once at the
@@ -9,41 +7,42 @@ import {PersistentGraphEventHandler} from "@/GraphUniverse/GraphEvents/Persisten
  * the mouse leaves the hovered element
  */
 export class PersistentGraphEvent<T> {
-    private isActive: boolean = false;
-    private previousEvent: T | null = null;
-    private handlers: (PersistentGraphEventHandler<T, object>)[] = [];
+  private active: boolean = false;
+  private previousEvent: T | null = null;
+  private handlers: PersistentGraphEventHandler<T, object>[] = [];
 
-    constructor() {
+  public addHandler(handler: PersistentGraphEventHandler<T, object>): void {
+    if (this.active) {
+      if (this.previousEvent === null) {
+        throw new Error("The event is active but the previous event value is null");
+      }
+
+      handler.executeStart(this.previousEvent);
     }
+    this.handlers.push(handler);
+  }
 
-    public addHandler(handler: PersistentGraphEventHandler<T, object>): void {
-        if (this.isActive) {
-            if (this.previousEvent === null) {
-                throw new Error("The event is active but the previous event value is null");
-            }
+  public isActive(): boolean {
+    return this.active;
+  }
 
-            handler.executeStart(this.previousEvent);
-        }
-        this.handlers.push(handler);
+  public removeHandler(handler: PersistentGraphEventHandler<T, object>): void {
+    const index = this.handlers.indexOf(handler);
+
+    if (index > -1) {
+      this.handlers.splice(index, 1);
     }
+  }
 
-    public removeHandler(handler: PersistentGraphEventHandler<T, object>): void {
-        const index = this.handlers.indexOf(handler);
+  public triggerStart(event: T): void {
+    this.active = true;
+    this.previousEvent = event;
 
-        if (index > -1) {
-            this.handlers.splice(index, 1);
-        }
-    }
+    this.handlers.forEach((handler) => handler.executeStart(event));
+  }
 
-    public triggerStart(event: T): void {
-        this.isActive = true;
-        this.previousEvent = event;
-
-        this.handlers.forEach(handler => handler.executeStart(event));
-    }
-
-    public triggerEnd(event: T): void {
-        this.handlers.forEach(handler => handler.executeEnd(event));
-        this.isActive = false;
-    }
+  public triggerEnd(event: T): void {
+    this.handlers.forEach((handler) => handler.executeEnd(event));
+    this.active = false;
+  }
 }

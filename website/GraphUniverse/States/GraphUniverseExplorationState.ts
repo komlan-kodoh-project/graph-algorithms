@@ -36,7 +36,7 @@ export class GraphUniverseExplorationState<V, E> implements GraphUniverseState<V
                         return;
                     }
 
-                    const vertexEntity = this.universe.renderingController.getVertexEntity(event.target);
+                    this.universe.renderingController.getVertexEntity(event.target);
 
                     hoverCleanup();
                 },

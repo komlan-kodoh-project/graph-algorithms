@@ -58,7 +58,7 @@ export default class GraphUniverseEventListener<V, E> {
   private events = {
     stateUpdatedEvent: new GraphEvent<GraphStateUpdateEvent<V, E>>(),
     embeddingUpdatedEvent: new GraphEvent<GraphEmbeddingUpdatedEvent<V, E>>(),
-    
+
     edgeAdded: new GraphEvent<EdgeAddedEvent<V, E>>(),
 
     vertexDragStart: new GraphEvent<GraphDragEvent<Vertex<V>>>(),
@@ -130,7 +130,7 @@ export default class GraphUniverseEventListener<V, E> {
         edge: entity.graphEdge,
       });
     });
-    
+
     entity.addEventListener("mousedown", (event) => {
       event.stopPropagation();
 
@@ -157,14 +157,21 @@ export default class GraphUniverseEventListener<V, E> {
 
   public listenOnVertex(entity: VertexEntity<V>): void {
     // Handles vertex hover event
-    entity.addEventListener("mouseenter", (event) => {
+    entity.addEventListener("pointerenter", (event) => {
       const target = event.target as VertexEntity<V>;
+
+      // This if statement might seem redundant. But I ran into an issue where for this event listerner ran twice back to back
+      // on pointer down
+      if (this.persistentEvents.vertexHover.isActive()) {
+        return;
+      }
+
       this.persistentEvents.vertexHover.triggerStart({
         target: target.graphVertex,
       });
     });
 
-    entity.addEventListener("pointer", (event) => {
+    entity.addEventListener("pointerleave", (event) => {
       const target = event.target as VertexEntity<V>;
       this.persistentEvents.vertexHover.triggerEnd({
         target: target.graphVertex,
@@ -172,7 +179,7 @@ export default class GraphUniverseEventListener<V, E> {
     });
 
     // Handles vertex click and drag events
-    entity.addEventListener("mousedown", (event) => {
+    entity.addEventListener("pointerdown", (event) => {
       // We stop propagation so the viewport is not alerted with this event
       event.stopPropagation();
 
@@ -184,7 +191,7 @@ export default class GraphUniverseEventListener<V, E> {
     });
 
     // Handles vertex drag events
-    entity.addEventListener("mousemove", (event) => {
+    entity.addEventListener("pointermove", (event) => {
       // Only execute this handler if there is a drag event that has started on a vertex
       if (
         !(
@@ -222,7 +229,7 @@ export default class GraphUniverseEventListener<V, E> {
   }
 
   private configureViewClickListener(): void {
-    this.universe.viewport.addEventListener("click", (event) => {
+    this.universe.viewport.addEventListener("pointerup", (event) => {
       if (this.mouseState.dragging) {
         return;
       }
@@ -252,8 +259,15 @@ export default class GraphUniverseEventListener<V, E> {
     });
   }
 
+  private reset() {
+    this.mouseDownObject = null;
+    this.mouseState.down = false;
+    this.dragHoveredVertex = null;
+    this.mouseState.dragging = false;
+  }
+
   private configureViewDragListener() {
-    this.universe.viewport.addEventListener("mousedown", () => {
+    this.universe.viewport.addEventListener("pointerdown", () => {
       this.mouseState.down = true;
       this.mouseDownObject = {
         type: "viewport",
@@ -261,7 +275,7 @@ export default class GraphUniverseEventListener<V, E> {
       };
     });
 
-    this.universe.viewport.addEventListener("mousemove", (event) => {
+    this.universe.viewport.addEventListener("pointermove", (event) => {
       // If the mouse is already down, event listener transitions it to a moving state
       if (!this.mouseState.down) return;
 
@@ -315,7 +329,7 @@ export default class GraphUniverseEventListener<V, E> {
       }
     });
 
-    this.universe.viewport.addEventListener("mouseup", (event) => {
+    const dragStopHandler = (event: FederatedPointerEvent) => {
       // If the mouse is already down, event listener transitions it to a moving state
       if (!this.mouseState.dragging) return;
 
@@ -350,7 +364,10 @@ export default class GraphUniverseEventListener<V, E> {
       this.mouseState.down = false;
       this.dragHoveredVertex = null;
       this.mouseState.dragging = false;
-    });
+    };
+
+    this.universe.viewport.addEventListener("pointerleave", dragStopHandler);
+    this.universe.viewport.addEventListener("pointerup", dragStopHandler);
   }
 
   private getEventCoordinates(event: FederatedPointerEvent): Coordinates {

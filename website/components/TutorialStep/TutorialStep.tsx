@@ -15,8 +15,9 @@ export function TutorialStep({ imageUrl, imageAlt, description }: TutorialStepPr
     <div className="flex flex-col gap-4">
       <Markdown>{description}</Markdown>
       <Image
-        width={900}
-        height={500}
+        width={450}
+        height={250}
+        objectFit="cover"
         className="rounded"
         loader={contentfulLoader}
         src={imageUrl}

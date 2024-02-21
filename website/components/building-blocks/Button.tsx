@@ -15,8 +15,6 @@ export function Button({ className, active, disabled, onClick, onClickAsync, chi
 
   const isActive = active !== undefined ? active : internalActive;
 
-  console.log(active, children, internalActive)
-
   return (
     <button
       className={`${className} ${styles.button} ${isActive ? styles.active : ""} ${disabled ? styles.disabled : ""}`}
