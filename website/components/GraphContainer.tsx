@@ -16,66 +16,68 @@ export type GraphUniverseEdgeData = {};
 export type GraphContainerProps = {};
 
 function GraphContainer(props: GraphContainerProps) {
-  useWebAssembly();
+  const hasInitialized = useWebAssembly();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedEdge, setSelectedEdge] = useState<Edge<any, any> | null>(null);
   const { hasInitiated, universe, setUniverse } = useContext(GraphUniverseContext);
 
-  useEffectOnce(() => {
-    setTimeout(() => {
-      const newUniverse = new GraphUniverse({
-        container: containerRef.current!,
-        graph: new SimpleGraph<GraphUniverseVertexData, GraphUniverseEdgeData>(),
-        backgroudColor: "#F1F5FE",
-        dangerAccent: {
-          light: "#f0bbbb",
-          dark: "#cd7c7c",
-        },
-        theme: {
-          light: "#BBD3F0",
-          dark: "#7C98CD",
-        },
-        primaryAccent: {
-          light: "#e3e0ff",
-          dark: "#8d86db",
-        },
-        secondaryAccent: {
-          light: "#bddbc6",
-          dark: "#54b06b",
-        },
-        darkAccent: {
-          dark: "#3b3c3d",
-          light: "#8d8e8f",
-        },
-      });
+  useEffect(() => {
+    if (!hasInitialized ) {
+      return;
+    }
 
-      // Event listener for top popup for edge weight edition
-      newUniverse.listener.addEventListener("edgeClickedEvent", (event) => {
-        if (newUniverse.getWellKnownState() !== WellKnownGraphUniverseState.Editing) {
-          return;
-        }
+    const newUniverse = new GraphUniverse({
+      container: containerRef.current!,
+      graph: new SimpleGraph<GraphUniverseVertexData, GraphUniverseEdgeData>(),
+      backgroudColor: "#F1F5FE",
+      dangerAccent: {
+        light: "#f0bbbb",
+        dark: "#cd7c7c",
+      },
+      theme: {
+        light: "#BBD3F0",
+        dark: "#7C98CD",
+      },
+      primaryAccent: {
+        light: "#e3e0ff",
+        dark: "#8d86db",
+      },
+      secondaryAccent: {
+        light: "#bddbc6",
+        dark: "#54b06b",
+      },
+      darkAccent: {
+        dark: "#3b3c3d",
+        light: "#8d8e8f",
+      },
+    });
 
-        if (inputRef.current === null) {
-          throw Error("Attempt to edit using input but input has not yet been rendered");
-        }
-
-        inputRef.current.value = event.edge.weight.toString();
-        inputRef.current.focus();
-
-        setSelectedEdge(event.edge);
-      });
-
-      newUniverse.initialize();
-
-      if (hasInitiated) {
-        throw Error("Attempt to update the universe context but it has already been initialized");
+    // Event listener for top popup for edge weight edition
+    newUniverse.listener.addEventListener("edgeClickedEvent", (event) => {
+      if (newUniverse.getWellKnownState() !== WellKnownGraphUniverseState.Editing) {
+        return;
       }
 
-      setUniverse(newUniverse);
-    }, 500 );
-  });
+      if (inputRef.current === null) {
+        throw Error("Attempt to edit using input but input has not yet been rendered");
+      }
+
+      inputRef.current.value = event.edge.weight.toString();
+      inputRef.current.focus();
+
+      setSelectedEdge(event.edge);
+    });
+
+    newUniverse.initialize();
+
+    if (hasInitiated) {
+      throw Error("Attempt to update the universe context but it has already been initialized");
+    }
+
+    setUniverse(newUniverse);
+  }, [hasInitialized]);
 
   return (
     <div className="w-full h-full overflow-hidden" ref={containerRef}>

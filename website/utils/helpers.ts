@@ -1,3 +1,5 @@
+import { KeyboardEvent } from "react";
+
 export function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
@@ -15,4 +17,14 @@ export function getRandomColor() {
   }
 
   return color;
+}
+
+export function keyDownHandler<T>(keys: string[], callback: (event: KeyboardEvent<T>) => void) {
+  return (event: KeyboardEvent<T>) => {
+    if (!keys.includes(event.key)) {
+      return;
+    }
+
+    callback(event)
+  };
 }

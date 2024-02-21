@@ -1,5 +1,5 @@
 
-const DefaultRandomColors: string[] = ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#1abc9c'];
+const DefaultRandomColors: string[] = ['#94a3b8', '#ef4444', '#f43f5e', '#6366f1', '#0ea5e9', '#65a30d', '#0d9488'];
 
 export class ColorGenerator {
     private baselineColors: string[];

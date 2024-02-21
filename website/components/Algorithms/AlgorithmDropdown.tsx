@@ -1,8 +1,12 @@
+import { GraphAlgorithm } from "@/GraphUniverse/Algorithm/GraphAlgorithm";
 import Select from "react-select";
 
 export type AlgorithmDropdownValue = (typeof GraphAlgorithms)[number]["value"] | null;
 
+export type AlgorithmDropdownValueNotNull = (typeof GraphAlgorithms)[number]["value"];
+
 export type AlgorithmDropdownProp = Readonly<{
+  value: AlgorithmDropdownValueNotNull;
   onChange: (algorithm: AlgorithmDropdownValue) => void;
 }>;
 
@@ -15,9 +19,10 @@ export const GraphAlgorithms = [
   { value: "maximum-independent-set", label: "Find Maximum Independent Set" },
 ] as const;
 
-export function AlgorithmDropdown({ onChange }: AlgorithmDropdownProp) {
+export function AlgorithmDropdown({ value, onChange }: AlgorithmDropdownProp) {
   return (
     <Select
+      value={GraphAlgorithms.filter((algorithm) => algorithm.value === value)[0]}
       className="w-full"
       placeholder="Select An Algorithm"
       styles={{

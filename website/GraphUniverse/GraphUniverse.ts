@@ -1,5 +1,5 @@
 import { Application } from "pixi.js";
-import { sleep } from "@/utils/helpers";
+import { generateRandomInteger, sleep } from "@/utils/helpers";
 import { AnyValue } from "@/utils/types";
 import { Viewport } from "pixi-viewport";
 import { Edge, Vertex } from "./Graph/Graph";
@@ -9,7 +9,10 @@ import { VertexDisplayConfiguration } from "./Entity/VertexEntity";
 import GraphUniverseEventListener from "./GraphUniverseEventListener";
 import GraphUniverseConfiguration from "./GraphUniverseConfiguration";
 import SimpleGraph from "@/GraphUniverse/Graph/SimpleGraph/SimpleGraph";
-import Embedding, { EmbeddingFActory, WellKnownGraphUniverseEmbedding } from "@/GraphUniverse/Embeddings/Embedding";
+import Embedding, {
+  EmbeddingFActory,
+  WellKnownGraphUniverseEmbedding,
+} from "@/GraphUniverse/Embeddings/Embedding";
 import GraphRenderingController from "@/GraphUniverse/GraphRenderingController";
 import { GraphUniverseDesignState } from "@/GraphUniverse/States/GraphUniverseDesignState";
 import {
@@ -80,7 +83,6 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
 
     this.renderingController.start();
 
-
     this.hasInitialized = true;
   }
 
@@ -90,25 +92,23 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
     this.setState(newState);
   }
 
-
   public setWellKnownEmbedding(embedding: WellKnownGraphUniverseEmbedding): void {
     const newEmbedding = EmbeddingFActory.getEmbedding(embedding, this);
 
     this.setEmbedding(newEmbedding);
   }
 
-
   public setEmbedding(embedding: Embedding<V, E>): void {
-    const previousEmbedding =  this.embedding;
+    const previousEmbedding = this.embedding;
     this.embedding.uninstall();
 
     this.embedding = embedding;
     this.embedding.initialize();
 
     this.listener.notifyUniverseEmbeddingUpdated({
-     previousEmbedding: previousEmbedding,
-     currentEmbedding : this.embedding 
-    })
+      previousEmbedding: previousEmbedding,
+      currentEmbedding: this.embedding,
+    });
   }
 
   public setState(state: GraphUniverseState<V, E>): void {
@@ -141,10 +141,16 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
   }
 
   public deleteVertex(vertex: Vertex<V>) {
+    const edges = this.graph.getNeighborEdges(vertex);
+
+    for (const edge of edges) {
+      this.deleteEdge(edge);
+    }
+
     this.listener.notifyVertexDeleted({
-        target: vertex,
+      target: vertex,
     });
-    
+
     this.graph.deleteVertex(vertex);
   }
 
@@ -204,9 +210,6 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
   public async generateRandomGraph(numNodes: number, additionalEdges: number): Promise<void> {
     const vertices = [];
 
-    const generateRandomInteger = (min: number, max: number) =>
-      Math.floor(Math.random() * (max - min + 1)) + min;
-
     for (let i = 0; i < numNodes; i++) {
       const x = generateRandomInteger(20, 1000);
       const y = generateRandomInteger(20, 1000);
@@ -222,8 +225,7 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
       await sleep(50);
     }
 
-
-    for (let i =0; i < additionalEdges; i++) {
+    for (let i = 0; i < additionalEdges; i++) {
       const randomVertexIndex = Math.floor(Math.random() * numNodes);
       const randomExistingVertex = vertices[randomVertexIndex];
 
