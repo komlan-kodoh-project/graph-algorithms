@@ -9,6 +9,7 @@ import Markdown from "react-markdown";
 import { Button } from "@/components/building-blocks/Button";
 import { Drawer } from "@/components/Drawer/Drawer";
 import remarkGfm from "remark-gfm";
+import Head from "next/head";
 
 const BruteForceMinimumNodeColoringBuilder: GraphAlgorithmBuilder<
   BruteForceMinimumNodecoloringConfig,
@@ -24,41 +25,53 @@ export default function BruteForceMinimumNodeColoringForm() {
   >(BruteForceMinimumNodeColoringBuilder);
 
   return (
-    <div className={"h-full"}>
-      <form className="grid grid-cols-1 gap-y-2" onSubmit={(e) => e.preventDefault()}>
-        <div className="p-2">Click start to exhaustively search for the minimum node coloring</div>
+    <>
+      <Head>
+        <title>Find Minimum Node Coloring in Custom Graph | Brute Force </title>
+        <meta
+          name="description"
+          content="Create a graph using the graph editor and find the minimum node coloring using a brute force algorithm. With detail step by step explanation and algorithms details."
+          key="desc"
+        />
+      </Head>
+      <div className={"h-full"}>
+        <form className="grid grid-cols-1 gap-y-2" onSubmit={(e) => e.preventDefault()}>
+          <div className="p-2">
+            Click start to exhaustively search for the minimum node coloring
+          </div>
 
-        <div className="flex  gap-3">
-          <Button className="flex-1 bg-blue-500 text-white" onClick={execution.start}>
-            Start
-          </Button>
+          <div className="flex  gap-3">
+            <Button className="flex-1 bg-blue-500 text-white" onClick={execution.start}>
+              Start
+            </Button>
 
-          <Button className="flex-1" onClick={execution.reset}>
-            Reset
-          </Button>
+            <Button className="flex-1" onClick={execution.reset}>
+              Reset
+            </Button>
+          </div>
+        </form>
+
+        <div className="mt-2">
+          <Drawer title="Execution Summary">
+            {execution.explanation ? (
+              <Markdown className={"markdown"} remarkPlugins={[remarkGfm]}>
+                {execution.explanation}
+              </Markdown>
+            ) : (
+              <div className="flex items-center justify-center h-60">
+                <p className="text-center max-w-64 border p-4">
+                  Click move forward to enable execution summary
+                </p>
+              </div>
+            )}
+          </Drawer>
         </div>
-      </form>
 
-      <div className="mt-2">
-        <Drawer title="Execution Summary">
-          {execution.explanation ? (
-            <Markdown className={"markdown"} remarkPlugins={[remarkGfm]}>
-              {execution.explanation}
-            </Markdown>
-          ) : (
-            <div className="flex items-center justify-center h-60">
-              <p className="text-center max-w-64 border p-4">
-                Click move forward to enable execution summary
-              </p>
-            </div>
-          )}
-        </Drawer>
+        <div className="separator mt-4 mb-2"></div>
+
+        <Markdown className={"markdown py-2"}>{markdown}</Markdown>
       </div>
-
-      <div className="separator mt-4 mb-2"></div>
-
-      <Markdown className={"markdown py-2"}>{markdown}</Markdown>
-    </div>
+    </>
   );
 }
 

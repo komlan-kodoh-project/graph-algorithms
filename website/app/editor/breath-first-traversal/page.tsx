@@ -1,12 +1,13 @@
-"use client"
+"use client";
 
-import { FormProp, GraphAlgorithmBuilder, useGraphUniverseForm } from "@/components/forms/FormProp";
+import { GraphAlgorithmBuilder, useGraphUniverseForm } from "@/components/forms/FormProp";
 import { VertexInputButton } from "@/components/forms/VertexInputButton";
 import { BFSAlgorightmConfig, BreathFirstSearchAlgorithm } from "./BreathFirstSearchAlgorithm";
 import { Button } from "@/components/building-blocks/Button";
 import Markdown from "react-markdown";
 import { Drawer } from "@/components/Drawer/Drawer";
 import remarkGfm from "remark-gfm";
+import Head from "next/head";
 
 const bfsBuilder: GraphAlgorithmBuilder<BFSAlgorightmConfig, BreathFirstSearchAlgorithm> = (
   config,
@@ -32,56 +33,68 @@ function BreathFirstSearch() {
   >(bfsBuilder);
 
   return (
-    <div className={"h-full"}>
-      <form className="grid grid-cols-1 gap-y-2" onSubmit={(e) => e.preventDefault()}>
-        <div className="flex justify-between gap-x-2">
-          <VertexInputButton {...registerGraphInput("sourceVertex")}>
-            Start Vertex
-          </VertexInputButton>
+    <>
+      <Head>
+        <title>Breath First Traversal of Custom Graph | BFS </title>
+        <meta
+          name="description"
+          content="Create a graph using the graph editor and watch a colorful traversal using breath first search. With detail step by step explanation and algorithms details."
+          key="desc"
+        />
+      </Head>
+      <div className={"h-full"}>
+        <form className="grid grid-cols-1 gap-y-2" onSubmit={(e) => e.preventDefault()}>
+          <div className="flex justify-between gap-x-2">
+            <VertexInputButton {...registerGraphInput("sourceVertex")}>
+              Start Vertex
+            </VertexInputButton>
 
-          <input
-            readOnly={true}
-            className="w-9 text-right bg-transparent"
-            value={formValues.sourceVertex?.id ?? ""}
-          ></input>
+            <input
+              readOnly={true}
+              className="w-9 text-right bg-transparent"
+              value={formValues.sourceVertex?.id ?? ""}
+            ></input>
+          </div>
+
+          <div className="py-2 px-1">
+            Running BFS centered on{" "}
+            <span className={"bg-gray-100 border-b-2 px-0.5 mx-0.5"}>
+              {formValues.sourceVertex?.id ?? "_"}
+            </span>
+          </div>
+
+          <div className="flex  gap-3">
+            <Button className="flex-1 bg-blue-500 text-white" onClick={execution.start}>
+              Start
+            </Button>
+
+            <Button className="flex-1" onClick={execution.reset}>
+              Reset
+            </Button>
+          </div>
+        </form>
+
+        <div className="mt-2">
+          <Drawer title="Execution Summary">
+            {execution.explanation ? (
+              <Markdown className={"markdown"} remarkPlugins={[remarkGfm]}>
+                {execution.explanation}
+              </Markdown>
+            ) : (
+              <div className="flex items-center justify-center h-60">
+                <p className="text-center max-w-64 border p-4">
+                  Click move forward to enable execution summary
+                </p>
+              </div>
+            )}
+          </Drawer>
         </div>
 
-        <div className="py-2 px-1">
-          Running BFS centered on{" "}
-          <span className={"bg-gray-100 border-b-2 px-0.5 mx-0.5"}>
-            {formValues.sourceVertex?.id ?? "_"}
-          </span>
-        </div>
+        <div className="separator mt-4 mb-2"></div>
 
-        <div className="flex  gap-3">
-          <Button className="flex-1 bg-blue-500 text-white" onClick={execution.start}>
-            Start
-          </Button>
-
-          <Button className="flex-1" onClick={execution.reset}>
-            Reset
-          </Button>
-        </div>
-      </form>
-
-      <div className="mt-2">
-        <Drawer title="Execution Summary">
-          {execution.explanation ? (
-            <Markdown className={"markdown"} remarkPlugins={[remarkGfm]}>
-              {execution.explanation}
-            </Markdown>
-          ) : (
-            <div className="flex items-center justify-center h-60">
-              <p className="text-center max-w-64 border p-4">Click move forward to enable execution summary</p>
-            </div>
-          )}
-        </Drawer>
+        <Markdown className={"markdown py-2"}>{markdown}</Markdown>
       </div>
-
-      <div className="separator mt-4 mb-2"></div>
-
-      <Markdown className={"markdown py-2"}>{markdown}</Markdown>
-    </div>
+    </>
   );
 }
 

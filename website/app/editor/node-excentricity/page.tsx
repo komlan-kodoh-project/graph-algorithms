@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Markdown from "react-markdown";
 import { Button } from "@/components/building-blocks/Button";
 import { VertexInputButton } from "@/components/forms/VertexInputButton";
@@ -6,6 +6,7 @@ import { GraphAlgorithmBuilder, useGraphUniverseForm } from "@/components/forms/
 import { ExcentricityAlgorithm, ExcentricityAlgorithmConfig } from "./ExcentricityAlgorithm";
 import { Drawer } from "@/components/Drawer/Drawer";
 import remarkGfm from "remark-gfm";
+import  Head from "next/head";
 
 const NodeExcentricityAlgorithm: GraphAlgorithmBuilder<
   ExcentricityAlgorithmConfig,
@@ -38,58 +39,69 @@ export default function ExcentricityAglgorithmForm() {
     useGraphUniverseForm(NodeExcentricityAlgorithm);
 
   return (
-    <div className={"h-full"}>
-      <form className="grid grid-cols-1 gap-y-2" onSubmit={(e) => e.preventDefault()}>
-        <div className="flex justify-between gap-x-2">
-          <VertexInputButton {...registerGraphInput("sourceVertex")}>
-            Source Vertex
-          </VertexInputButton>
+    <>
+      <Head>
+        <title>Find node excentriciy of custom graph | Graph Theory </title>
+        <meta
+          name="description"
+          content="Create a graph using the graph editor and find the node excentricity of any node in the graph. With detail step by step explanation and algorithms details"
+          key="desc"
+        />
+      </Head>
 
-          <input
-            readOnly={true}
-            className="w-9 text-right bg-transparent"
-            value={formValues.sourceVertex?.id ?? ""}
-          ></input>
+      <div className={"h-full"}>
+        <form className="grid grid-cols-1 gap-y-2" onSubmit={(e) => e.preventDefault()}>
+          <div className="flex justify-between gap-x-2">
+            <VertexInputButton {...registerGraphInput("sourceVertex")}>
+              Source Vertex
+            </VertexInputButton>
+
+            <input
+              readOnly={true}
+              className="w-9 text-right bg-transparent"
+              value={formValues.sourceVertex?.id ?? ""}
+            ></input>
+          </div>
+
+          <div className="p-2">
+            Finding node excentricity of node
+            <span className={"bg-gray-100 border-b-2 px-0.5 mx-0.5"}>
+              {formValues.sourceVertex?.id ?? "_"}
+            </span>
+          </div>
+
+          <div className="flex  gap-3">
+            <Button className="flex-1 bg-blue-500 text-white" onClick={execution.start}>
+              Start
+            </Button>
+
+            <Button className="flex-1" onClick={execution.reset}>
+              Reset
+            </Button>
+          </div>
+        </form>
+
+        <div className="mt-2">
+          <Drawer title="Execution Summary">
+            {execution.explanation ? (
+              <Markdown className={"markdown"} remarkPlugins={[remarkGfm]}>
+                {execution.explanation}
+              </Markdown>
+            ) : (
+              <div className="flex items-center justify-center h-60">
+                <p className="text-center max-w-64 border p-4">
+                  Click move forward to enable execution summary
+                </p>
+              </div>
+            )}
+          </Drawer>
         </div>
 
-        <div className="p-2">
-          Finding node excentricity of node
-          <span className={"bg-gray-100 border-b-2 px-0.5 mx-0.5"}>
-            {formValues.sourceVertex?.id ?? "_"}
-          </span>
-        </div>
+        <div className="separator mt-4 mb-2"></div>
 
-        <div className="flex  gap-3">
-          <Button className="flex-1 bg-blue-500 text-white" onClick={execution.start}>
-            Start
-          </Button>
-
-          <Button className="flex-1" onClick={execution.reset}>
-            Reset
-          </Button>
-        </div>
-      </form>
-
-      <div className="mt-2">
-        <Drawer title="Execution Summary">
-          {execution.explanation ? (
-            <Markdown className={"markdown"} remarkPlugins={[remarkGfm]}>
-              {execution.explanation}
-            </Markdown>
-          ) : (
-            <div className="flex items-center justify-center h-60">
-              <p className="text-center max-w-64 border p-4">
-                Click move forward to enable execution summary
-              </p>
-            </div>
-          )}
-        </Drawer>
+        <Markdown className={"markdown py-2"}>{markdown}</Markdown>
       </div>
-
-      <div className="separator mt-4 mb-2"></div>
-
-      <Markdown className={"markdown py-2"}>{markdown}</Markdown>
-    </div>
+    </>
   );
 }
 
