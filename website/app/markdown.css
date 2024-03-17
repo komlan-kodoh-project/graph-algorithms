@@ -4,7 +4,7 @@
 }
 
 body {
-  color: #444;
+  color: #444 !important;
   font-family: "Merriweather", Georgia, serif;
   margin: 0;
   max-width: 100%;
@@ -36,27 +36,18 @@ li {
 }
 
 /* Counteract the specificity of the gross *:not() chain. */
-
-.separator {
-  width: 70%;
-  height: 2px;
-  margin: 2em auto 0em auto;
-  display: block;
-  background-color: #444;
-}
-
 .markdown h1 {
-  padding: 0.7rem 0 !important;
+  margin: 0.7rem 0 !important;
 }
+
 
 .markdown h2 {
-  padding: 0.7rem 0 !important;
+  margin: 0.7rem 0 !important;
 }
 
 .markdown p ~ p {
   margin: 0.4em 0em;
 }
-
 
 .markdow.pre,
 .markdow.code {
@@ -79,4 +70,11 @@ li {
 .markdown a:focus,
 .markdown a:active {
   color: #2980b9;
+}
+
+.markdown table,
+.markdown td,
+.markdown th {
+  padding: 0.4em;
+  border: 2px solid rgb(169, 169, 169);
 }

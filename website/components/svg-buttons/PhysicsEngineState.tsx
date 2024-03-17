@@ -1,20 +1,38 @@
+"use client";
+
 import { act } from "react-dom/test-utils";
 import { InteractiveButtonProps } from "./InteractiveButtonProps";
+import { motion } from "framer-motion";
 
 export type PointerSVGProps = InteractiveButtonProps & {};
 
 export function PhysiscsEngineState({ active, onClick }: PointerSVGProps) {
   const restColor = "#444647";
   const activeColor = "rgb(59 130 246)";
-  
+
+  // const [rotation, setRotation] = useState(0);
+  // const [stateUpdatePromise, setStateUpdatePromise] = useState<Promise<void> | null>(null);
+
+  // useEffect(() => {
+  //   var interval = setInterval(() => {
+  //     setRotation(x => x + )
+  //   }, 1000 / 60);
+  // }, [active])
+
   return (
     <button
       onClick={onClick}
       className={`h-full p-1 transition-all duration-250 ease-in-out ${active && "rounded shadow"}`}
     >
-      <svg
-        className={`h-full ${active && "spin"}`}
+      <motion.svg
+        className={`h-full`}
         fill="none"
+        animate={active ? { rotate: 360 } : { rotate: 720 }}
+        transition={
+          active
+            ? { repeat: Infinity, repeatType: "loop", duration: 4, ease: "linear" }
+            : { ease: "linear" }
+        }
         viewBox="0 0 100 100"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -24,7 +42,7 @@ export function PhysiscsEngineState({ active, onClick }: PointerSVGProps) {
           fill={active ? activeColor : "#292D32"}
           stroke={active ? activeColor : "#292D32"}
         />
-      </svg>
+      </motion.svg>
     </button>
   );
 }

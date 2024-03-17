@@ -24,6 +24,7 @@ export function useGraphUniverseForm<TConfig, TAlgorithm extends GraphAlgorithm>
 ) {
   const { universe, hasInitiated } = useContext(GraphUniverseContext);
 
+  const [explanation, setExplanation] = useState<string>("");
   const [formValues, setFormValues] = useState<Partial<TConfig>>({});
 
   const algorithmExecution = useRef<GraphAlgorithmExecution | null>(null);
@@ -72,7 +73,10 @@ export function useGraphUniverseForm<TConfig, TAlgorithm extends GraphAlgorithm>
     ensureAlgorithnExecutionExists();
 
     setIsExecuting(true);
-    algorithmExecution.current!.MoveForward().then(() => setIsExecuting(false));
+    algorithmExecution.current!.MoveForward().then(result => {
+      setIsExecuting(false);
+      setExplanation(result.markdown ?? "");
+    });
   }
 
   function resetUniverse(): void {
@@ -85,9 +89,10 @@ export function useGraphUniverseForm<TConfig, TAlgorithm extends GraphAlgorithm>
     registerGraphInput,
     execution: {
       isExecuting,
+      explanation,
       start: startExecution,
       reset: resetUniverse,
-      moveForward: moveExecutionForward
+      moveForward: moveExecutionForward,
     },
   };
 }

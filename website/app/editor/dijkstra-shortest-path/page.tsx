@@ -5,6 +5,8 @@ import { VertexInputButton } from "@/components/forms/VertexInputButton";
 import { DijkstraAlgorithm, DijkstraAlgorithmConfig } from "./DijkstraAlgorithm";
 import { GraphAlgorithmBuilder, useGraphUniverseForm } from "@/components/forms/FormProp";
 import { Button } from "@/components/building-blocks/Button";
+import { Drawer } from "@/components/Drawer/Drawer";
+import remarkGfm from "remark-gfm";
 
 const buildDijkstraAlgorithmExecution: GraphAlgorithmBuilder<
   DijkstraAlgorithmConfig,
@@ -108,9 +110,25 @@ export default function DijkstraAlgorithmForm() {
         </div>
       </form>
 
-      <div className="separator"></div>
+      <div className="mt-2">
+        <Drawer title="Execution Summary">
+          {execution.explanation ? (
+            <Markdown className={"markdown"} remarkPlugins={[remarkGfm]}>
+              {execution.explanation}
+            </Markdown>
+          ) : (
+            <div className="flex items-center justify-center h-60">
+              <p className="text-center max-w-64 border p-4">Click move forward to enable execution summary</p>
+            </div>
+          )}
+        </Drawer>
+      </div>
 
-      <Markdown className={"markdown py-2"}>{markdown}</Markdown>
+      <div className="separator mt-4 mb-2"></div>
+
+      <Markdown className={"markdown py-2"} remarkPlugins={[remarkGfm]}>
+        {markdown}
+      </Markdown>
     </div>
   );
 }
@@ -146,4 +164,3 @@ Dijkstra's algorithm is a powerful tool with various applications in computer sc
 
 ** **Generated with the help of ChatGPT** **
 `;
-

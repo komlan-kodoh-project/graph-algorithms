@@ -34,7 +34,7 @@ type MouseState = {
 };
 
 type MouseDownObject = {
-  type: "vertex-entity" | "viewport";
+  type: "vertex-entity" | "viewport" | "edge-entity";
   object: object;
 };
 
@@ -132,11 +132,17 @@ export default class GraphUniverseEventListener<V, E> {
     });
 
     entity.addEventListener("mousedown", (event) => {
+      // We stop propagation so that the view is not alerted of this event  
       event.stopPropagation();
 
       this.events.edgeClickedEvent.trigger({
         edge: entity.graphEdge,
       });
+
+      this.mouseDownObject = {
+        type: "edge-entity",
+        object: event.target as VertexEntity<V>,
+      };
     });
 
     // Handles vertex hover event
