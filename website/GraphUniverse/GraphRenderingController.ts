@@ -20,7 +20,10 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
   }
 
   private triggerRendering(timestamp: number): void {
-    const delta = timestamp - this.previousRenderingTimeStamp;
+    // Doing math min because request animation frame is not called when the window is out of focus.
+    // As a result the time stamp can be very hight and cause glitch in the rendering
+    
+    const delta = Math.min(timestamp - this.previousRenderingTimeStamp, 1000 / 60);
 
     this.embeddingIsEnable && this.universe.embedding.update(delta);
     this.universe.application.ticker.update(timestamp);

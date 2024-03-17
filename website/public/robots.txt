@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://graph.komlankodoh.com
+
+# Sitemaps
+Sitemap: https://graph.komlankodoh.com/sitemap.xml

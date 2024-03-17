@@ -1,4 +1,4 @@
-import { GraphAlgorithm } from "./GraphAlgorithm";
+import { GraphAlgorithm, OperationSummary } from "./GraphAlgorithm";
 import GraphUniverse from "../GraphUniverse";
 import { sleep } from "@/utils/helpers";
 import { AlgorithmCommand } from "./AlgorithmCommands";
@@ -70,7 +70,7 @@ export class GraphAlgorithmExecution {
     });
   }
 
-  async MoveForward() {
+  async MoveForward(): Promise<OperationSummary> {
     this.isExecuting = true;
 
     while (true) {
@@ -78,11 +78,12 @@ export class GraphAlgorithmExecution {
 
       if (instruction === null) {
         this.isExecuting = false;
-        break;
+
+        return { markdown: "Execution completed" };
       }
 
       if (instruction?.cofiguration().isStep) {
-        break;
+        return { markdown: instruction.cofiguration().explanation ?? "" };
       }
 
       if (this.executionCancelRequested) {
@@ -90,11 +91,9 @@ export class GraphAlgorithmExecution {
         this.executionCancelRequested = false;
 
         this.pauseRequestCallBack && this.pauseRequestCallBack();
-        break;
+        return { markdown: "Execution paused" };
       }
     }
-
-    return this.ExecuteNext(false);
   }
 
   async MoveBackward() {

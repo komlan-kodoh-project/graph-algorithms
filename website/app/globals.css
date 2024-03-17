@@ -36,6 +36,15 @@ body {
   overscroll-behavior-x: none;
 }
 
+.separator {
+  width: 70%;
+  height: 2px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  background-color: #444;
+}
+
 /* scroll bar styles */
 
 /* Scrollbar Styling */

@@ -13,6 +13,7 @@ import {
 } from "@/components/GraphUniverseContext";
 import { DeleteButton } from "@/components/svg-buttons/DeleteButton";
 import EditButton from "@/components/svg-buttons/EditButton";
+import { GithubLink } from "@/components/svg-buttons/GithubLink";
 import { PhysiscsEngineState } from "@/components/svg-buttons/PhysicsEngineState";
 import PointerButton from "@/components/svg-buttons/PointerButton";
 import { motion } from "framer-motion";
@@ -44,9 +45,8 @@ function extractAlgorithmName(): AlgorithmDropdownValue | null {
   }
 }
 
-export function Layout({ children }: LayoutProps) {
+function Layout({ children }: LayoutProps) {
   const router = useRouter();
-  const path = usePathname();
 
   const { hasInitiated, universe } = useContext(GraphUniverseContext);
 
@@ -132,6 +132,10 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="relative w-full h-full outline-4 outline-primary-color text-sm">
+      <div className="absolute bottom-3.5 left-3.5 z-20 h-9">
+        <GithubLink/>
+      </div>
+
       <div className="absolute inline-flex gap-2 top-3.5 left-3.5 z-20 h-9 rounded bg-white px-1.5 py-1 shadow">
         <PointerButton
           active={editorState === WellKnownGraphUniverseState.Exploring}
@@ -173,14 +177,15 @@ export function Layout({ children }: LayoutProps) {
         initial={{ opacity: 0 }}
         animate={
           selectedAlgorithm === null || selectedAlgorithm === "None"
-            ? { opacity: 0, pointerEvents: "none"}
-            : { opacity: 1 , pointerEvents: "all"}
+            ? { opacity: 0, pointerEvents: "none" }
+            : { opacity: 1, pointerEvents: "all" }
         }
         transition={{ duration: 0.5, ease: "easeOut", delayChildren: 0.5 }}
         className="absolute gap-2 top-9 bottom-0 z-20 py-0 right-0 w-[35em] p-4 mt-3 pt-4 border-blue-400 border-t-2 shadow overflow-y-scroll scroll-bar rounded bg-slate-50"
       >
         {pageTransition ? "Loading ..." : children}
       </motion.div>
+
 
       <div className="absolute top-0 bottom-0 left-0 right-0 z-10 ">
         <GraphContainer />

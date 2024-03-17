@@ -20,20 +20,23 @@ export default class GraphUniverseCamera<T, E> implements GraphUniverseComponent
 
   private initializeZoomController() {
     // this.universe.viewport.plugins.
-    this.universe.viewport.plugins.add(
-      "custom-wheel",
-      new Wheel(this.universe.viewport, {
-        keyToPress: ["ControlLeft", "ControlRight"],
-      })
-    );
+    // this.universe.viewport.plugins.add(
+    //   "custom-wheel",
+    //   new Wheel(this.universe.viewport, {
+    //     keyToPress: ["ControlLeft", "ControlRight"],
+    //   })
+    // );
 
     this.universe.viewport
-      .wheel({
-        wheelZoom: false,
-      })
-      .drag({
-        pressDrag: false,
-      })
+      // .wheel({
+      //   wheelZoom: false,
+      // })
+      // .drag({
+      //   pressDrag: false,
+      // })
+      .drag()
+      .wheel()
+      .pinch()
       .decelerate();
   }
 }

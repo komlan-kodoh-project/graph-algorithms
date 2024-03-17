@@ -36,6 +36,33 @@ type DijkstraNode = {
   source: DijkstraNode | null;
 };
 
+type MarkdownTable = {
+  header: string[];
+  rows: string[][];
+};
+
+function buildMarkdownTable(table: MarkdownTable): string {
+  let markdownTable = `| ${table.header.join(" | ")} |\n| ${table.header
+    .map(() => "---")
+    .join(" | ")} |\n`;
+
+  for (const row of table.rows) {
+    markdownTable += `| ${row.join(" | ")} |\n`;
+  }
+
+  return markdownTable;
+}
+
+function objectToMarkdownTable(map: Map<unknown, unknown>): string {
+  let table = "| Key | Value |\n| --- | --- |\n";
+
+  for (const [key, value] of map) {
+    table += `| ${key} | ${value} |\n`;
+  }
+
+  return table;
+}
+
 export class DijkstraAlgorithm implements GraphAlgorithm {
   private generator: Generator<AlgorithmCommand> | null = null;
 
@@ -67,21 +94,46 @@ export class DijkstraAlgorithm implements GraphAlgorithm {
       },
     ];
 
+    function getAlgorithmState(): string {
+      return `
+# Vertex Queue 
+${buildMarkdownTable({  
+  header: ["Vertex", "Cost", "Source"],
+  rows: vertexLeftToExplore.map((x) => [
+    x.vertex.id.toString(),
+    x.cost.toString(),
+    x.source?.vertex.id.toString() ?? "Self",
+  ]),
+})}
+
+# Known vertex cost
+${buildMarkdownTable({
+  header: ["Vertex", "Cost"],
+  rows: Array.from(vertexCost.entries()).map(([key, value]) => [key.toString(), value.toString()]),
+})}
+      `;
+    }
+
     yield new UpdateVertexRenderingConfiguration(
       this.config.sourceVertex,
       {
-        ...this.config.exploredVertex,
+        ...this.config.visitedVertex,
         underLabelDisplayConfiguration: () => `Source : ${0} from self`,
       },
       {
         delay: 3,
+        isStep: true,
+        explanation: `
+Initialization of the source vertex with cost to zero
+${getAlgorithmState()}
+        `,
       }
     );
 
     let backtrackingNode: DijkstraNode | null = null;
 
     while (vertexLeftToExplore.length !== 0) {
-      const currentVertex = vertexLeftToExplore.shift()!;
+      const currentVertex = vertexLeftToExplore[0];
 
       if (currentVertex.vertex.id === this.config.destinatonVertex.id) {
         yield new UpdateVertexRenderingConfiguration(currentVertex.vertex, {
@@ -107,8 +159,6 @@ export class DijkstraAlgorithm implements GraphAlgorithm {
 
         yield new UpdateEdgeRenderingConfiguration(sourceEdge, this.config.exploredEdge);
       }
-
-      visitedVertexId.add(currentVertex.vertex.id);
 
       const vertexEdges = this.config.graph.getNeighborEdges(currentVertex.vertex);
 
@@ -154,11 +204,20 @@ export class DijkstraAlgorithm implements GraphAlgorithm {
         }
       }
 
-      yield new PassiveCommand({
-        delay: 1,
-        isStep: true,
-        explanation: "Doing something reallly cool",
-      });
+      vertexLeftToExplore.shift();
+      visitedVertexId.add(currentVertex.vertex.id);
+      yield new UpdateVertexRenderingConfiguration(
+        currentVertex.vertex,
+        this.config.exploredVertex,
+        {
+          delay: 1,
+          isStep: true,
+          explanation: `
+Vertex ${currentVertex.vertex.id} is being explored. All of its neighbors will be added to the queue
+${getAlgorithmState()}
+        `,
+        }
+      );
     }
 
     while (backtrackingNode?.source != null) {
@@ -173,13 +232,16 @@ export class DijkstraAlgorithm implements GraphAlgorithm {
 
       yield new PassiveCommand({
         delay: 1,
-        isStep: true,
+        isStep: false,
         explanation: "Doing something reallly cool",
       });
 
       backtrackingNode = backtrackingNode.source;
     }
 
-    yield new UpdateVertexRenderingConfiguration(this.config.sourceVertex, this.config.pathVertex);
+    yield new UpdateVertexRenderingConfiguration(this.config.sourceVertex, this.config.pathVertex, {
+      isStep: true,
+      explanation: "Shortest path has been found is being highlighted\n" + getAlgorithmState(),
+    });
   }
 }

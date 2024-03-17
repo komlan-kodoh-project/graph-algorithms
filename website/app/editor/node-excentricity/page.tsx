@@ -4,6 +4,8 @@ import { Button } from "@/components/building-blocks/Button";
 import { VertexInputButton } from "@/components/forms/VertexInputButton";
 import { GraphAlgorithmBuilder, useGraphUniverseForm } from "@/components/forms/FormProp";
 import { ExcentricityAlgorithm, ExcentricityAlgorithmConfig } from "./ExcentricityAlgorithm";
+import { Drawer } from "@/components/Drawer/Drawer";
+import remarkGfm from "remark-gfm";
 
 const NodeExcentricityAlgorithm: GraphAlgorithmBuilder<
   ExcentricityAlgorithmConfig,
@@ -68,7 +70,23 @@ export default function ExcentricityAglgorithmForm() {
         </div>
       </form>
 
-      <div className="separator"></div>
+      <div className="mt-2">
+        <Drawer title="Execution Summary">
+          {execution.explanation ? (
+            <Markdown className={"markdown"} remarkPlugins={[remarkGfm]}>
+              {execution.explanation}
+            </Markdown>
+          ) : (
+            <div className="flex items-center justify-center h-60">
+              <p className="text-center max-w-64 border p-4">
+                Click move forward to enable execution summary
+              </p>
+            </div>
+          )}
+        </Drawer>
+      </div>
+
+      <div className="separator mt-4 mb-2"></div>
 
       <Markdown className={"markdown py-2"}>{markdown}</Markdown>
     </div>
