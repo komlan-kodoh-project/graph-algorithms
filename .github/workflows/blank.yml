@@ -9,7 +9,7 @@ env:
 on:
   push:
     branches:
-      - '**'
+      - 'mazin'
 
 jobs:
   push-image-to-docker-hub:
@@ -41,7 +41,7 @@ jobs:
       - name: Build Website  
         working-directory: ./website
         run: |
-          npm ci 
+          npm install
           npm run build
 
       - name: Publish to Cloudflare Pages
