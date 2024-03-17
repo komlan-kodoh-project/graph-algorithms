@@ -41,7 +41,7 @@ jobs:
       - name: Build Website  
         working-directory: ./website
         run: |
-          npm install
+          npm ci 
           npm run build
 
       - name: Publish to Cloudflare Pages
