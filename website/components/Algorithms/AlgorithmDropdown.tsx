@@ -1,4 +1,3 @@
-import { GraphAlgorithm } from "@/GraphUniverse/Algorithm/GraphAlgorithm";
 import Select from "react-select";
 
 export type AlgorithmDropdownValue = (typeof GraphAlgorithms)[number]["value"] | null;
@@ -11,7 +10,7 @@ export type AlgorithmDropdownProp = Readonly<{
 }>;
 
 export const GraphAlgorithms = [
-  { value: "None", label: "Select An Algorithm" },
+  { value: "None", label: "Search algorithm" },
   { value: "dijkstra-shortest-path", label: "Dijkstra Algorithm" },
   { value: "brute-force-minimum-node-coloring", label: "Exhaustive Minimum Node Coloring" },
   { value: "breath-first-traversal", label: "Breath First Traversal" },
