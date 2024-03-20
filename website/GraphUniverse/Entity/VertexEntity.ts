@@ -65,7 +65,6 @@ export default class VertexEntity<V> extends Graphics {
   }
 
   private drawSelf() {
-    console.log(this.graphVertex)
     const configuration = this.configuration.getCurrentConfiguration();
     this.clear();
     this.removeChildren();
