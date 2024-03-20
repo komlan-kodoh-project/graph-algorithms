@@ -10,15 +10,6 @@ export function PhysiscsEngineState({ active, onClick }: PointerSVGProps) {
   const restColor = "#444647";
   const activeColor = "rgb(59 130 246)";
 
-  // const [rotation, setRotation] = useState(0);
-  // const [stateUpdatePromise, setStateUpdatePromise] = useState<Promise<void> | null>(null);
-
-  // useEffect(() => {
-  //   var interval = setInterval(() => {
-  //     setRotation(x => x + )
-  //   }, 1000 / 60);
-  // }, [active])
-
   return (
     <button
       onClick={onClick}

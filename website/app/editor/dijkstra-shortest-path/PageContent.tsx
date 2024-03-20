@@ -7,6 +7,7 @@ import { GraphAlgorithmBuilder, useGraphUniverseForm } from "@/components/forms/
 import { Button } from "@/components/building-blocks/Button";
 import { Drawer } from "@/components/Drawer/Drawer";
 import remarkGfm from "remark-gfm";
+import { VertexSelection } from "@/components/building-blocks/VertexSelection";
 
 const buildDijkstraAlgorithmExecution: GraphAlgorithmBuilder<
   DijkstraAlgorithmConfig,
@@ -56,16 +57,12 @@ export default function DijkstraAlgorithmForm() {
   return (
     <div className={"h-full"}>
       <form className="grid grid-cols-1 gap-y-2" onSubmit={(e) => e.preventDefault()}>
-        <div className="flex justify-between gap-x-2">
+        <div className="flex justify-between items-center gap-x-2">
           <VertexInputButton {...registerGraphInput("sourceVertex")}>
             Source Vertex
           </VertexInputButton>
 
-          <input
-            readOnly={true}
-            className="w-9 text-right bg-transparent"
-            value={formValues.sourceVertex?.id ?? ""}
-          ></input>
+          <VertexSelection value={formValues.sourceVertex?.id.toString()} />
         </div>
 
         <div className="flex justify-between gap-x-2">
@@ -73,18 +70,12 @@ export default function DijkstraAlgorithmForm() {
             Destination Vertex
           </VertexInputButton>
 
-          <input
-            readOnly={true}
-            className="w-9 text-right bg-transparent"
-            value={formValues.destinatonVertex?.id ?? ""}
-          ></input>
+          <VertexSelection value={formValues.destinatonVertex?.id.toString()} />
         </div>
 
         <div className="p-2">
           Running Dijkstra algorithm from
-          <span className={"bg-gray-100 border-b-2 px-0.5 mx-0.5"}>
-            {formValues.sourceVertex?.id ?? "_"}
-          </span>
+          <span className={"bg-gray-100 border-b-2 px-0.5 mx-0.5"}>{formValues.sourceVertex?.id ?? "_"}</span>
           to
           <span className={"bg-gray-100 border-b-2 px-0.5 mx-0.5"}>
             {formValues.destinatonVertex?.id ?? "_"}

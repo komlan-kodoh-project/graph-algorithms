@@ -7,6 +7,7 @@ import { ExcentricityAlgorithm, ExcentricityAlgorithmConfig } from "./Excentrici
 import { Drawer } from "@/components/Drawer/Drawer";
 import remarkGfm from "remark-gfm";
 import { Metadata } from "next";
+import { VertexSelection } from "@/components/building-blocks/VertexSelection";
 const NodeExcentricityAlgorithm: GraphAlgorithmBuilder<
   ExcentricityAlgorithmConfig,
   ExcentricityAlgorithm
@@ -38,60 +39,54 @@ export default function ExcentricityAglgorithmForm() {
     useGraphUniverseForm(NodeExcentricityAlgorithm);
 
   return (
-    <>
-      <div className={"h-full"}>
-        <form className="grid grid-cols-1 gap-y-2" onSubmit={(e) => e.preventDefault()}>
-          <div className="flex justify-between gap-x-2">
-            <VertexInputButton {...registerGraphInput("sourceVertex")}>
-              Source Vertex
-            </VertexInputButton>
+    <div className={"h-full"}>
+      <form className="grid grid-cols-1 gap-y-2" onSubmit={(e) => e.preventDefault()}>
+        <div className="flex justify-between gap-x-2">
+          <VertexInputButton {...registerGraphInput("sourceVertex")}>
+            Source Vertex
+          </VertexInputButton>
 
-            <input
-              readOnly={true}
-              className="w-9 text-right bg-transparent"
-              value={formValues.sourceVertex?.id ?? ""}
-            ></input>
-          </div>
-
-          <div className="p-2">
-            Finding node excentricity of node
-            <span className={"bg-gray-100 border-b-2 px-0.5 mx-0.5"}>
-              {formValues.sourceVertex?.id ?? "_"}
-            </span>
-          </div>
-
-          <div className="flex  gap-3">
-            <Button className="flex-1 bg-blue-500 text-white" onClick={execution.start}>
-              Start
-            </Button>
-
-            <Button className="flex-1" onClick={execution.reset}>
-              Reset
-            </Button>
-          </div>
-        </form>
-
-        <div className="mt-2">
-          <Drawer title="Execution Summary">
-            {execution.explanation ? (
-              <Markdown className={"markdown"} remarkPlugins={[remarkGfm]}>
-                {execution.explanation}
-              </Markdown>
-            ) : (
-              <div className="flex items-center justify-center h-60">
-                <p className="text-center max-w-64 border p-4">
-                  Click move forward to enable execution summary
-                </p>
-              </div>
-            )}
-          </Drawer>
+          <VertexSelection value={formValues.sourceVertex?.id.toString()} />
         </div>
 
-        <div className="separator mt-4 mb-2"></div>
+        <div className="p-2">
+          Finding node excentricity of node
+          <span className={"bg-gray-100 border-b-2 px-0.5 mx-0.5 whitespace-nowrap"}>
+            {formValues.sourceVertex?.id ?? "_"}
+          </span>
+        </div>
 
-        <Markdown className={"markdown py-2"}>{markdown}</Markdown>
+        <div className="flex  gap-3">
+          <Button className="flex-1 bg-blue-500 text-white" onClick={execution.start}>
+            Start
+          </Button>
+
+          <Button className="flex-1" onClick={execution.reset}>
+            Reset
+          </Button>
+        </div>
+      </form>
+
+      <div className="mt-2">
+        <Drawer title="Execution Summary">
+          {execution.explanation ? (
+            <Markdown className={"markdown"} remarkPlugins={[remarkGfm]}>
+              {execution.explanation}
+            </Markdown>
+          ) : (
+            <div className="flex items-center justify-center h-60">
+              <p className="text-center max-w-64 border p-4">
+                Click move forward to enable execution summary
+              </p>
+            </div>
+          )}
+        </Drawer>
       </div>
-    </>
+
+      <div className="separator mt-4 mb-2"></div>
+
+      <Markdown className={"markdown py-2"}>{markdown}</Markdown>
+    </div>
   );
 }
 

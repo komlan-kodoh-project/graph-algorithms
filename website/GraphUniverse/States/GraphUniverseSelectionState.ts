@@ -12,6 +12,7 @@ export class GraphUniverseSelectionState<T, E> implements GraphUniverseState<T, 
     wellKnownStateName(): WellKnownGraphUniverseState {
         return WellKnownGraphUniverseState.NodeSelection;
     }
+
     initialize(): void {
         this.cleanup = [
             this.universe.listener.addPersistentEventListener(

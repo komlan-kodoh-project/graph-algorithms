@@ -4,10 +4,18 @@ import GraphUniverse from "@/GraphUniverse/GraphUniverse";
 import { AnyValue } from "@/utils/types";
 import { createContext, useMemo, useState } from "react";
 
+export type GraphUniverseVertexData = {
+};
+
+export type GraphUniverseEdgeData = {
+
+};
+
+
 export type GraphUniverseContextValue = {
   hasInitiated: boolean;
-  universe: () => GraphUniverse<AnyValue, AnyValue>;
-  setUniverse: (universe: GraphUniverse<AnyValue, AnyValue>) => void;
+  universe: () => GraphUniverse<GraphUniverseVertexData, GraphUniverseEdgeData>;
+  setUniverse: (universe: GraphUniverse<GraphUniverseVertexData, GraphUniverseEdgeData>) => void;
 };
 
 export const GraphUniverseContext = createContext<GraphUniverseContextValue>({
@@ -22,7 +30,7 @@ export const GraphUniverseContext = createContext<GraphUniverseContextValue>({
 
 export const GraphUniverseContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [hasInitiated, setHasInitiated] = useState(false);
-  const [universe, setUniverse] = useState<GraphUniverse<AnyValue, AnyValue> | null>(null);
+  const [universe, setUniverse] = useState<GraphUniverse<GraphUniverseVertexData, GraphUniverseEdgeData> | null>(null);
 
   const context = useMemo<GraphUniverseContextValue>(
     () => ({

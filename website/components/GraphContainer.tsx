@@ -6,12 +6,12 @@ import GraphUniverse from "@/GraphUniverse/GraphUniverse";
 import { WellKnownGraphUniverseState } from "@/GraphUniverse/States/GraphUniverseState";
 import { motion } from "framer-motion";
 import { useRef, useState, useContext, useEffect } from "react";
-import { GraphUniverseContext } from "./GraphUniverseContext";
-import { useEffectOnce, useWebAssembly } from "@/utils/hooks";
-
-export type GraphUniverseVertexData = {};
-
-export type GraphUniverseEdgeData = {};
+import {
+  GraphUniverseContext,
+  GraphUniverseEdgeData,
+  GraphUniverseVertexData,
+} from "./GraphUniverseContext";
+import { useWebAssembly } from "@/utils/hooks";
 
 export type GraphContainerProps = {};
 
@@ -19,18 +19,22 @@ function GraphContainer(props: GraphContainerProps) {
   const hasInitialized = useWebAssembly();
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const lastVertexIdRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedEdge, setSelectedEdge] = useState<Edge<any, any> | null>(null);
   const { hasInitiated, universe, setUniverse } = useContext(GraphUniverseContext);
 
   useEffect(() => {
-    if (!hasInitialized ) {
+    if (!hasInitialized) {
       return;
     }
 
-    const newUniverse = new GraphUniverse({
+    const newUniverse = new GraphUniverse<GraphUniverseVertexData, GraphUniverseEdgeData>({
       container: containerRef.current!,
       graph: new SimpleGraph<GraphUniverseVertexData, GraphUniverseEdgeData>(),
+      vertexLabel: (vertex) => vertex.id ?? "error",
+      getVertexId: () => (lastVertexIdRef.current++).toString(),
+      getVertexData: () => ({}),
       backgroudColor: "#F1F5FE",
       dangerAccent: {
         light: "#f0bbbb",

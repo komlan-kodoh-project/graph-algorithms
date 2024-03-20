@@ -32,15 +32,23 @@ export default class SimpleGraph<V = AnyValue, E = AnyValue> {
     return vertexData;
   }
 
-  getEdge(sourceVertex: Vertex<V>, destinationVertex: Vertex<V>): Readonly<Edge<V, E>> {
+  getEdge(sourceVertex: Vertex<V>, destinationVertex: Vertex<V>): Readonly<Edge<V, E>> | undefined {
     if (this.operationMode === GraphOperationMode.Directed) {
-      const edgeId = this.graph.edge_directed(sourceVertex.id, destinationVertex.id);
+      const edgeId = this.graph.edge_directed(sourceVertex.wasmId, destinationVertex.wasmId);
+
+      if (edgeId === undefined) {
+        return undefined;
+      }
 
       return this.edgeData.get(edgeId)!;
     }
 
     if (this.operationMode === GraphOperationMode.Undirected) {
-      const edgeId = this.graph.edge(sourceVertex.id, destinationVertex.id);
+      const edgeId = this.graph.edge(sourceVertex.wasmId, destinationVertex.wasmId);
+
+      if (edgeId === undefined) {
+        return undefined;
+      }
 
       return this.edgeData.get(edgeId)!;
     }
@@ -48,33 +56,39 @@ export default class SimpleGraph<V = AnyValue, E = AnyValue> {
     throw new Error("The graph is not in a valid state.");
   }
 
-  createVertex(vertexData: V | null): Readonly<Vertex<V>> {
-    const vertexId = this.graph.create_vertex();
+  createVertex(id: string, vertexData: V | null): Readonly<Vertex<V>> {
+    const wasmId = this.graph.create_vertex();
 
     const newVertex: Vertex<V> = {
-      id: vertexId,
+      id: id,
+      wasmId: wasmId,
       data: vertexData,
     };
 
-    this.vertexData.set(vertexId, newVertex);
+    this.vertexData.set(wasmId, newVertex);
 
     return newVertex;
   }
 
   deleteVertex(vertex: Vertex<V>): void {
+    console.log("Before deletion");
+    this.printGraphState();
     // We MUST ALWAYS delete the edges first
     for (const edge of this.getNeighborEdges(vertex)) {
       this.deleteEdge(edge);
     }
 
-    this.graph.delete_vertex(vertex.id);
+    this.graph.delete_vertex(vertex.wasmId);
 
     const lastVertex = this.vertexData.get(this.vertexData.size - 1)!;
 
     // Move last element to the place
-    lastVertex.id = vertex.id;
-    this.vertexData.set(vertex.id, lastVertex);
+    lastVertex.wasmId = vertex.wasmId;
+    this.vertexData.set(vertex.wasmId, lastVertex);
     this.vertexData.delete(this.vertexData.size - 1);
+
+    console.log("after deletion");
+    this.printGraphState();
   }
 
   deleteEdge(edge: Edge<V, E>): void {
@@ -89,7 +103,7 @@ export default class SimpleGraph<V = AnyValue, E = AnyValue> {
   }
 
   getNeighborEdges(sourceVertex: Vertex<V>): Edge<V, E>[] {
-    const neighbors = this.graph.adjacent_egdes(sourceVertex.id);
+    const neighbors = this.graph.adjacent_egdes(sourceVertex.wasmId);
 
     const edgesData = new Array<Edge<V, E>>(neighbors.length);
 
@@ -107,7 +121,7 @@ export default class SimpleGraph<V = AnyValue, E = AnyValue> {
   }
 
   getAllNeighbors(sourceVertex: Vertex<V>): Vertex<V>[] {
-    const neighbors = this.graph.neighbors(sourceVertex.id);
+    const neighbors = this.graph.neighbors(sourceVertex.wasmId);
 
     const vertexData = new Array<Vertex<V>>(neighbors.length);
 
@@ -129,7 +143,7 @@ export default class SimpleGraph<V = AnyValue, E = AnyValue> {
     destinationVertex: Vertex<V>,
     edgeData: E | null
   ): Readonly<Edge<V, E>> {
-    const newEdgeId = this.graph.create_edge(sourceVertex.id, destinationVertex.id);
+    const newEdgeId = this.graph.create_edge(sourceVertex.wasmId, destinationVertex.wasmId);
 
     const newEdge: Edge<V, E> = {
       weight: 1,
@@ -142,5 +156,28 @@ export default class SimpleGraph<V = AnyValue, E = AnyValue> {
     this.edgeData.set(newEdgeId, newEdge);
 
     return newEdge;
+  }
+
+  private printJavascriptEdges(): string {
+    let graph = "";
+
+    for (const vertex of this.vertexData.values()) {
+      graph += `${vertex.id} \n`;
+    }
+
+    for (const edge of this.edgeData.values()) {
+      graph += `${edge.sourceVertex.id} ${edge.targetVertex.id}\n`;
+    }
+
+    return graph;
+  }
+
+  private printWasmEdges(): string {
+    return this.graph.to_string();
+  }
+
+  private printGraphState(): void {
+    console.log("Wasm graph: \n", this.printWasmEdges());
+    console.log("Javascript graph: \n", this.printJavascriptEdges());
   }
 }

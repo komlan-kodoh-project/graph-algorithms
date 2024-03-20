@@ -16,9 +16,10 @@ import EditButton from "@/components/svg-buttons/EditButton";
 import { GithubLink } from "@/components/svg-buttons/GithubLink";
 import { PhysiscsEngineState } from "@/components/svg-buttons/PhysicsEngineState";
 import PointerButton from "@/components/svg-buttons/PointerButton";
+import { Snackbar, SnackbarContent } from "@mui/material";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState, useTransition } from "react";
 
 type LayoutProps = Readonly<{
@@ -55,26 +56,45 @@ function Layout({ children }: LayoutProps) {
     WellKnownGraphUniverseEmbedding.DormantEmbedding
   );
 
+  const [snackBarIsOpen, setSnackBarIsOpen] = useState(false);
+  const [snackBarContent, setSnackBarContent] = useState<string | null>(null);
+
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<AlgorithmDropdownValue | null>(null);
   const [pageTransition, startPageTransition] = useTransition();
 
+  // Use effect that handles initialization events that must take place every time the universe is updated
   useEffect(() => {
     if (!hasInitiated) {
       return;
     }
 
+    // Event listener that ensures that the universe state is kept tracked off
     universe().listener.addEventListener("stateUpdatedEvent", (event) => {
       setEditorState(event.currentState.wellKnownStateName());
     });
 
+    // Event listner that controlls the snack bar that shows when entering the selection states
+    universe().listener.addEventListener("stateUpdatedEvent", (event) => {
+      if (event.currentState.wellKnownStateName() == WellKnownGraphUniverseState.NodeSelection) {
+        setSnackBarContent("Now select a vertex by clicking on it");
+        setSnackBarIsOpen(true);
+      } else {
+        setSnackBarIsOpen(false);
+      }
+    });
+
+    // Event listener that reacts to any changes in the rendering engine that the universe
+    // is using to represent relationships between vertices
     universe().listener.addEventListener("embeddingUpdatedEvent", (event) => {
       setUniverseEngine(event.currentEmbedding.wellKnownEmbedingName());
     });
 
+    // Generate a random graph in the new universe
     universe().generateRandomGraph(10, 1);
 
     updateEditorState(WellKnownGraphUniverseState.Exploring);
 
+    // Small timeout after universe generation for cool activation effect
     setTimeout(() => {
       updateEditorEngine(WellKnownGraphUniverseEmbedding.PhysicsBasedEmbedding);
     }, 1 * 1000);
@@ -133,7 +153,7 @@ function Layout({ children }: LayoutProps) {
   return (
     <div className="relative w-full h-full outline-4 outline-primary-color text-sm">
       <div className="absolute bottom-3.5 left-3.5 z-20 h-9">
-        <GithubLink/>
+        <GithubLink />
       </div>
 
       <div className="absolute inline-flex gap-2 top-3.5 left-3.5 z-20 h-9 rounded bg-white px-1.5 py-1 shadow">
@@ -186,10 +206,27 @@ function Layout({ children }: LayoutProps) {
         {pageTransition ? "Loading ..." : children}
       </motion.div>
 
-
       <div className="absolute top-0 bottom-0 left-0 right-0 z-10 ">
         <GraphContainer />
       </div>
+
+      <Snackbar open={snackBarIsOpen} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
+        <SnackbarContent
+          message={snackBarContent}
+          sx={{
+            display: "block",
+            width: "100%",
+            textAlign: "center",
+            fontWeight: "700",
+            color: "#444",
+            backgroundColor: "rgb(248 250 252)",
+            boxShadow: `2px 2px 2px #d7dade, -2px -2px 2px #fafbff,
+                        inset 0px 0px 0px rgba(255, 255, 255, 0.7),
+                        inset 0px 0px 0px rgba(255, 255, 255, 0.5)
+                        `,
+          }}
+        ></SnackbarContent>
+      </Snackbar>
     </div>
   );
 }

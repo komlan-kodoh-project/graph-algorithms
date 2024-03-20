@@ -11,6 +11,7 @@ export type AlgorithmDropdownProp = Readonly<{
 
 export const GraphAlgorithms = [
   { value: "None", label: "Search algorithm" },
+  { value: "depth-first-search", label: "Depth first search" },
   { value: "dijkstra-shortest-path", label: "Dijkstra Algorithm" },
   { value: "brute-force-minimum-node-coloring", label: "Exhaustive Minimum Node Coloring" },
   { value: "breath-first-traversal", label: "Breath First Traversal" },

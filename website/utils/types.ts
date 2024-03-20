@@ -1,4 +1,1 @@
-
-
-
-export type AnyValue = object | number | string; 
+export type AnyValue = any;
