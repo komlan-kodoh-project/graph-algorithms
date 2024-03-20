@@ -75,6 +75,21 @@ impl GraphWrapper {
         }
     }
 
+    pub fn to_string(&self) -> String {
+        let mut text = String::new();
+
+        for node in self.graph.node_indices() {
+            text.push_str(&format!("{}\n", node.index()));
+        }
+
+        for edge in self.graph.edge_indices() {
+            let (source, destination) = self.graph.edge_endpoints(edge).unwrap();
+            text.push_str(&format!("{} {}\n", source.index(), destination.index()));
+        }
+
+        return text;
+    }
+
     pub fn len(&self) -> u32 {
         self.graph.node_count() as u32
     }
@@ -104,7 +119,11 @@ impl GraphWrapper {
         self.graph.remove_edge(edge_index);
     }
 
-    pub fn edge(&self, first_node_id: usize, second_node_id: usize) -> Result<u32, String> {
+    pub fn edge(
+        &self,
+        first_node_id: usize,
+        second_node_id: usize,
+    ) -> Result<Option<u32>, String> {
         let first_node = NodeIndex::<u32>::new(first_node_id);
         let second_node = NodeIndex::<u32>::new(second_node_id);
 
@@ -124,14 +143,18 @@ impl GraphWrapper {
             return Err(format!("An error was logged because there exists more than one edge between {first_node_id} and {second_node_id}"));
         }
 
-        return Ok(all_edges[0]);
+        if all_edges.len() == 0 {
+            return Ok(None);
+        }
+
+        return Ok(Some(all_edges[0]));
     }
 
     pub fn edge_directed(
         &self,
         first_node_id: usize,
         second_node_id: usize,
-    ) -> Result<u32, String> {
+    ) -> Result<Option<u32>, String> {
         let first_node = NodeIndex::<u32>::new(first_node_id);
         let second_node = NodeIndex::<u32>::new(second_node_id);
 
@@ -145,7 +168,11 @@ impl GraphWrapper {
             return Err(format!("An error was logged because there exists more than one edge between {first_node_id} and {second_node_id}"));
         }
 
-        return Ok(edges[0]);
+        if edges.len() == 0 {
+            return Ok(None);
+        }
+
+        return Ok(Some(edges[0]));
     }
 
     pub fn adjacent_egdes(&self, node_id: usize) -> Int32Array {

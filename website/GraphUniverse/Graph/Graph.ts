@@ -18,7 +18,8 @@ export type MetaStore = {
 }
 
 export type Vertex<T = AnyValue> = MetaStore & {
-    id: number,
+    id: string,
+    wasmId: number,
     data: T | null,
 }
 

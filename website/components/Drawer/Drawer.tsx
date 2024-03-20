@@ -13,6 +13,7 @@ export function Drawer({ children, title }: DrawerProps) {
   return (
     <Accordion
       disableGutters
+      defaultExpanded
       sx={{
         padding: 0,
         color: "#444",

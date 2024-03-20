@@ -92,6 +92,7 @@ export class EdgeEntity<V, E> extends Container {
   public forceRerender() {
     this.redraw_arrow();
     this.redraw_label();
+    this.handlePositionUpdate();
   }
 
   private handlePositionUpdate() {

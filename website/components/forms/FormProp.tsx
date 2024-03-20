@@ -1,10 +1,10 @@
 import { GraphAlgorithmExecution } from "@/GraphUniverse/Algorithm/AlgorithmExecutor";
 import { GraphAlgorithm } from "@/GraphUniverse/Algorithm/GraphAlgorithm";
-import { Graph } from "@/GraphUniverse/Graph/Graph";
 import GraphUniverse from "@/GraphUniverse/GraphUniverse";
 import { userReactiveRef } from "@/utils/hooks";
-import { createContext, useContext, useMemo, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { GraphUniverseContext } from "../GraphUniverseContext";
+import { AnyValue } from "@/utils/types";
 
 export type FormProp = Readonly<{
   universe: GraphUniverse;
@@ -19,9 +19,32 @@ export type GraphAlgorithmBuilder<TConfig, TAlgorithm extends GraphAlgorithm> = 
   universe: GraphUniverse
 ) => TAlgorithm;
 
+export type GraphUniverseFormDataReturn<TConfig> = {
+  formValues: Partial<TConfig>;
+  registerGraphInput: <K extends keyof TConfig>(
+    key: K
+  ) => {
+    active: boolean;
+    universe: GraphUniverse;
+    formValues: Partial<TConfig>;
+    type: K;
+    setInputMode: (mode: K | null) => void;
+    setFormValues: (data: Partial<TConfig>) => void;
+    updateFormInputMode: (mode: K | null) => void;
+    updateFormInput: (data: TConfig[K]) => void;
+  };
+  execution: {
+    isExecuting: boolean;
+    explanation: string;
+    start: () => void;
+    reset: () => void;
+    moveForward: () => void;
+  };
+};
+
 export function useGraphUniverseForm<TConfig, TAlgorithm extends GraphAlgorithm>(
   algorithmBuilder: GraphAlgorithmBuilder<TConfig, TAlgorithm>
-) {
+): GraphUniverseFormDataReturn<TConfig> {
   const { universe, hasInitiated } = useContext(GraphUniverseContext);
 
   const [explanation, setExplanation] = useState<string>("");
@@ -35,7 +58,7 @@ export function useGraphUniverseForm<TConfig, TAlgorithm extends GraphAlgorithm>
   function registerGraphInput<K extends keyof TConfig>(key: K) {
     return {
       active: key === inputModeRef.current,
-      universe: hasInitiated ? universe() : ({} as any),
+      universe: hasInitiated ? (universe() as GraphUniverse) : ({} as any),
       formValues,
       type: key,
       setInputMode,
@@ -58,8 +81,14 @@ export function useGraphUniverseForm<TConfig, TAlgorithm extends GraphAlgorithm>
     // Reset all colors of the rendering before starting the algorithm
     universe().resetAllDisplayConfiguration();
 
-    const newAlgorithm = algorithmBuilder(formValues as TConfig, universe());
-    algorithmExecution.current = new GraphAlgorithmExecution(newAlgorithm, universe());
+    const newAlgorithm = algorithmBuilder(
+      formValues as TConfig,
+      universe() as GraphUniverse<AnyValue, AnyValue>
+    );
+    algorithmExecution.current = new GraphAlgorithmExecution(
+      newAlgorithm,
+      universe() as GraphUniverse<AnyValue, AnyValue>
+    );
   }
 
   function startExecution(): void {
@@ -73,7 +102,7 @@ export function useGraphUniverseForm<TConfig, TAlgorithm extends GraphAlgorithm>
     ensureAlgorithnExecutionExists();
 
     setIsExecuting(true);
-    algorithmExecution.current!.MoveForward().then(result => {
+    algorithmExecution.current!.MoveForward().then((result) => {
       setIsExecuting(false);
       setExplanation(result.markdown ?? "");
     });

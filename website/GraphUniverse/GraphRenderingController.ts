@@ -1,5 +1,5 @@
 import GraphUniverseComponent from "@/GraphUniverse/GraphUniverseComponent";
-import VertexEntity from "@/GraphUniverse/Entity/VertexEntity";
+import VertexEntity, { VertexDefaultDisplayConfiguration } from "@/GraphUniverse/Entity/VertexEntity";
 import { Edge, Vertex, getMeta, setMeta } from "@/GraphUniverse/Graph/Graph";
 import GraphUniverse from "./GraphUniverse";
 import { EdgeEntity } from "./Entity/EdgeEntity";
@@ -22,7 +22,7 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
   private triggerRendering(timestamp: number): void {
     // Doing math min because request animation frame is not called when the window is out of focus.
     // As a result the time stamp can be very hight and cause glitch in the rendering
-    
+
     const delta = Math.min(timestamp - this.previousRenderingTimeStamp, 1000 / 60);
 
     this.embeddingIsEnable && this.universe.embedding.update(delta);
@@ -59,6 +59,7 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
       const vertexEntity = new VertexEntity(event.x, event.y, event.vertex, {
         innerColor: this.universe.configuration.theme["light"],
         borderColor: this.universe.configuration.theme["dark"],
+        innerLabelGetter : this.universe.configuration.vertexLabel || VertexDefaultDisplayConfiguration.innerLabelGetter,
       });
 
       // Attach metadata to the graph vertex to carry a reference to its corresponding universe rendering
@@ -109,11 +110,16 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
       );
 
       this.universe.viewport.removeChild(entity);
+      this.universe.listener.onVertexDeletion(entity);
 
       const neighbors = this.universe.graph.getAllNeighbors(event.target);
 
       for (const vertex of neighbors) {
         const edge = this.universe.graph.getEdge(event.target, vertex);
+
+        if (edge === undefined) {
+          throw new Error("Failed to find edge between vertex and its neighbor");
+        }
 
         const neighborEntity = getMeta<VertexEntity<V>>(
           vertex,
@@ -134,6 +140,7 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
         );
 
         this.universe.viewport.removeChild(edgeEntity);
+        this.universe.listener.onEdgeDeletion(edgeEntity);
       }
     });
 
@@ -144,6 +151,7 @@ export default class GraphRenderingController<V, E> implements GraphUniverseComp
       );
 
       this.universe.viewport.removeChild(entity);
+      this.universe.listener.onEdgeDeletion(entity);
 
       const sourceVertexEntity = getMeta<VertexEntity<V>>(
         event.target.sourceVertex,

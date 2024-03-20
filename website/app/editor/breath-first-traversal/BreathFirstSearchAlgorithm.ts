@@ -14,7 +14,7 @@ export type BFSAlgorightmConfig = {
 };
 
 export class BreathFirstSearchAlgorithm implements GraphAlgorithm {
-  private visitedVertexId = new Set<number>();
+  private visitedVertexId = new Set<string>();
   private randomColorGenerator = new ColorGenerator();
   private nextVertices: Vertex<any>[] = [this.config.sourceVertex];
 
@@ -38,7 +38,7 @@ export class BreathFirstSearchAlgorithm implements GraphAlgorithm {
       const currentBatch = this.nextVertices.map((x) => x.id);
 
       for (let i = 0; i < length; i++) {
-        var currentVertex = this.nextVertices.shift()!;
+        const currentVertex = this.nextVertices.shift()!;
 
         this.visitedVertexId.add(currentVertex.id);
 

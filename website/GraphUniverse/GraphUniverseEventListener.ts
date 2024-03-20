@@ -132,7 +132,7 @@ export default class GraphUniverseEventListener<V, E> {
     });
 
     entity.addEventListener("mousedown", (event) => {
-      // We stop propagation so that the view is not alerted of this event  
+      // We stop propagation so that the view is not alerted of this event
       event.stopPropagation();
 
       this.events.edgeClickedEvent.trigger({
@@ -231,6 +231,32 @@ export default class GraphUniverseEventListener<V, E> {
 
         this.dragHoveredVertex = target;
       }
+    });
+  }
+
+  /**
+   * Call back that must be invoked every time a vertex is removed from the rendering controller
+   */
+  public onVertexDeletion(target: VertexEntity<V>) {
+    if (!this.persistentEvents.vertexHover.isActive()) {
+      return;
+    }
+
+    this.persistentEvents.vertexHover.triggerEnd({
+      target: target.graphVertex,
+    });
+  }
+
+  /**
+   * Call back that must be invoked every time an edge is removed from the rendering controller
+   */
+  public onEdgeDeletion(target: EdgeEntity<V, E>) {
+    if (!this.persistentEvents.edgeHover.isActive()) {
+      return;
+    }
+
+    this.persistentEvents.edgeHover.triggerEnd({
+      target: target.graphEdge,
     });
   }
 

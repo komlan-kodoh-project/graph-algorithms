@@ -22,6 +22,10 @@ import {
 } from "@/GraphUniverse/States/GraphUniverseState";
 import DormantEmbeding from "./Embeddings/DormantEmbedding";
 
+export type BaseGraphUniverseData = {
+  label: string;
+};
+
 export default class GraphUniverse<V = AnyValue, E = AnyValue> {
   private hasInitialized: boolean = false;
 
@@ -129,7 +133,10 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
   }
 
   public createVertex(x: number, y: number): Vertex<V> {
-    const newVertex = this.graph.createVertex(null);
+    const newVertex = this.graph.createVertex(
+      this.configuration.getVertexId(),
+      this.configuration.getVertexData()
+    );
 
     this.listener.notifyVertexCreated({
       x,
@@ -141,12 +148,6 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
   }
 
   public deleteVertex(vertex: Vertex<V>) {
-    const edges = this.graph.getNeighborEdges(vertex);
-
-    for (const edge of edges) {
-      this.deleteEdge(edge);
-    }
-
     this.listener.notifyVertexDeleted({
       target: vertex,
     });
@@ -163,6 +164,13 @@ export default class GraphUniverse<V = AnyValue, E = AnyValue> {
   }
 
   public createEdge(firstVertex: Vertex<V>, secondVertex: Vertex<V>): void {
+    const existingEdge = this.graph.getEdge(firstVertex, secondVertex);
+
+    if (existingEdge !== undefined) {
+      console.log("Edge already exists. Not creating duplicate");
+      return;
+    }
+
     const newEdge = this.graph.addEdge(firstVertex, secondVertex, null);
 
     this.listener.notifyEdgeCreated({

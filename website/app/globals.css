@@ -5,6 +5,7 @@
 :root {
   --primary-color: #7c98cd;
   --secondary-color: #bbd3f0;
+  --primary-text-color: #444;
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
@@ -33,7 +34,14 @@ body {
 }
 
 body {
+  margin: 0;
+  max-width: 100%;
+  color: #444 !important;
   overscroll-behavior-x: none;
+}
+
+* {
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .separator {
@@ -87,4 +95,27 @@ h2 {
   to {
     transform: rotate(360deg);
   }
+}
+
+.popped {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0.8em 1em;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 2px 2px 2px #d7dade, -2px -2px 2px #ffffff, inset 0px 0px 0px rgba(255, 255, 255, 0.7),
+    inset 0px 0px 0px rgba(255, 255, 255, 0.5);
+}
+
+.cave {
+  background: transparent;
+  color: rgb(33, 33, 33);
+  box-shadow: 0px 0px 0px rgba(255, 255, 255, 0.7), 0px 0px 0px rgba(255, 255, 255, 0.5),
+    inset 2px 2px 2px #d7dade, inset -2px -2px 2px #ffffff;
+}
+
+.disabled {
+  background: transparent;
+  color: rgb(171, 171, 171);
+  box-shadow: 0px 0px 0px rgba(255, 255, 255, 0.7), 0px 0px 0px rgba(255, 255, 255, 0.5),
+    inset 0px 0px 0px #d7dade, inset -0px -0px 0px #ffffff;
 }

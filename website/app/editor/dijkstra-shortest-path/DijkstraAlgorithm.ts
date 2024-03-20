@@ -8,6 +8,7 @@ import { EdgeDisplayConfiguration } from "@/GraphUniverse/Entity/EdgeEntity";
 import { VertexDisplayConfiguration } from "@/GraphUniverse/Entity/VertexEntity";
 import SimpleGraph from "@/GraphUniverse/Graph/SimpleGraph/SimpleGraph";
 import { PassiveCommand } from "@/GraphUniverse/Algorithm/Commands/PassiveCommand";
+import { GraphUniverseEdgeData, GraphUniverseVertexData } from "@/components/GraphUniverseContext";
 
 export interface GraphAlgorithmExecution {
   done: boolean;
@@ -17,8 +18,8 @@ export interface GraphAlgorithmExecution {
 export type DijkstraAlgorithmConfig = {
   graph: SimpleGraph;
 
-  sourceVertex: Vertex;
-  destinatonVertex: Vertex;
+  sourceVertex: Vertex<GraphUniverseVertexData>;
+  destinatonVertex: Vertex<GraphUniverseVertexData>;
 
   exploredEdge: Partial<EdgeDisplayConfiguration>;
   exploredVertex: Partial<VertexDisplayConfiguration>;
@@ -83,8 +84,8 @@ export class DijkstraAlgorithm implements GraphAlgorithm {
   }
 
   private *execute(): Generator<AlgorithmCommand, void> {
-    const vertexCost = new Map<number, number>();
-    const visitedVertexId = new Set<number>();
+    const vertexCost = new Map<string, number>();
+    const visitedVertexId = new Set<string>();
 
     let vertexLeftToExplore: DijkstraNode[] = [
       {
@@ -157,6 +158,10 @@ ${getAlgorithmState()}
           currentVertex.vertex
         );
 
+        if (sourceEdge === undefined) {
+          throw new Error("Failed to find edge between current vertex and its source");
+        }
+
         yield new UpdateEdgeRenderingConfiguration(sourceEdge, this.config.exploredEdge);
       }
 
@@ -225,6 +230,10 @@ ${getAlgorithmState()}
         backtrackingNode.source.vertex,
         backtrackingNode.vertex
       );
+
+      if (relevantEdge === undefined) {
+        throw new Error("Failed to find edge between backtracking node and its source");
+      }
 
       yield new UpdateEdgeRenderingConfiguration(relevantEdge, this.config.pathEdge);
 
