@@ -178,8 +178,6 @@ function Layout({ children }: LayoutProps) {
         />
       </div>
 
-      <EditorTutorial />
-
       <motion.div
         initial={{ top: "0.875rem", right: "0.875rem", width: "20rem" }}
         animate={

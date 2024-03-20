@@ -34,7 +34,7 @@ function BreathFirstSearch() {
 Fancy algorithn that does some cool stuff
       `}
       formData={formData}
-      summary={`Explanation of the depth first search algorithm ${formData.formValues.startVertex?.id}`}
+      summary={`Searching for node with Id ${formData.formValues.targetVertex?.id} from node with Id ${formData.formValues.startVertex?.id}`}
     />
   );
 }
