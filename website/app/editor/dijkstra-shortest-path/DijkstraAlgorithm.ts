@@ -98,7 +98,7 @@ export class DijkstraAlgorithm implements GraphAlgorithm {
     function getAlgorithmState(): string {
       return `
 # Vertex Queue 
-${buildMarkdownTable({  
+${buildMarkdownTable({
   header: ["Vertex", "Cost", "Source"],
   rows: vertexLeftToExplore.map((x) => [
     x.vertex.id.toString(),
@@ -184,6 +184,7 @@ ${getAlgorithmState()}
           yield new UpdateVertexRenderingConfiguration(adjacentVertex, this.config.visitedVertex);
         }
 
+        // Handle case where the vertex has not been explored yet
         if (previousExplorationCost == undefined) {
           vertexCost.set(adjacentVertex.id, explorationCost);
 
@@ -196,7 +197,11 @@ ${getAlgorithmState()}
           });
 
           vertexLeftToExplore.sort((first, second) => first.cost - second.cost);
-        } else if (explorationCost < previousExplorationCost) {
+        }
+
+        // Handles the case where teh vertex has already been explored but the new cost is less
+        else if (explorationCost < previousExplorationCost) {
+          vertexCost.set(adjacentVertex.id, explorationCost);
           vertexLeftToExplore = vertexLeftToExplore.filter((x) => x.vertex.id != adjacentVertex.id);
 
           vertexLeftToExplore.push({
@@ -211,6 +216,7 @@ ${getAlgorithmState()}
 
       vertexLeftToExplore.shift();
       visitedVertexId.add(currentVertex.vertex.id);
+
       yield new UpdateVertexRenderingConfiguration(
         currentVertex.vertex,
         this.config.exploredVertex,
