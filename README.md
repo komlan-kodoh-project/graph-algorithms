@@ -26,6 +26,8 @@ Contributions are welcome! If you have any ideas for new features, improvements,
 
 This project is licensed under the GPLv3 License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgements 🙏
+## Social Media 
 
-Special thanks to [contributors](CONTRIBUTORS.md) who have helped in the development of this project.
+- [Linkedin](https://www.linkedin.com/in/komlankodoh) 👨‍💼
+- [Portfolio](https://komlankodoh.com) 📁
+
