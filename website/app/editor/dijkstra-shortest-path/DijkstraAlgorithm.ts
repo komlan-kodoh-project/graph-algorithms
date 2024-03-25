@@ -95,6 +95,7 @@ export class DijkstraAlgorithm implements GraphAlgorithm {
       },
     ];
 
+    
     function getAlgorithmState(): string {
       return `
 # Vertex Queue 
